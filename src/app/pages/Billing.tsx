@@ -130,10 +130,11 @@ export function Billing() {
         </div>
         <ResponsiveContainer width="100%" height={250}>
           <LineChart data={usageData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
-            <XAxis dataKey="month" stroke="#9ca3af" />
-            <YAxis stroke="#9ca3af" />
+            <CartesianGrid key="usage-grid" strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
+            <XAxis key="usage-x" dataKey="month" stroke="#9ca3af" />
+            <YAxis key="usage-y" stroke="#9ca3af" />
             <Tooltip
+              key="usage-tooltip"
               contentStyle={{
                 backgroundColor: '#1f2937',
                 border: 'none',
@@ -142,7 +143,7 @@ export function Billing() {
               }}
               formatter={(value) => [`$${value}`, 'Cost']}
             />
-            <Line type="monotone" dataKey="cost" stroke="#3b82f6" strokeWidth={3} dot={{ r: 5 }} />
+            <Line key="cost-line" type="monotone" dataKey="cost" stroke="#3b82f6" strokeWidth={3} dot={{ r: 5 }} />
           </LineChart>
         </ResponsiveContainer>
       </div>

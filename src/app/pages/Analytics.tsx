@@ -122,10 +122,11 @@ export function Analytics() {
                   <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
-              <XAxis dataKey="date" stroke="#9ca3af" />
-              <YAxis stroke="#9ca3af" />
+              <CartesianGrid key="trend-grid" strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
+              <XAxis key="trend-x" dataKey="date" stroke="#9ca3af" />
+              <YAxis key="trend-y" stroke="#9ca3af" />
               <Tooltip
+                key="trend-tooltip"
                 contentStyle={{
                   backgroundColor: '#1f2937',
                   border: 'none',
@@ -133,7 +134,7 @@ export function Analytics() {
                   color: '#fff',
                 }}
               />
-              <Area type="monotone" dataKey="conversations" stroke="#3b82f6" fillOpacity={1} fill="url(#colorTotal)" />
+              <Area key="conversations-trend" type="monotone" dataKey="conversations" stroke="#3b82f6" fillOpacity={1} fill="url(#colorTotal)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -145,10 +146,11 @@ export function Analytics() {
           </div>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={conversationData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
-              <XAxis dataKey="date" stroke="#9ca3af" />
-              <YAxis stroke="#9ca3af" />
+              <CartesianGrid key="status-grid" strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
+              <XAxis key="status-x" dataKey="date" stroke="#9ca3af" />
+              <YAxis key="status-y" stroke="#9ca3af" />
               <Tooltip
+                key="status-tooltip"
                 contentStyle={{
                   backgroundColor: '#1f2937',
                   border: 'none',
@@ -156,9 +158,9 @@ export function Analytics() {
                   color: '#fff',
                 }}
               />
-              <Legend />
-              <Bar dataKey="resolved" fill="#10b981" radius={[8, 8, 0, 0]} />
-              <Bar dataKey="escalated" fill="#f59e0b" radius={[8, 8, 0, 0]} />
+              <Legend key="status-legend" />
+              <Bar key="resolved-bar" dataKey="resolved" fill="#10b981" radius={[8, 8, 0, 0]} />
+              <Bar key="escalated-bar" dataKey="escalated" fill="#f59e0b" radius={[8, 8, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -173,10 +175,11 @@ export function Analytics() {
           </div>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={responseTimeData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
-              <XAxis dataKey="hour" stroke="#9ca3af" />
-              <YAxis stroke="#9ca3af" />
+              <CartesianGrid key="response-grid" strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
+              <XAxis key="response-x" dataKey="hour" stroke="#9ca3af" />
+              <YAxis key="response-y" stroke="#9ca3af" />
               <Tooltip
+                key="response-tooltip"
                 contentStyle={{
                   backgroundColor: '#1f2937',
                   border: 'none',
@@ -184,7 +187,7 @@ export function Analytics() {
                   color: '#fff',
                 }}
               />
-              <Line type="monotone" dataKey="time" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 5 }} />
+              <Line key="time-line" type="monotone" dataKey="time" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 5 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -198,6 +201,7 @@ export function Analytics() {
             <ResponsiveContainer width="50%" height={250}>
               <PieChart>
                 <Pie
+                  key="categories-pie"
                   data={categoriesData}
                   cx="50%"
                   cy="50%"
@@ -206,16 +210,16 @@ export function Analytics() {
                   paddingAngle={2}
                   dataKey="value"
                 >
-                  {categoriesData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  {categoriesData.map((entry) => (
+                    <Cell key={`cell-${entry.id}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip key="pie-tooltip" />
               </PieChart>
             </ResponsiveContainer>
             <div className="flex-1 space-y-3">
               {categoriesData.map((category) => (
-                <div key={category.name} className="flex items-center justify-between">
+                <div key={category.id} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: category.color }} />
                     <span className="text-sm dark:text-white">{category.name}</span>

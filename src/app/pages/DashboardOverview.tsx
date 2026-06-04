@@ -1,4 +1,6 @@
-import { MessageSquare, Users, TrendingUp, Zap, ArrowUp, ArrowDown, MoreVertical } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
+import { MessageSquare, Users, TrendingUp, Zap, ArrowUp, ArrowDown, MoreVertical, Bot, Plus, Settings, Trash2, BarChart3 } from 'lucide-react';
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const statsData = [
@@ -18,12 +20,122 @@ const recentChats = [
   { id: 4, user: 'David Brown', message: 'Product pricing question', time: '2 hours ago', status: 'resolved' },
 ];
 
+const mockChatbots = [
+  { id: 1, name: 'Customer Support Bot', model: 'GPT-4', conversations: 1243, status: 'active', lastActive: '2 min ago' },
+  { id: 2, name: 'Sales Assistant', model: 'GPT-3.5', conversations: 856, status: 'active', lastActive: '1 hour ago' },
+  { id: 3, name: 'Technical Support', model: 'Claude-3', conversations: 432, status: 'inactive', lastActive: '2 days ago' },
+];
+
 export function DashboardOverview() {
+  const navigate = useNavigate();
+  const [chatbots, setChatbots] = useState(mockChatbots);
+
+  const handleDeleteChatbot = (id: number) => {
+    setChatbots(chatbots.filter(bot => bot.id !== id));
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-3xl font-bold dark:text-white">Dashboard</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">Welcome back! Here's what's happening.</p>
+      </div>
+
+      {/* Chatbots Section */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-semibold dark:text-white">Your Chatbots</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              {chatbots.length === 0 ? 'No chatbots created yet' : `${chatbots.length} ${chatbots.length === 1 ? 'chatbot' : 'chatbots'} active`}
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/dashboard/create')}
+            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2"
+          >
+            <Plus className="w-5 h-5" />
+            Create Chatbot
+          </button>
+        </div>
+
+        {chatbots.length === 0 ? (
+          <div className="p-12 flex flex-col items-center justify-center text-center">
+            <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+              <Bot className="w-10 h-10 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-semibold dark:text-white mb-2">No Chatbots Yet</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
+              You haven't created any chatbots yet. Get started by creating your first AI-powered chatbot to assist your customers.
+            </p>
+            <button
+              onClick={() => navigate('/dashboard/create')}
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2"
+            >
+              <Plus className="w-5 h-5" />
+              Create Your First Chatbot
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+            {chatbots.map((chatbot) => (
+              <div
+                key={chatbot.id}
+                className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-all group"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                    <Bot className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => navigate(`/dashboard/chatbot/${chatbot.id}/settings`)}
+                      className="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                    >
+                      <Settings className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteChatbot(chatbot.id)}
+                      className="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+
+                <h3 className="text-lg font-semibold dark:text-white mb-2">{chatbot.name}</h3>
+
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Model:</span>
+                  <span className="text-sm font-medium text-blue-600 dark:text-blue-400">{chatbot.model}</span>
+                </div>
+
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4 text-gray-400" />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">{chatbot.conversations.toLocaleString()} conversations</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${chatbot.status === 'active' ? 'bg-green-500' : 'bg-gray-400'}`} />
+                    <span className="text-xs text-gray-600 dark:text-gray-400 capitalize">{chatbot.status}</span>
+                  </div>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{chatbot.lastActive}</span>
+                </div>
+
+                <button
+                  onClick={() => navigate('/dashboard/analytics')}
+                  className="w-full mt-4 px-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 group-hover:border-blue-500"
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  View Analytics
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Stats Cards */}
@@ -102,10 +214,11 @@ export function DashboardOverview() {
                   <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
-              <XAxis dataKey="name" stroke="#9ca3af" />
-              <YAxis stroke="#9ca3af" />
+              <CartesianGrid key="conv-grid" strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
+              <XAxis key="conv-x" dataKey="name" stroke="#9ca3af" />
+              <YAxis key="conv-y" stroke="#9ca3af" />
               <Tooltip
+                key="conv-tooltip"
                 contentStyle={{
                   backgroundColor: '#1f2937',
                   border: 'none',
@@ -113,7 +226,7 @@ export function DashboardOverview() {
                   color: '#fff',
                 }}
               />
-              <Area type="monotone" dataKey="conversations" stroke="#3b82f6" fillOpacity={1} fill="url(#colorConversations)" />
+              <Area key="conversations-area" type="monotone" dataKey="conversations" stroke="#3b82f6" fillOpacity={1} fill="url(#colorConversations)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -127,10 +240,11 @@ export function DashboardOverview() {
           </div>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={statsData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
-              <XAxis dataKey="name" stroke="#9ca3af" />
-              <YAxis stroke="#9ca3af" />
+              <CartesianGrid key="users-grid" strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
+              <XAxis key="users-x" dataKey="name" stroke="#9ca3af" />
+              <YAxis key="users-y" stroke="#9ca3af" />
               <Tooltip
+                key="users-tooltip"
                 contentStyle={{
                   backgroundColor: '#1f2937',
                   border: 'none',
@@ -138,7 +252,7 @@ export function DashboardOverview() {
                   color: '#fff',
                 }}
               />
-              <Bar dataKey="users" fill="#8b5cf6" radius={[8, 8, 0, 0]} />
+              <Bar key="users-bar" dataKey="users" fill="#8b5cf6" radius={[8, 8, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

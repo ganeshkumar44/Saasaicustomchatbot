@@ -4,22 +4,21 @@ import { useTheme } from 'next-themes';
 import {
   LayoutDashboard,
   Bot,
-  Settings,
-  Database,
   MessageSquare,
   BarChart3,
   CreditCard,
   Plus,
-  Menu,
-  X,
   Moon,
   Sun,
   LogOut,
   User,
+  Settings,
+  ChevronRight,
+  ChevronLeft,
 } from 'lucide-react';
 
 export function DashboardLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [collapsed, setCollapsed] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
   const { theme, setTheme } = useTheme();
@@ -29,6 +28,7 @@ export function DashboardLayout() {
     { path: '/dashboard/create', icon: Plus, label: 'Create Chatbot' },
     { path: '/dashboard/history', icon: MessageSquare, label: 'Chat History' },
     { path: '/dashboard/analytics', icon: BarChart3, label: 'Analytics' },
+    { path: '/dashboard/settings', icon: Settings, label: 'Settings' },
     { path: '/dashboard/billing', icon: CreditCard, label: 'Billing' },
   ];
 
@@ -42,69 +42,82 @@ export function DashboardLayout() {
       {/* Sidebar */}
       <aside
         className={`${
-          sidebarOpen ? 'w-64' : 'w-0 lg:w-20'
-        } transition-all duration-300 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col`}
+          collapsed ? 'w-[64px]' : 'w-60'
+        } transition-all duration-300 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col flex-shrink-0 relative`}
       >
-        <div className="h-16 flex items-center justify-between px-6 border-b border-gray-200 dark:border-gray-800">
-          {sidebarOpen && (
-            <div className="flex items-center gap-2">
-              <Bot className="w-8 h-8 text-blue-600" />
-              <span className="font-bold text-xl dark:text-white">ChatAI</span>
+        {/* Logo */}
+        <div className="h-16 flex items-center justify-center border-b border-gray-200 dark:border-gray-800 overflow-hidden">
+          {collapsed ? (
+            <Bot className="w-7 h-7 text-blue-600" />
+          ) : (
+            <div className="flex items-center gap-2 px-4 w-full">
+              <Bot className="w-7 h-7 text-blue-600 flex-shrink-0" />
+              <span className="font-bold text-lg dark:text-white whitespace-nowrap">ChatAI</span>
             </div>
           )}
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
-          >
-            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto py-4">
+        {/* Nav items */}
+        <nav className="flex-1 overflow-y-auto py-3">
           {menuItems.map((item) => (
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-3 px-6 py-3 transition-colors ${
+              title={collapsed ? item.label : undefined}
+              className={`w-full flex items-center gap-3 py-3 transition-colors ${
+                collapsed ? 'justify-center px-0' : 'px-4'
+              } ${
                 isActive(item.path)
-                  ? 'bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border-r-4 border-blue-600'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                  ? 'bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border-r-2 border-blue-600'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
               <item.icon className="w-5 h-5 flex-shrink-0" />
-              {sidebarOpen && <span className="font-medium">{item.label}</span>}
+              {!collapsed && <span className="text-sm font-medium whitespace-nowrap">{item.label}</span>}
             </button>
           ))}
         </nav>
 
-        <div className="p-4 border-t border-gray-200 dark:border-gray-800">
-          <div className="flex items-center gap-3 px-2 py-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-              <User className="w-5 h-5 text-white" />
-            </div>
-            {sidebarOpen && (
-              <div className="flex-1">
-                <p className="text-sm font-medium dark:text-white">John Doe</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">john@example.com</p>
+        {/* User info */}
+        <div className="border-t border-gray-200 dark:border-gray-800 p-3">
+          {collapsed ? (
+            <div className="flex justify-center">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <User className="w-4 h-4 text-white" />
               </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 px-1">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                <User className="w-4 h-4 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium dark:text-white truncate">John Doe</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">john@example.com</p>
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Collapse toggle button */}
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="absolute -right-3 top-[72px] w-6 h-6 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors z-10"
+          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          {collapsed ? (
+            <ChevronRight className="w-3 h-3 text-gray-500 dark:text-gray-400" />
+          ) : (
+            <ChevronLeft className="w-3 h-3 text-gray-500 dark:text-gray-400" />
+          )}
+        </button>
       </aside>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Navbar */}
         <header className="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-6">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 lg:hidden"
-          >
-            <Menu className="w-5 h-5 dark:text-white" />
-          </button>
-
           <div className="flex-1" />
-
           <div className="flex items-center gap-2">
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}

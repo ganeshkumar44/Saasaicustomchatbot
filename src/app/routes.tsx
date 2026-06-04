@@ -11,6 +11,7 @@ import { KnowledgeBase } from "./pages/KnowledgeBase";
 import { ChatHistory } from "./pages/ChatHistory";
 import { Analytics } from "./pages/Analytics";
 import { Billing } from "./pages/Billing";
+import { AccountSettings } from "./pages/AccountSettings";
 
 export const router = createBrowserRouter([
   {
@@ -39,6 +40,7 @@ export const router = createBrowserRouter([
       { path: "knowledge-base", Component: KnowledgeBase },
       { path: "history", Component: ChatHistory },
       { path: "analytics", Component: Analytics },
+      { path: "settings", Component: AccountSettings },
       { path: "billing", Component: Billing },
     ],
   },

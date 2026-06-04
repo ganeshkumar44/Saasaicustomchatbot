@@ -19,6 +19,35 @@ export function ChatbotSettings() {
     toast.success('Settings saved successfully!');
   };
 
+  const copyToClipboard = async (text: string) => {
+    try {
+      // Try modern Clipboard API first
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        toast.success('Code copied to clipboard!');
+      } else {
+        // Fallback for older browsers or when Clipboard API is blocked
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          toast.success('Code copied to clipboard!');
+        } catch (err) {
+          toast.error('Failed to copy code');
+        }
+        textArea.remove();
+      }
+    } catch (err) {
+      toast.error('Failed to copy code');
+    }
+  };
+
   const tabs = [
     { id: 'general', label: 'General', icon: Bot },
     { id: 'appearance', label: 'Appearance', icon: Palette },
@@ -208,8 +237,15 @@ export function ChatbotSettings() {
                   </pre>
                   <button
                     onClick={() => {
-                      navigator.clipboard.writeText('<script>...</script>');
-                      toast.success('Code copied to clipboard!');
+                      const embedCode = `<script>
+  (function(w,d,s,o,f,js,fjs){
+    w['ChatAI']=o;w[o] = w[o] || function () { (w[o].q = w[o].q || []).push(arguments) };
+    js = d.createElement(s), fjs = d.getElementsByTagName(s)[0];
+    js.id = o; js.src = f; js.async = 1; fjs.parentNode.insertBefore(js, fjs);
+  }(window, document, 'script', 'chatai', 'https://cdn.chatai.com/widget.js'));
+  chatai('init', 'YOUR_CHATBOT_ID');
+</script>`;
+                      copyToClipboard(embedCode);
                     }}
                     className="absolute top-4 right-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
                   >

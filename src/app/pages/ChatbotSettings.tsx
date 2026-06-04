@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { Bot, Save, Trash2, Copy, Eye, Code, Palette, MessageSquare, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router';
+import { Bot, Save, Trash2, Copy, Eye, Code, Palette, MessageSquare, Shield, Database, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function ChatbotSettings() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('general');
   const [settings, setSettings] = useState({
     name: 'Customer Support Bot',
@@ -52,13 +54,28 @@ export function ChatbotSettings() {
     { id: 'general', label: 'General', icon: Bot },
     { id: 'appearance', label: 'Appearance', icon: Palette },
     { id: 'messages', label: 'Messages', icon: MessageSquare },
+    { id: 'knowledge', label: 'Knowledge Base', icon: Database },
     { id: 'security', label: 'Security', icon: Shield },
     { id: 'embed', label: 'Embed Code', icon: Code },
   ];
 
+  const handleDelete = () => {
+    if (confirm('Are you sure you want to delete this chatbot? This action cannot be undone.')) {
+      toast.success('Chatbot deleted successfully!');
+      navigate('/dashboard');
+    }
+  };
+
   return (
     <div className="p-6">
       <div className="mb-8">
+        <button
+          onClick={() => navigate('/dashboard')}
+          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back to Dashboard
+        </button>
         <h1 className="text-3xl font-bold dark:text-white">Chatbot Settings</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">Configure and customize your chatbot</p>
       </div>
@@ -217,6 +234,50 @@ export function ChatbotSettings() {
               </div>
             )}
 
+            {activeTab === 'knowledge' && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-xl font-semibold dark:text-white mb-6">Knowledge Base</h2>
+                </div>
+
+                <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 text-center hover:border-blue-500 dark:hover:border-blue-500 transition-colors">
+                  <div className="flex flex-col items-center">
+                    <Database className="w-12 h-12 text-gray-400 mb-4" />
+                    <p className="text-gray-600 dark:text-gray-400 mb-2">
+                      Drag and drop files here, or click to browse
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                      Supported: PDF, DOC, DOCX, TXT, CSV, MD (Max 10MB)
+                    </p>
+                    <button
+                      type="button"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Choose Files
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Uploaded Files (3)</p>
+                  {['Product Documentation.pdf', 'FAQ Database.csv', 'User Guide.docx'].map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Database className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        <span className="text-sm font-medium dark:text-white">{file}</span>
+                      </div>
+                      <button className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300">
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {activeTab === 'embed' && (
               <div className="space-y-6">
                 <div>
@@ -259,7 +320,10 @@ export function ChatbotSettings() {
 
           {/* Action Buttons */}
           <div className="flex items-center justify-between mt-6">
-            <button className="px-6 py-3 border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-950 transition-colors flex items-center gap-2">
+            <button
+              onClick={handleDelete}
+              className="px-6 py-3 border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-950 transition-colors flex items-center gap-2"
+            >
               <Trash2 className="w-5 h-5" />
               Delete Chatbot
             </button>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { Bot, Sparkles, MessageSquare, Settings, ArrowRight } from 'lucide-react';
+import { Bot, Sparkles, MessageSquare, Settings, ArrowRight, Upload, CheckCircle } from 'lucide-react';
 
 export function CreateChatbot() {
   const navigate = useNavigate();
@@ -11,7 +11,13 @@ export function CreateChatbot() {
     personality: 'professional',
     language: 'en',
     model: 'gpt-4',
+    uploadedFiles: [] as string[],
   });
+
+  const handleFileUpload = () => {
+    // Simulate file upload
+    setFormData({ ...formData, uploadedFiles: ['document.pdf'] });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +33,7 @@ export function CreateChatbot() {
 
       {/* Progress Steps */}
       <div className="flex items-center justify-between mb-8">
-        {[1, 2, 3].map((s) => (
+        {[1, 2, 3, 4].map((s) => (
           <div key={s} className="flex items-center flex-1">
             <div
               className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
@@ -38,7 +44,7 @@ export function CreateChatbot() {
             >
               {s}
             </div>
-            {s < 3 && (
+            {s < 4 && (
               <div
                 className={`flex-1 h-1 mx-4 ${
                   s < step ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-800'
@@ -154,6 +160,60 @@ export function CreateChatbot() {
         {step === 3 && (
           <div className="bg-white dark:bg-gray-900 rounded-xl p-8 border border-gray-200 dark:border-gray-800 space-y-6">
             <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-orange-100 dark:bg-orange-950 rounded-lg flex items-center justify-center">
+                <Upload className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold dark:text-white">Knowledge Base</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Upload training data for your chatbot</p>
+              </div>
+            </div>
+
+            <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 text-center hover:border-blue-500 dark:hover:border-blue-500 transition-colors">
+              <div className="flex flex-col items-center">
+                <Upload className="w-12 h-12 text-gray-400 mb-4" />
+                <p className="text-gray-600 dark:text-gray-400 mb-2">
+                  Drag and drop files here, or click to browse
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                  Supported: PDF, DOC, DOCX, TXT, CSV, MD (Max 10MB)
+                </p>
+                <button
+                  type="button"
+                  onClick={handleFileUpload}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Choose Files
+                </button>
+              </div>
+            </div>
+
+            {formData.uploadedFiles.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Uploaded Files:</p>
+                {formData.uploadedFiles.map((file, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg"
+                  >
+                    <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{file}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                <strong>Optional:</strong> You can skip this step and add knowledge base files later from the chatbot settings.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {step === 4 && (
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-8 border border-gray-200 dark:border-gray-800 space-y-6">
+            <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 bg-green-100 dark:bg-green-950 rounded-lg flex items-center justify-center">
                 <Settings className="w-6 h-6 text-green-600 dark:text-green-400" />
               </div>
@@ -199,13 +259,13 @@ export function CreateChatbot() {
               Back
             </button>
           )}
-          {step < 3 ? (
+          {step < 4 ? (
             <button
               type="button"
               onClick={() => setStep(step + 1)}
               className="ml-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
             >
-              Next
+              {step === 3 ? 'Skip & Continue' : 'Next'}
               <ArrowRight className="w-5 h-5" />
             </button>
           ) : (

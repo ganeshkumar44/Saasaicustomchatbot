@@ -27,8 +27,6 @@ export function DashboardLayout() {
   const menuItems = [
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/dashboard/create', icon: Plus, label: 'Create Chatbot' },
-    { path: '/dashboard/chatbot/1/settings', icon: Settings, label: 'Chatbot Settings' },
-    { path: '/dashboard/knowledge-base', icon: Database, label: 'Knowledge Base' },
     { path: '/dashboard/history', icon: MessageSquare, label: 'Chat History' },
     { path: '/dashboard/analytics', icon: BarChart3, label: 'Analytics' },
     { path: '/dashboard/billing', icon: CreditCard, label: 'Billing' },

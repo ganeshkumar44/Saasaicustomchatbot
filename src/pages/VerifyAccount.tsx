@@ -1,19 +1,38 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { Mail, CheckCircle, Loader2 } from 'lucide-react';
-import { AuthBackground } from '../components/AuthBackground';
+import { AuthBackground } from '@/app/components/AuthBackground';
+import { useVerification } from '@/hooks/useVerification';
+import { validateVerificationForm } from '@/utils/validation';
 
 export function VerifyAccount() {
   const navigate = useNavigate();
+  const {
+    registeredEmail,
+    verify,
+    resendVerification,
+    verificationLoading,
+    verificationSuccess,
+    verificationError,
+    resendLoading,
+    resendError,
+    showResendLink,
+    clearVerificationErrors,
+  } = useVerification();
+
   const [verificationCode, setVerificationCode] = useState(['', '', '', '', '', '']);
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [isVerified, setIsVerified] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+
+  const isProcessing = verificationLoading || resendLoading;
 
   const handleCodeChange = (index: number, value: string) => {
     if (value.length > 1) return;
+    if (value && !/^\d$/.test(value)) return;
+
     const newCode = [...verificationCode];
     newCode[index] = value;
     setVerificationCode(newCode);
+
     if (value && index < 5) {
       document.getElementById(`code-${index + 1}`)?.focus();
     }
@@ -26,28 +45,47 @@ export function VerifyAccount() {
   };
 
   const handleVerify = () => {
-    if (verificationCode.join('').length === 6) {
-      setIsVerifying(true);
-      setTimeout(() => {
-        setIsVerifying(false);
-        setIsVerified(true);
-        setTimeout(() => navigate('/dashboard'), 2000);
-      }, 1500);
+    if (!registeredEmail) return;
+
+    clearVerificationErrors();
+
+    const code = verificationCode.join('');
+    const validation = validateVerificationForm(registeredEmail, code);
+
+    if (!validation.isValid) {
+      setValidationErrors(validation.errors);
+      return;
     }
+
+    setValidationErrors([]);
+    verify({
+      email: registeredEmail,
+      verification_code: code,
+    });
   };
 
   const handleResend = () => {
+    if (!registeredEmail || resendLoading) return;
+
+    clearVerificationErrors();
+    setValidationErrors([]);
     setVerificationCode(['', '', '', '', '', '']);
     document.getElementById('code-0')?.focus();
+
+    resendVerification({ email: registeredEmail });
   };
 
   useEffect(() => {
     document.getElementById('code-0')?.focus();
   }, []);
 
+  if (!registeredEmail) {
+    return null;
+  }
+
   return (
     <AuthBackground>
-      {!isVerified ? (
+      {!verificationSuccess ? (
         <>
           <div className="flex flex-col items-center mb-8">
             <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
@@ -55,7 +93,7 @@ export function VerifyAccount() {
             </div>
             <h1 className="text-3xl font-bold">Verify Your Account</h1>
             <p className="text-[var(--color-text-secondary)] mt-2 text-center">We've sent a verification code to your email</p>
-            <p className="text-indigo-500 dark:text-indigo-400 font-medium mt-1">john@example.com</p>
+            <p className="text-indigo-500 dark:text-indigo-400 font-medium mt-1">{registeredEmail}</p>
           </div>
 
           <div className="space-y-6">
@@ -74,18 +112,37 @@ export function VerifyAccount() {
                     value={digit}
                     onChange={(e) => handleCodeChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
-                    className="w-12 h-14 text-center text-2xl font-bold rounded-lg bg-[var(--color-surface)] border-2 border-[var(--color-border)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    disabled={isProcessing}
+                    className="w-12 h-14 text-center text-2xl font-bold rounded-lg bg-[var(--color-surface)] border-2 border-[var(--color-border)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all disabled:opacity-40"
                   />
                 ))}
               </div>
             </div>
 
+            {validationErrors.length > 0 && (
+              <div className="rounded-lg border border-red-200 dark:border-red-800 p-3 space-y-1">
+                {validationErrors.map((validationError) => (
+                  <p key={validationError} className="text-sm text-red-600 dark:text-red-400 text-center">
+                    {validationError}
+                  </p>
+                ))}
+              </div>
+            )}
+
+            {verificationError && (
+              <p className="text-sm text-red-600 dark:text-red-400 text-center">{verificationError}</p>
+            )}
+
+            {resendError && (
+              <p className="text-sm text-red-600 dark:text-red-400 text-center">{resendError}</p>
+            )}
+
             <button
               onClick={handleVerify}
-              disabled={verificationCode.join('').length !== 6 || isVerifying}
+              disabled={verificationCode.join('').length !== 6 || isProcessing}
               className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-medium hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg hover:shadow-xl disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {isVerifying ? (
+              {verificationLoading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
                   Verifying...
@@ -97,13 +154,22 @@ export function VerifyAccount() {
           </div>
 
           <div className="mt-6 text-center space-y-2">
-            <p className="text-sm text-[var(--color-text-secondary)]">
-              Didn't receive the code?{' '}
-              <button onClick={handleResend} className="text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium transition-colors">
-                Resend Code
-              </button>
-            </p>
-            <button onClick={() => navigate('/')} className="text-sm text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] transition-colors">
+            {showResendLink && (
+              <p className="text-sm text-[var(--color-text-secondary)]">
+                <button
+                  onClick={handleResend}
+                  disabled={resendLoading}
+                  className="text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {resendLoading ? 'Sending...' : 'Resend Verification Code'}
+                </button>
+              </p>
+            )}
+            <button
+              onClick={() => navigate('/')}
+              disabled={isProcessing}
+              className="text-sm text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] transition-colors disabled:opacity-40"
+            >
               Back to Login
             </button>
           </div>
@@ -115,7 +181,7 @@ export function VerifyAccount() {
           </div>
           <h1 className="text-3xl font-bold mb-2">Account Verified!</h1>
           <p className="text-[var(--color-text-secondary)] text-center">Your account has been successfully verified.</p>
-          <p className="text-[var(--color-text-tertiary)] text-center mt-2 text-sm">Redirecting to dashboard…</p>
+          <p className="text-[var(--color-text-tertiary)] text-center mt-2 text-sm">Redirecting to login…</p>
           <div className="mt-6">
             <Loader2 className="w-8 h-8 text-indigo-500 dark:text-indigo-400 animate-spin" />
           </div>

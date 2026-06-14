@@ -1,11 +1,45 @@
 import type { SignupRequest } from '@/types/auth.types';
 
-export interface SignupValidationResult {
+export interface ValidationResult {
   isValid: boolean;
   errors: string[];
 }
 
+export type SignupValidationResult = ValidationResult;
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const VERIFICATION_CODE_REGEX = /^\d{6}$/;
+
+export function isVerificationExpiredError(message: string): boolean {
+  const lower = message.toLowerCase();
+  return lower.includes('expired') || lower.includes('expire');
+}
+
+export function validateVerificationForm(
+  email: string,
+  verificationCode: string,
+): ValidationResult {
+  const errors: string[] = [];
+  const trimmedEmail = email.trim();
+  const trimmedCode = verificationCode.trim();
+
+  if (!trimmedEmail) {
+    errors.push('Email is required.');
+  } else if (!EMAIL_REGEX.test(trimmedEmail)) {
+    errors.push('Please enter a valid email address.');
+  }
+
+  if (!trimmedCode) {
+    errors.push('Verification code is required.');
+  } else if (!VERIFICATION_CODE_REGEX.test(trimmedCode)) {
+    errors.push('Verification code must be exactly 6 digits.');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+}
 const MOBILE_REGEX = /^\d{10}$/;
 
 export function validateSignupForm(data: SignupRequest): SignupValidationResult {

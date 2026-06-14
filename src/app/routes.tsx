@@ -3,7 +3,7 @@ import { DashboardLayout } from "./components/DashboardLayout";
 import { Login } from "./pages/Login";
 import { Register } from "@/pages/Register";
 import { ForgotPassword } from "./pages/ForgotPassword";
-import { VerifyAccount } from "./pages/VerifyAccount";
+import { VerifyAccount } from "@/pages/VerifyAccount";
 import { DashboardOverview } from "./pages/DashboardOverview";
 import { CreateChatbot } from "./pages/CreateChatbot";
 import { ChatbotSettings } from "./pages/ChatbotSettings";

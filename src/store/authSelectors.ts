@@ -12,5 +12,41 @@ export const selectSignupError = (state: RootState): string | null =>
 export const selectRegisteredUser = (state: RootState) =>
   state.auth.registeredUser;
 
+export const selectRegisteredEmail = (state: RootState): string | null =>
+  state.auth.registeredEmail;
+
 export const selectSignupSuccessMessage = (state: RootState): string | null =>
   state.auth.successMessage;
+
+export const selectVerificationLoading = (state: RootState): boolean =>
+  state.auth.verificationLoading;
+
+export const selectVerificationSuccess = (state: RootState): boolean =>
+  state.auth.verificationSuccess;
+
+export const selectVerificationError = (state: RootState): string | null =>
+  state.auth.verificationError;
+
+export const selectVerificationSuccessMessage = (state: RootState): string | null =>
+  state.auth.verificationSuccessMessage;
+
+export const selectResendLoading = (state: RootState): boolean =>
+  state.auth.resendLoading;
+
+export const selectResendSuccess = (state: RootState): boolean =>
+  state.auth.resendSuccess;
+
+export const selectResendError = (state: RootState): string | null =>
+  state.auth.resendError;
+
+export const selectResendSuccessMessage = (state: RootState): string | null =>
+  state.auth.resendSuccessMessage;
+
+export const selectShowResendLink = (state: RootState): boolean =>
+  state.auth.showResendLink;
+
+export const selectIsEmailVerified = (state: RootState): boolean =>
+  state.auth.isEmailVerified;
+
+export const selectIsMobileVerified = (state: RootState): boolean =>
+  state.auth.isMobileVerified;

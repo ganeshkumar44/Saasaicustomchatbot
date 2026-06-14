@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Filter, Download, MessageSquare, Clock, User, ChevronRight } from 'lucide-react';
+import { Search, Filter, Download, MessageSquare, Clock, ChevronRight } from 'lucide-react';
 
 const mockConversations = [
   {

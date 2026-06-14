@@ -1,4 +1,4 @@
-import { TrendingUp, Users, MessageSquare, Clock, Target, ArrowUp, ArrowDown } from 'lucide-react';
+import { Users, MessageSquare, Clock, Target, ArrowUp, ArrowDown } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const conversationData = [

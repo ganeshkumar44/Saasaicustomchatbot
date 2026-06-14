@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { MessageSquare, Users, TrendingUp, Zap, ArrowUp, ArrowDown, MoreVertical, Bot, Plus, Settings, Trash2, BarChart3 } from 'lucide-react';
-import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const statsData = [
   { id: 'mon', name: 'Mon', conversations: 240, users: 120 },

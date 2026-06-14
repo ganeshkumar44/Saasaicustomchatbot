@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { Bot, Sparkles, MessageSquare, Settings, ArrowRight, Upload, CheckCircle, X } from 'lucide-react';
+import { Bot, Sparkles, Settings, ArrowRight, Upload, CheckCircle, X } from 'lucide-react';
 
 const AI_MODELS = [
   { id: 'gpt-4o', label: 'GPT-4o', provider: 'OpenAI', desc: 'Most capable multimodal model', badge: 'Popular' },

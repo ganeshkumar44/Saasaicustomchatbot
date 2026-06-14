@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router';
 import { useTheme } from 'next-themes';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { logout } from '@/store/authSlice';
+import { selectUser } from '@/store/authSelectors';
 import {
   LayoutDashboard,
   Bot,
@@ -21,7 +24,14 @@ export function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useAppDispatch();
   const { theme, setTheme } = useTheme();
+  const user = useAppSelector(selectUser);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/');
+  };
 
   const menuItems = [
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -92,8 +102,12 @@ export function DashboardLayout() {
                 <User className="w-4 h-4 text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium dark:text-white truncate">John Doe</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">john@example.com</p>
+                <p className="text-sm font-medium dark:text-white truncate">
+                  {user ? `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}` : 'User'}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                  {user?.email ?? ''}
+                </p>
               </div>
             </div>
           )}
@@ -130,7 +144,7 @@ export function DashboardLayout() {
               )}
             </button>
             <button
-              onClick={() => navigate('/')}
+              onClick={handleLogout}
               className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
               <LogOut className="w-5 h-5 text-gray-600 dark:text-gray-300" />

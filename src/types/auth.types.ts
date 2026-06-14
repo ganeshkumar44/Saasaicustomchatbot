@@ -20,6 +20,28 @@ export interface SignupResponse {
   data: SignupUserData;
 }
 
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface AuthUser {
+  id: number;
+  first_name: string;
+  last_name: string | null;
+  email: string;
+  role: string;
+  is_email_verified: boolean;
+}
+
+export interface LoginResponse {
+  success: true;
+  message: string;
+  data: AuthUser;
+  access_token: string;
+  token_type: string;
+}
+
 export interface VerificationRequest {
   email: string;
   verification_code: string;
@@ -71,4 +93,13 @@ export interface AuthState {
   showResendLink: boolean;
   isEmailVerified: boolean;
   isMobileVerified: boolean;
+  user: AuthUser | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  tokenType: string | null;
+  isAuthenticated: boolean;
+  loginLoading: boolean;
+  loginSuccess: boolean;
+  loginError: string | null;
+  loginSuccessMessage: string | null;
 }

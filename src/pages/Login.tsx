@@ -1,17 +1,62 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { Bot, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { AuthBackground } from '../components/AuthBackground';
+import { Bot, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { AuthBackground } from '@/app/components/AuthBackground';
+import { useAuth } from '@/hooks/useAuth';
+import { useAppDispatch } from '@/store/hooks';
+import { resetLoginState } from '@/store/authSlice';
+import { validateLoginForm } from '@/utils/validation';
 
 export function Login() {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const {
+    login,
+    loginLoading,
+    loginError,
+    loginSuccess,
+    loginSuccessMessage,
+    isAuthenticated,
+    clearError,
+  } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+
+  useEffect(() => {
+    dispatch(resetLoginState());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
+
+  useEffect(() => {
+    if (loginSuccess && loginSuccessMessage) {
+      toast.success(loginSuccessMessage);
+      navigate('/dashboard');
+    }
+  }, [loginSuccess, loginSuccessMessage, navigate]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/dashboard');
+    clearError();
+
+    const validation = validateLoginForm(email, password);
+    if (!validation.isValid) {
+      setValidationErrors(validation.errors);
+      return;
+    }
+
+    setValidationErrors([]);
+    login({
+      email: email.trim(),
+      password,
+    });
   };
 
   return (
@@ -35,7 +80,7 @@ export function Login() {
               onChange={(e) => setEmail(e.target.value)}
               className="w-full pl-10 pr-4 py-3 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] placeholder-[var(--color-text-tertiary)] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
               placeholder="you@example.com"
-              required
+              disabled={loginLoading}
             />
           </div>
         </div>
@@ -50,12 +95,13 @@ export function Login() {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full pl-10 pr-12 py-3 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] placeholder-[var(--color-text-tertiary)] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
               placeholder="••••••••"
-              required
+              disabled={loginLoading}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-tertiary)] hover:text-[var(--color-text)] transition-colors"
+              disabled={loginLoading}
             >
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
@@ -71,22 +117,49 @@ export function Login() {
             type="button"
             onClick={() => navigate('/forgot-password')}
             className="text-sm text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
+            disabled={loginLoading}
           >
             Forgot password?
           </button>
         </div>
 
+        {validationErrors.length > 0 && (
+          <div className="rounded-lg border border-red-200 dark:border-red-800 p-3 space-y-1">
+            {validationErrors.map((validationError) => (
+              <p key={validationError} className="text-sm text-red-600 dark:text-red-400">
+                {validationError}
+              </p>
+            ))}
+          </div>
+        )}
+
+        {loginError && (
+          <p className="text-sm text-red-600 dark:text-red-400 text-center">{loginError}</p>
+        )}
+
         <button
           type="submit"
-          className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-medium hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg hover:shadow-xl"
+          disabled={loginLoading}
+          className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-medium hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg hover:shadow-xl disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          Sign In
+          {loginLoading ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Signing In...
+            </>
+          ) : (
+            'Sign In'
+          )}
         </button>
       </form>
 
       <div className="mt-6 text-center">
         <span className="text-[var(--color-text-secondary)]">Don't have an account? </span>
-        <button onClick={() => navigate('/register')} className="text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium transition-colors">
+        <button
+          onClick={() => navigate('/register')}
+          className="text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium transition-colors"
+          disabled={loginLoading}
+        >
           Sign up
         </button>
       </div>

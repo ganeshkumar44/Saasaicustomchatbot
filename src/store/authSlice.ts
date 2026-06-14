@@ -1,11 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { AuthState } from '@/types/auth.types';
 import {
+  loginUser,
   resendVerificationCode,
   signupUser,
   verifyAccount,
 } from '@/store/authThunk';
+import { saveAuthSession, loadAuthSession, clearAuthSession } from '@/utils/authStorage';
 import { isVerificationExpiredError } from '@/utils/validation';
+
+const persistedSession = loadAuthSession();
 
 const initialState: AuthState = {
   loading: false,
@@ -25,6 +29,15 @@ const initialState: AuthState = {
   showResendLink: false,
   isEmailVerified: false,
   isMobileVerified: false,
+  user: persistedSession?.user ?? null,
+  accessToken: persistedSession?.accessToken ?? null,
+  refreshToken: persistedSession?.refreshToken ?? null,
+  tokenType: persistedSession?.tokenType ?? null,
+  isAuthenticated: Boolean(persistedSession?.accessToken),
+  loginLoading: false,
+  loginSuccess: false,
+  loginError: null,
+  loginSuccessMessage: null,
 };
 
 const authSlice = createSlice({
@@ -57,6 +70,28 @@ const authSlice = createSlice({
       state.resendSuccessMessage = null;
       state.showResendLink = false;
     },
+    resetLoginState: (state) => {
+      state.loginLoading = false;
+      state.loginSuccess = false;
+      state.loginError = null;
+      state.loginSuccessMessage = null;
+    },
+    clearLoginError: (state) => {
+      state.loginError = null;
+    },
+    logout: (state) => {
+      state.user = null;
+      state.accessToken = null;
+      state.refreshToken = null;
+      state.tokenType = null;
+      state.isAuthenticated = false;
+      state.loginLoading = false;
+      state.loginSuccess = false;
+      state.loginError = null;
+      state.loginSuccessMessage = null;
+      clearAuthSession();
+    },
+    resetAuthState: () => initialState,
   },
   extraReducers: (builder) => {
     builder
@@ -83,6 +118,36 @@ const authSlice = createSlice({
         state.registeredUser = null;
         state.registeredEmail = null;
         state.successMessage = null;
+      })
+      .addCase(loginUser.pending, (state) => {
+        state.loginLoading = true;
+        state.loginSuccess = false;
+        state.loginError = null;
+        state.loginSuccessMessage = null;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.loginLoading = false;
+        state.loginSuccess = true;
+        state.loginError = null;
+        state.loginSuccessMessage = action.payload.message;
+        state.user = action.payload.data;
+        state.accessToken = action.payload.access_token;
+        state.tokenType = action.payload.token_type;
+        state.refreshToken = null;
+        state.isAuthenticated = true;
+
+        saveAuthSession({
+          user: action.payload.data,
+          accessToken: action.payload.access_token,
+          tokenType: action.payload.token_type,
+          refreshToken: null,
+        });
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.loginLoading = false;
+        state.loginSuccess = false;
+        state.loginError = action.payload ?? 'Sign in failed. Please try again.';
+        state.loginSuccessMessage = null;
       })
       .addCase(verifyAccount.pending, (state) => {
         state.verificationLoading = true;
@@ -141,6 +206,10 @@ export const {
   clearVerificationError,
   clearResendError,
   resetVerificationFlow,
+  resetLoginState,
+  clearLoginError,
+  logout,
+  resetAuthState,
 } = authSlice.actions;
 
 export default authSlice.reducer;

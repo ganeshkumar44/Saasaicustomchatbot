@@ -18,6 +18,29 @@ export const selectRegisteredEmail = (state: RootState): string | null =>
 export const selectSignupSuccessMessage = (state: RootState): string | null =>
   state.auth.successMessage;
 
+export const selectUser = (state: RootState) => state.auth.user;
+
+export const selectAccessToken = (state: RootState): string | null =>
+  state.auth.accessToken;
+
+export const selectRefreshToken = (state: RootState): string | null =>
+  state.auth.refreshToken;
+
+export const selectIsAuthenticated = (state: RootState): boolean =>
+  state.auth.isAuthenticated;
+
+export const selectLoginLoading = (state: RootState): boolean =>
+  state.auth.loginLoading;
+
+export const selectLoginSuccess = (state: RootState): boolean =>
+  state.auth.loginSuccess;
+
+export const selectLoginError = (state: RootState): string | null =>
+  state.auth.loginError;
+
+export const selectLoginSuccessMessage = (state: RootState): string | null =>
+  state.auth.loginSuccessMessage;
+
 export const selectVerificationLoading = (state: RootState): boolean =>
   state.auth.verificationLoading;
 

@@ -40,6 +40,34 @@ export function validateVerificationForm(
     errors,
   };
 }
+
+const PASSWORD_MIN_LENGTH = 8;
+const PASSWORD_MAX_LENGTH = 100;
+
+export function validateLoginForm(email: string, password: string): ValidationResult {
+  const errors: string[] = [];
+  const trimmedEmail = email.trim();
+
+  if (!trimmedEmail) {
+    errors.push('Email is required.');
+  } else if (!EMAIL_REGEX.test(trimmedEmail)) {
+    errors.push('Please enter a valid email address.');
+  }
+
+  if (!password) {
+    errors.push('Password is required.');
+  } else if (password.length < PASSWORD_MIN_LENGTH) {
+    errors.push(`Password must contain at least ${PASSWORD_MIN_LENGTH} characters.`);
+  } else if (password.length > PASSWORD_MAX_LENGTH) {
+    errors.push(`Password must not exceed ${PASSWORD_MAX_LENGTH} characters.`);
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+}
+
 const MOBILE_REGEX = /^\d{10}$/;
 
 export function validateSignupForm(data: SignupRequest): SignupValidationResult {

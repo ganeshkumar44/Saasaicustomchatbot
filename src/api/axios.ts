@@ -1,5 +1,6 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import type { ApiErrorResponse } from '@/types/api.types';
+import { clearAuthSession } from '@/utils/authStorage';
 
 const AUTH_TOKEN_KEY = 'access_token';
 const REQUEST_TIMEOUT_MS = 30000;
@@ -29,7 +30,8 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError<ApiErrorResponse>) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem(AUTH_TOKEN_KEY);
+      clearAuthSession();
+      window.dispatchEvent(new Event('auth:unauthorized'));
     }
 
     return Promise.reject(error);

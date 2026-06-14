@@ -1,10 +1,13 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
+  login as loginService,
   resendSignupVerification,
   signup as signupService,
   verifySignup,
 } from '@/services/auth.service';
 import type {
+  LoginRequest,
+  LoginResponse,
   ResendVerificationRequest,
   ResendVerificationResponse,
   SignupRequest,
@@ -21,6 +24,18 @@ export const signupUser = createAsyncThunk<
 >('auth/signup', async (payload, { rejectWithValue }) => {
   try {
     return await signupService(payload);
+  } catch (error) {
+    return rejectWithValue(getApiErrorMessage(error));
+  }
+});
+
+export const loginUser = createAsyncThunk<
+  LoginResponse,
+  LoginRequest,
+  { rejectValue: string }
+>('auth/login', async (payload, { rejectWithValue }) => {
+  try {
+    return await loginService(payload);
   } catch (error) {
     return rejectWithValue(getApiErrorMessage(error));
   }

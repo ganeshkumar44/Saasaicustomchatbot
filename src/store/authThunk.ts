@@ -2,20 +2,25 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
   login as loginService,
   resendSignupVerification,
+  signout as signoutService,
   signup as signupService,
   verifySignup,
 } from '@/services/auth.service';
+import type { RootState } from '@/store/index';
 import type {
   LoginRequest,
   LoginResponse,
   ResendVerificationRequest,
   ResendVerificationResponse,
+  SignoutResponse,
   SignupRequest,
   SignupResponse,
   VerificationRequest,
   VerificationResponse,
 } from '@/types/auth.types';
 import { getApiErrorMessage } from '@/utils/apiError';
+import { getSignoutErrorMessage } from '@/utils/signoutError';
+import { validateSignoutSession } from '@/utils/signoutValidation';
 
 export const signupUser = createAsyncThunk<
   SignupResponse,
@@ -62,5 +67,28 @@ export const resendVerificationCode = createAsyncThunk<
     return await resendSignupVerification(payload);
   } catch (error) {
     return rejectWithValue(getApiErrorMessage(error));
+  }
+});
+
+export const signoutUser = createAsyncThunk<
+  SignoutResponse,
+  void,
+  { rejectValue: string; state: RootState }
+>('auth/signout', async (_, { rejectWithValue, getState }) => {
+  const { auth } = getState();
+  const validation = validateSignoutSession(
+    auth.isAuthenticated,
+    auth.user,
+    auth.accessToken,
+  );
+
+  if (!validation.isValid) {
+    return rejectWithValue(validation.error ?? 'Please login first.');
+  }
+
+  try {
+    return await signoutService();
+  } catch (error) {
+    return rejectWithValue(getSignoutErrorMessage(error));
   }
 });

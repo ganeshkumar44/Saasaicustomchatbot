@@ -61,6 +61,11 @@ export interface ResendVerificationResponse {
   message: string;
 }
 
+export interface SignoutResponse {
+  success: true;
+  message: string;
+}
+
 export interface VerificationState {
   verificationLoading: boolean;
   verificationSuccess: boolean;
@@ -102,4 +107,8 @@ export interface AuthState {
   loginSuccess: boolean;
   loginError: string | null;
   loginSuccessMessage: string | null;
+  signoutLoading: boolean;
+  signoutSuccess: boolean;
+  signoutError: string | null;
+  signoutSuccessMessage: string | null;
 }

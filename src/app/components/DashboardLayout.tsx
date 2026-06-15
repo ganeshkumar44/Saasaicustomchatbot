@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router';
 import { useTheme } from 'next-themes';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { logout } from '@/store/authSlice';
+import { useAppSelector } from '@/store/hooks';
 import { selectUser } from '@/store/authSelectors';
+import { useAuth } from '@/hooks/useAuth';
 import {
   LayoutDashboard,
   Bot,
@@ -14,6 +14,7 @@ import {
   Moon,
   Sun,
   LogOut,
+  Loader2,
   User,
   Settings,
   ChevronRight,
@@ -24,13 +25,12 @@ export function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
-  const dispatch = useAppDispatch();
   const { theme, setTheme } = useTheme();
   const user = useAppSelector(selectUser);
+  const { signout, signoutLoading } = useAuth();
 
   const handleLogout = () => {
-    dispatch(logout());
-    navigate('/');
+    void signout();
   };
 
   const menuItems = [
@@ -145,9 +145,14 @@ export function DashboardLayout() {
             </button>
             <button
               onClick={handleLogout}
+              disabled={signoutLoading}
               className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
-              <LogOut className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+              {signoutLoading ? (
+                <Loader2 className="w-5 h-5 text-gray-600 dark:text-gray-300 animate-spin" />
+              ) : (
+                <LogOut className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+              )}
             </button>
           </div>
         </header>

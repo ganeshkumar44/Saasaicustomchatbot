@@ -4,6 +4,7 @@ import type {
   LoginResponse,
   ResendVerificationRequest,
   ResendVerificationResponse,
+  SignoutResponse,
   SignupRequest,
   SignupResponse,
   VerificationRequest,
@@ -37,5 +38,10 @@ export async function resendSignupVerification(
     '/v1/signup-resend-verification',
     data,
   );
+  return response.data;
+}
+
+export async function signout(): Promise<SignoutResponse> {
+  const response = await apiClient.post<SignoutResponse>('/v1/signout');
   return response.data;
 }

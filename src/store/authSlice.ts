@@ -3,11 +3,29 @@ import type { AuthState } from '@/types/auth.types';
 import {
   loginUser,
   resendVerificationCode,
+  signoutUser,
   signupUser,
   verifyAccount,
 } from '@/store/authThunk';
 import { saveAuthSession, loadAuthSession, clearAuthSession } from '@/utils/authStorage';
 import { isVerificationExpiredError } from '@/utils/validation';
+
+function clearAuthenticatedSession(state: AuthState): void {
+  state.user = null;
+  state.accessToken = null;
+  state.refreshToken = null;
+  state.tokenType = null;
+  state.isAuthenticated = false;
+  state.loginLoading = false;
+  state.loginSuccess = false;
+  state.loginError = null;
+  state.loginSuccessMessage = null;
+  state.signoutLoading = false;
+  state.signoutSuccess = false;
+  state.signoutError = null;
+  state.signoutSuccessMessage = null;
+  clearAuthSession();
+}
 
 const persistedSession = loadAuthSession();
 
@@ -38,6 +56,10 @@ const initialState: AuthState = {
   loginSuccess: false,
   loginError: null,
   loginSuccessMessage: null,
+  signoutLoading: false,
+  signoutSuccess: false,
+  signoutError: null,
+  signoutSuccessMessage: null,
 };
 
 const authSlice = createSlice({
@@ -79,17 +101,17 @@ const authSlice = createSlice({
     clearLoginError: (state) => {
       state.loginError = null;
     },
+    clearSignoutError: (state) => {
+      state.signoutError = null;
+    },
+    resetSignoutState: (state) => {
+      state.signoutLoading = false;
+      state.signoutSuccess = false;
+      state.signoutError = null;
+      state.signoutSuccessMessage = null;
+    },
     logout: (state) => {
-      state.user = null;
-      state.accessToken = null;
-      state.refreshToken = null;
-      state.tokenType = null;
-      state.isAuthenticated = false;
-      state.loginLoading = false;
-      state.loginSuccess = false;
-      state.loginError = null;
-      state.loginSuccessMessage = null;
-      clearAuthSession();
+      clearAuthenticatedSession(state);
     },
     resetAuthState: () => initialState,
   },
@@ -196,6 +218,23 @@ const authSlice = createSlice({
         state.resendError =
           action.payload ?? 'Failed to resend verification code. Please try again.';
         state.resendSuccessMessage = null;
+      })
+      .addCase(signoutUser.pending, (state) => {
+        state.signoutLoading = true;
+        state.signoutSuccess = false;
+        state.signoutError = null;
+        state.signoutSuccessMessage = null;
+      })
+      .addCase(signoutUser.fulfilled, (state, action) => {
+        clearAuthenticatedSession(state);
+        state.signoutSuccess = true;
+        state.signoutSuccessMessage = action.payload.message;
+      })
+      .addCase(signoutUser.rejected, (state, action) => {
+        state.signoutLoading = false;
+        state.signoutSuccess = false;
+        state.signoutError = action.payload ?? 'Sign out failed. Please try again.';
+        state.signoutSuccessMessage = null;
       });
   },
 });
@@ -208,6 +247,8 @@ export const {
   resetVerificationFlow,
   resetLoginState,
   clearLoginError,
+  clearSignoutError,
+  resetSignoutState,
   logout,
   resetAuthState,
 } = authSlice.actions;

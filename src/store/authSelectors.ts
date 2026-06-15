@@ -41,6 +41,18 @@ export const selectLoginError = (state: RootState): string | null =>
 export const selectLoginSuccessMessage = (state: RootState): string | null =>
   state.auth.loginSuccessMessage;
 
+export const selectSignoutLoading = (state: RootState): boolean =>
+  state.auth.signoutLoading;
+
+export const selectSignoutSuccess = (state: RootState): boolean =>
+  state.auth.signoutSuccess;
+
+export const selectSignoutError = (state: RootState): string | null =>
+  state.auth.signoutError;
+
+export const selectSignoutSuccessMessage = (state: RootState): string | null =>
+  state.auth.signoutSuccessMessage;
+
 export const selectVerificationLoading = (state: RootState): boolean =>
   state.auth.verificationLoading;
 

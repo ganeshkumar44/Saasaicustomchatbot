@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { MessageSquare, Users, TrendingUp, Zap, ArrowUp, ArrowDown, MoreVertical, Bot, Plus, Settings, Trash2, BarChart3 } from 'lucide-react';
+import { MessageSquare, Users, TrendingUp, Zap, ArrowUp, ArrowDown, MoreVertical, Bot, Plus, Settings, Trash2, BarChart3, Loader2 } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useChatbot } from '@/hooks/useChatbot';
 
 const statsData = [
   { id: 'mon', name: 'Mon', conversations: 240, users: 120 },
@@ -28,10 +29,15 @@ const mockChatbots = [
 
 export function DashboardOverview() {
   const navigate = useNavigate();
+  const { createDraft, createDraftLoading } = useChatbot();
   const [chatbots, setChatbots] = useState(mockChatbots);
 
   const handleDeleteChatbot = (id: number) => {
     setChatbots(chatbots.filter(bot => bot.id !== id));
+  };
+
+  const handleCreateChatbot = () => {
+    void createDraft();
   };
 
   return (
@@ -51,10 +57,15 @@ export function DashboardOverview() {
             </p>
           </div>
           <button
-            onClick={() => navigate('/dashboard/create')}
-            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2"
+            onClick={handleCreateChatbot}
+            disabled={createDraftLoading}
+            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <Plus className="w-5 h-5" />
+            {createDraftLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Plus className="w-5 h-5" />
+            )}
             Create Chatbot
           </button>
         </div>
@@ -69,10 +80,15 @@ export function DashboardOverview() {
               You haven't created any chatbots yet. Get started by creating your first AI-powered chatbot to assist your customers.
             </p>
             <button
-              onClick={() => navigate('/dashboard/create')}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2"
+              onClick={handleCreateChatbot}
+              disabled={createDraftLoading}
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <Plus className="w-5 h-5" />
+              {createDraftLoading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <Plus className="w-5 h-5" />
+              )}
               Create Your First Chatbot
             </button>
           </div>

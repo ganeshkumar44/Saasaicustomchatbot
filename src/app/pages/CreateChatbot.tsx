@@ -1,57 +1,277 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { Bot, Sparkles, Settings, ArrowRight, Upload, CheckCircle, X } from 'lucide-react';
-
-const AI_MODELS = [
-  { id: 'gpt-4o', label: 'GPT-4o', provider: 'OpenAI', desc: 'Most capable multimodal model', badge: 'Popular' },
-  { id: 'gpt-4.1', label: 'GPT-4.1', provider: 'OpenAI', desc: 'Latest GPT-4 generation', badge: 'New' },
-  { id: 'gpt-5.0', label: 'GPT-5.0', provider: 'OpenAI', desc: 'Next-gen reasoning & knowledge', badge: 'Latest' },
-  { id: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro', provider: 'Google', desc: 'Long context & multimodal', badge: null },
-  { id: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash', provider: 'Google', desc: 'Fast & cost-effective', badge: 'Fast' },
-  { id: 'claude-3.5-sonnet', label: 'Claude 3.5 Sonnet', provider: 'Anthropic', desc: 'Excellent at reasoning & code', badge: null },
-  { id: 'claude-3-opus', label: 'Claude 3 Opus', provider: 'Anthropic', desc: 'Best for complex analysis', badge: null },
-  { id: 'llama-3.1', label: 'Llama 3.1', provider: 'Meta', desc: 'Open-source, privacy-friendly', badge: null },
-];
-
-const PROVIDER_COLORS: Record<string, string> = {
-  OpenAI: 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400',
-  Google: 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400',
-  Anthropic: 'bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-400',
-  Meta: 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-400',
-};
+import { Bot, Sparkles, Settings, ArrowRight, Upload, CheckCircle, X, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import {
+  CHATBOT_AI_MODEL,
+  CHATBOT_LANGUAGE,
+  CHATBOT_PERSONALITY_OPTIONS,
+} from '@/constants/chatbot';
+import { useChatbot } from '@/hooks/useChatbot';
+import {
+  validateChatbotBasicInfo,
+  validateChatbotBehaviour,
+  validateKnowledgeBaseFiles,
+} from '@/utils/chatbotValidation';
 
 export function CreateChatbot() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const {
+    chatbotId,
+    chatbotReview,
+    currentStep,
+    createDraftLoading,
+    createDraftError,
+    basicInfoLoading,
+    basicInfoError,
+    behaviourLoading,
+    behaviourError,
+    knowledgeBaseLoading,
+    knowledgeBaseError,
+    knowledgeBaseUploadProgress,
+    reviewLoading,
+    reviewError,
+    publishLoading,
+    publishError,
+    publishResponse,
+    publishSuccess,
+    ensureChatbotDraft,
+    updateBasicInfo,
+    updateBehaviour,
+    uploadKnowledgeBase,
+    getReview,
+    publishChatbot,
+    goToStep,
+    clearErrors,
+    resetWizard,
+  } = useChatbot();
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     personality: 'professional',
-    aiModel: 'gpt-4o',
-    language: 'en',
-    uploadedFiles: [] as string[],
+    aiModel: CHATBOT_AI_MODEL.id,
+    language: CHATBOT_LANGUAGE.id as string,
   });
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+
+  const step = currentStep;
+  const hasFiles = uploadedFiles.length > 0;
+  const isStepLoading =
+    createDraftLoading
+    || basicInfoLoading
+    || behaviourLoading
+    || knowledgeBaseLoading
+    || reviewLoading
+    || publishLoading;
+
+  useEffect(() => {
+    if (!chatbotId && !createDraftLoading) {
+      void ensureChatbotDraft();
+    }
+  }, [chatbotId, createDraftLoading, ensureChatbotDraft]);
+
+  useEffect(() => {
+    if (!chatbotId) {
+      return;
+    }
+
+    setFormData({
+      name: '',
+      description: '',
+      personality: 'professional',
+      aiModel: CHATBOT_AI_MODEL.id,
+      language: CHATBOT_LANGUAGE.id as string,
+    });
+    setUploadedFiles([]);
+    setValidationErrors([]);
+  }, [chatbotId]);
+
+  useEffect(() => {
+    if (currentStep === 4 && chatbotId) {
+      void getReview();
+    }
+  }, [currentStep, chatbotId, getReview]);
+
+  useEffect(() => {
+    if (publishSuccess && publishResponse) {
+      toast.success('Chatbot published successfully');
+      navigate(`/dashboard/chatbot/${publishResponse.chatbot_id}/settings`);
+    }
+  }, [publishSuccess, publishResponse, navigate]);
+
+  useEffect(() => {
+    return () => {
+      resetWizard();
+    };
+  }, [resetWizard]);
+
+  const addFiles = (files: FileList | null) => {
+    if (!files) {
+      return;
+    }
+
+    const incoming = Array.from(files);
+    const validation = validateKnowledgeBaseFiles([...uploadedFiles, ...incoming]);
+
+    if (!validation.isValid) {
+      setValidationErrors(validation.errors);
+      return;
+    }
+
+    const existingKeys = new Set(uploadedFiles.map((file) => `${file.name}-${file.size}`));
+    const merged = [...uploadedFiles];
+
+    incoming.forEach((file) => {
+      const fileKey = `${file.name}-${file.size}`;
+      if (!existingKeys.has(fileKey)) {
+        existingKeys.add(fileKey);
+        merged.push(file);
+      }
+    });
+
+    setValidationErrors([]);
+    setUploadedFiles(merged);
+  };
 
   const handleFileUpload = () => {
-    setFormData({ ...formData, uploadedFiles: [...formData.uploadedFiles, 'document.pdf'] });
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    addFiles(event.target.files);
+    event.target.value = '';
   };
 
   const removeFile = (index: number) => {
-    setFormData({
-      ...formData,
-      uploadedFiles: formData.uploadedFiles.filter((_, i) => i !== index),
+    setUploadedFiles(uploadedFiles.filter((_, fileIndex) => fileIndex !== index));
+  };
+
+  const handleBasicInfoNext = async () => {
+    clearErrors();
+    const validation = validateChatbotBasicInfo(formData.name, formData.description);
+
+    if (!validation.isValid) {
+      setValidationErrors(validation.errors);
+      return;
+    }
+
+    setValidationErrors([]);
+    await updateBasicInfo({
+      chatbot_name: formData.name.trim(),
+      description: formData.description.trim(),
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    navigate('/dashboard/chatbot/1/settings');
+  const handleBehaviourNext = async () => {
+    clearErrors();
+    const validation = validateChatbotBehaviour(
+      formData.personality,
+      formData.aiModel,
+      formData.language,
+    );
+
+    if (!validation.isValid) {
+      setValidationErrors(validation.errors);
+      return;
+    }
+
+    setValidationErrors([]);
+    const personalityOption = CHATBOT_PERSONALITY_OPTIONS.find(
+      (option) => option.id === formData.personality,
+    );
+
+    await updateBehaviour({
+      personality: personalityOption?.apiValue ?? 'Professional',
+      ai_model: CHATBOT_AI_MODEL.apiValue,
+      language: CHATBOT_LANGUAGE.apiValue,
+    });
   };
 
-  const hasFiles = formData.uploadedFiles.length > 0;
+  const handleKnowledgeNext = async () => {
+    clearErrors();
+    const validation = validateKnowledgeBaseFiles(uploadedFiles);
+
+    if (!validation.isValid) {
+      setValidationErrors(validation.errors);
+      return;
+    }
+
+    setValidationErrors([]);
+    await uploadKnowledgeBase({
+      files: uploadedFiles,
+      urls: [],
+    });
+  };
+
+  const handleSkipKnowledge = () => {
+    clearErrors();
+    setValidationErrors([]);
+    goToStep(4);
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    clearErrors();
+    setValidationErrors([]);
+    await publishChatbot();
+  };
+
+  const handleNext = async () => {
+    if (step === 1) {
+      await handleBasicInfoNext();
+      return;
+    }
+
+    if (step === 2) {
+      await handleBehaviourNext();
+      return;
+    }
+
+    if (step === 3) {
+      await handleKnowledgeNext();
+    }
+  };
+
+  const reviewName = (chatbotReview?.chatbot_name ?? formData.name) || '—';
+  const reviewPersonality = chatbotReview?.personality ?? formData.personality;
+  const reviewAiModel = chatbotReview?.ai_model ?? CHATBOT_AI_MODEL.label;
+  const reviewLanguage = chatbotReview?.language ?? CHATBOT_LANGUAGE.label;
+  const reviewKnowledgeSummary = chatbotReview?.knowledgebase
+    ? `${chatbotReview.knowledgebase.total_knowledge_sources} source(s)`
+    : hasFiles
+      ? `${uploadedFiles.length} file(s)`
+      : 'None (can add later)';
+
+  const stepError =
+    createDraftError
+    ?? basicInfoError
+    ?? behaviourError
+    ?? knowledgeBaseError
+    ?? reviewError
+    ?? publishError;
+
+  if (createDraftLoading && !chatbotId) {
+    return (
+      <div className="p-6 max-w-4xl mx-auto flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept=".pdf,.doc,.docx,.txt,.csv,.md"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold dark:text-white">Create New Chatbot</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">Set up your AI-powered chatbot in minutes</p>
@@ -110,6 +330,7 @@ export function CreateChatbot() {
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
                 placeholder="e.g., Customer Support Bot"
                 required
+                disabled={basicInfoLoading}
               />
             </div>
 
@@ -122,6 +343,7 @@ export function CreateChatbot() {
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white resize-none"
                 placeholder="Describe what your chatbot does..."
                 required
+                disabled={basicInfoLoading}
               />
             </div>
           </div>
@@ -144,22 +366,23 @@ export function CreateChatbot() {
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Personality</label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {['professional', 'friendly', 'casual'].map((personality) => (
+                {CHATBOT_PERSONALITY_OPTIONS.map((personality) => (
                   <button
-                    key={personality}
+                    key={personality.id}
                     type="button"
-                    onClick={() => setFormData({ ...formData, personality })}
+                    onClick={() => setFormData({ ...formData, personality: personality.id })}
                     className={`p-4 border-2 rounded-lg text-left transition-all ${
-                      formData.personality === personality
+                      formData.personality === personality.id
                         ? 'border-blue-600 bg-blue-50 dark:bg-blue-950'
                         : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
                     }`}
+                    disabled={behaviourLoading}
                   >
-                    <p className="font-medium dark:text-white capitalize">{personality}</p>
+                    <p className="font-medium dark:text-white capitalize">{personality.id}</p>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      {personality === 'professional' && 'Formal and business-like'}
-                      {personality === 'friendly' && 'Warm and approachable'}
-                      {personality === 'casual' && 'Relaxed and conversational'}
+                      {personality.id === 'professional' && 'Formal and business-like'}
+                      {personality.id === 'friendly' && 'Warm and approachable'}
+                      {personality.id === 'casual' && 'Relaxed and conversational'}
                     </p>
                   </button>
                 ))}
@@ -170,33 +393,29 @@ export function CreateChatbot() {
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">AI Model</label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {AI_MODELS.map((model) => (
-                  <button
-                    key={model.id}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, aiModel: model.id })}
-                    className={`p-4 border-2 rounded-lg text-left transition-all ${
-                      formData.aiModel === model.id
-                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-950'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-medium dark:text-white">{model.label}</span>
-                      <div className="flex items-center gap-1.5">
-                        {model.badge && (
-                          <span className="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded text-xs font-medium">
-                            {model.badge}
-                          </span>
-                        )}
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${PROVIDER_COLORS[model.provider]}`}>
-                          {model.provider}
-                        </span>
-                      </div>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, aiModel: CHATBOT_AI_MODEL.id })}
+                  className={`p-4 border-2 rounded-lg text-left transition-all ${
+                    formData.aiModel === CHATBOT_AI_MODEL.id
+                      ? 'border-blue-600 bg-blue-50 dark:bg-blue-950'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}
+                  disabled={behaviourLoading}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-medium dark:text-white">{CHATBOT_AI_MODEL.label}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded text-xs font-medium">
+                        Fast
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400">
+                        {CHATBOT_AI_MODEL.provider}
+                      </span>
                     </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{model.desc}</p>
-                  </button>
-                ))}
+                  </div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{CHATBOT_AI_MODEL.desc}</p>
+                </button>
               </div>
             </div>
 
@@ -207,15 +426,9 @@ export function CreateChatbot() {
                 value={formData.language}
                 onChange={(e) => setFormData({ ...formData, language: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
+                disabled={behaviourLoading}
               >
-                <option value="en">English</option>
-                <option value="es">Spanish</option>
-                <option value="fr">French</option>
-                <option value="de">German</option>
-                <option value="zh">Chinese</option>
-                <option value="ja">Japanese</option>
-                <option value="hi">Hindi</option>
-                <option value="pt">Portuguese</option>
+                <option value={CHATBOT_LANGUAGE.id}>{CHATBOT_LANGUAGE.label}</option>
               </select>
             </div>
           </div>
@@ -237,6 +450,11 @@ export function CreateChatbot() {
             <div
               className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 text-center hover:border-blue-500 dark:hover:border-blue-500 transition-colors cursor-pointer"
               onClick={handleFileUpload}
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={(event) => {
+                event.preventDefault();
+                addFiles(event.dataTransfer.files);
+              }}
             >
               <div className="flex flex-col items-center">
                 <Upload className="w-12 h-12 text-gray-400 mb-4" />
@@ -249,28 +467,45 @@ export function CreateChatbot() {
                 <button
                   type="button"
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  disabled={knowledgeBaseLoading}
                 >
                   Choose Files
                 </button>
               </div>
             </div>
 
+            {knowledgeBaseLoading && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                  <span>Uploading...</span>
+                  <span>{knowledgeBaseUploadProgress}%</span>
+                </div>
+                <div className="w-full h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-blue-600 transition-all duration-300"
+                    style={{ width: `${knowledgeBaseUploadProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
             {hasFiles && (
               <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Uploaded Files ({formData.uploadedFiles.length})</p>
-                {formData.uploadedFiles.map((file, index) => (
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Uploaded Files ({uploadedFiles.length})</p>
+                {uploadedFiles.map((file, index) => (
                   <div
-                    key={index}
+                    key={`${file.name}-${file.size}-${index}`}
                     className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg"
                   >
                     <div className="flex items-center gap-2">
                       <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">{file}</span>
+                      <span className="text-sm text-gray-700 dark:text-gray-300">{file.name}</span>
                     </div>
                     <button
                       type="button"
                       onClick={() => removeFile(index)}
                       className="p-1 hover:bg-green-100 dark:hover:bg-green-900 rounded transition-colors"
+                      disabled={knowledgeBaseLoading}
                     >
                       <X className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                     </button>
@@ -302,21 +537,41 @@ export function CreateChatbot() {
               </div>
             </div>
 
-            <div className="space-y-4">
-              {[
-                { label: 'Name', value: formData.name || '—' },
-                { label: 'Personality', value: formData.personality },
-                { label: 'AI Model', value: AI_MODELS.find(m => m.id === formData.aiModel)?.label ?? formData.aiModel },
-                { label: 'Language', value: formData.language === 'en' ? 'English' : formData.language },
-                { label: 'Knowledge Files', value: hasFiles ? `${formData.uploadedFiles.length} file(s)` : 'None (can add later)' },
-              ].map(({ label, value }) => (
-                <div key={label} className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-800 last:border-0">
-                  <span className="text-sm text-gray-500 dark:text-gray-400">{label}</span>
-                  <span className="text-sm font-medium dark:text-white capitalize">{value}</span>
-                </div>
-              ))}
-            </div>
+            {reviewLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {[
+                  { label: 'Name', value: reviewName },
+                  { label: 'Personality', value: reviewPersonality },
+                  { label: 'AI Model', value: reviewAiModel },
+                  { label: 'Language', value: reviewLanguage },
+                  { label: 'Knowledge Files', value: reviewKnowledgeSummary },
+                ].map(({ label, value }) => (
+                  <div key={label} className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-800 last:border-0">
+                    <span className="text-sm text-gray-500 dark:text-gray-400">{label}</span>
+                    <span className="text-sm font-medium dark:text-white capitalize">{value}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
+        )}
+
+        {validationErrors.length > 0 && (
+          <div className="rounded-lg border border-red-200 dark:border-red-800 p-3 space-y-1">
+            {validationErrors.map((validationError) => (
+              <p key={validationError} className="text-sm text-red-600 dark:text-red-400">
+                {validationError}
+              </p>
+            ))}
+          </div>
+        )}
+
+        {stepError && (
+          <p className="text-sm text-red-600 dark:text-red-400 text-center">{stepError}</p>
         )}
 
         {/* Navigation Buttons */}
@@ -324,8 +579,9 @@ export function CreateChatbot() {
           {step > 1 ? (
             <button
               type="button"
-              onClick={() => setStep(step - 1)}
+              onClick={() => goToStep(step - 1)}
               className="px-6 py-3 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              disabled={isStepLoading}
             >
               Back
             </button>
@@ -339,8 +595,9 @@ export function CreateChatbot() {
               {step === 3 && !hasFiles && (
                 <button
                   type="button"
-                  onClick={() => setStep(step + 1)}
+                  onClick={handleSkipKnowledge}
                   className="px-6 py-3 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-2"
+                  disabled={knowledgeBaseLoading}
                 >
                   Skip & Continue
                   <ArrowRight className="w-5 h-5" />
@@ -349,21 +606,41 @@ export function CreateChatbot() {
               {(step !== 3 || hasFiles) && (
                 <button
                   type="button"
-                  onClick={() => setStep(step + 1)}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                  onClick={() => void handleNext()}
+                  disabled={isStepLoading}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  {step === 3 ? 'Continue' : 'Next'}
-                  <ArrowRight className="w-5 h-5" />
+                  {(step === 1 && basicInfoLoading) || (step === 2 && behaviourLoading) || (step === 3 && knowledgeBaseLoading) ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      {step === 3 ? 'Uploading...' : 'Saving...'}
+                    </>
+                  ) : (
+                    <>
+                      {step === 3 ? 'Continue' : 'Next'}
+                      <ArrowRight className="w-5 h-5" />
+                    </>
+                  )}
                 </button>
               )}
             </div>
           ) : (
             <button
               type="submit"
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl flex items-center gap-2"
+              disabled={publishLoading || reviewLoading}
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              Create Chatbot
-              <Sparkles className="w-5 h-5" />
+              {publishLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  Create Chatbot
+                  <Sparkles className="w-5 h-5" />
+                </>
+              )}
             </button>
           )}
         </div>

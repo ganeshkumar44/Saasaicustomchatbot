@@ -4,6 +4,7 @@ import { useTheme } from 'next-themes';
 import { useAppSelector } from '@/store/hooks';
 import { selectUser } from '@/store/authSelectors';
 import { useAuth } from '@/hooks/useAuth';
+import { useChatbot } from '@/hooks/useChatbot';
 import {
   LayoutDashboard,
   Bot,
@@ -28,9 +29,19 @@ export function DashboardLayout() {
   const { theme, setTheme } = useTheme();
   const user = useAppSelector(selectUser);
   const { signout, signoutLoading } = useAuth();
+  const { createDraft, createDraftLoading } = useChatbot();
 
   const handleLogout = () => {
     void signout();
+  };
+
+  const handleMenuClick = (path: string, label: string) => {
+    if (label === 'Create Chatbot') {
+      void createDraft();
+      return;
+    }
+
+    navigate(path);
   };
 
   const menuItems = [
@@ -72,8 +83,9 @@ export function DashboardLayout() {
           {menuItems.map((item) => (
             <button
               key={item.path}
-              onClick={() => navigate(item.path)}
+              onClick={() => handleMenuClick(item.path, item.label)}
               title={collapsed ? item.label : undefined}
+              disabled={item.label === 'Create Chatbot' && createDraftLoading}
               className={`w-full flex items-center gap-3 py-3 transition-colors ${
                 collapsed ? 'justify-center px-0' : 'px-4'
               } ${

@@ -43,6 +43,93 @@ export function validateVerificationForm(
 
 const PASSWORD_MIN_LENGTH = 8;
 const PASSWORD_MAX_LENGTH = 100;
+const PASSWORD_UPPERCASE = /[A-Z]/;
+const PASSWORD_LOWERCASE = /[a-z]/;
+const PASSWORD_DIGIT = /\d/;
+const PASSWORD_SPECIAL = /[!@#$%^&*(),.?":{}|<>_\-+=[\]\\;/'`~]/;
+
+export function validatePasswordPolicy(password: string): string | null {
+  if (!password) {
+    return 'Password is required.';
+  }
+
+  if (password.length < PASSWORD_MIN_LENGTH) {
+    return 'Password must be at least 8 characters long.';
+  }
+
+  if (password.length > PASSWORD_MAX_LENGTH) {
+    return 'Password must not exceed 100 characters.';
+  }
+
+  if (
+    !PASSWORD_UPPERCASE.test(password)
+    || !PASSWORD_LOWERCASE.test(password)
+    || !PASSWORD_DIGIT.test(password)
+    || !PASSWORD_SPECIAL.test(password)
+  ) {
+    return (
+      'Password must contain at least one uppercase letter, one lowercase letter, '
+      + 'one number and one special character.'
+    );
+  }
+
+  return null;
+}
+
+export function validateForgotPasswordEmail(email: string): ValidationResult {
+  const errors: string[] = [];
+  const trimmedEmail = email.trim();
+
+  if (!trimmedEmail) {
+    errors.push('Email is required.');
+  } else if (!EMAIL_REGEX.test(trimmedEmail)) {
+    errors.push('Please enter a valid email address.');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+}
+
+export function validateForgotPasswordCode(verificationCode: string): ValidationResult {
+  const errors: string[] = [];
+  const trimmedCode = verificationCode.trim();
+
+  if (!trimmedCode) {
+    errors.push('Verification code is required.');
+  } else if (!VERIFICATION_CODE_REGEX.test(trimmedCode)) {
+    errors.push('Verification code must be exactly 6 digits.');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+}
+
+export function validateResetPasswordForm(
+  newPassword: string,
+  confirmPassword: string,
+): ValidationResult {
+  const errors: string[] = [];
+  const passwordError = validatePasswordPolicy(newPassword);
+
+  if (passwordError) {
+    errors.push(passwordError);
+  }
+
+  if (!confirmPassword) {
+    errors.push('Confirm password is required.');
+  } else if (newPassword !== confirmPassword) {
+    errors.push('Password and confirm password do not match.');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+}
 
 export function validateEmailForVerificationRedirect(
   email: string,

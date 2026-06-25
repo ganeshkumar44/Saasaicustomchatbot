@@ -10,6 +10,14 @@ import type {
   VerificationRequest,
   VerificationResponse,
 } from '@/types/auth.types';
+import type {
+  ForgotPasswordEmailRequest,
+  ForgotPasswordEmailResponse,
+  ResetPasswordRequest,
+  ResetPasswordResponse,
+  VerifyForgotPasswordCodeRequest,
+  VerifyForgotPasswordCodeResponse,
+} from '@/types/forgotPassword.types';
 
 export async function signup(data: SignupRequest): Promise<SignupResponse> {
   const response = await apiClient.post<SignupResponse>('/v1/signup', data);
@@ -44,4 +52,40 @@ export async function resendSignupVerification(
 export async function signout(): Promise<SignoutResponse> {
   const response = await apiClient.post<SignoutResponse>('/v1/signout');
   return response.data;
+}
+
+export async function verifyForgotPasswordEmail(
+  data: ForgotPasswordEmailRequest,
+): Promise<ForgotPasswordEmailResponse> {
+  const response = await apiClient.post<ForgotPasswordEmailResponse>(
+    '/v1/verify-forgot-password-email',
+    data,
+  );
+  return response.data;
+}
+
+export async function verifyForgotPasswordCode(
+  data: VerifyForgotPasswordCodeRequest,
+): Promise<VerifyForgotPasswordCodeResponse> {
+  const response = await apiClient.post<VerifyForgotPasswordCodeResponse>(
+    '/v1/verify-forgot-password-uniquecode',
+    data,
+  );
+  return response.data;
+}
+
+export async function resetForgotPassword(
+  data: ResetPasswordRequest,
+): Promise<ResetPasswordResponse> {
+  const response = await apiClient.post<ResetPasswordResponse>(
+    '/v1/forgot-password',
+    data,
+  );
+  return response.data;
+}
+
+export async function resendForgotPasswordCode(
+  data: ForgotPasswordEmailRequest,
+): Promise<ForgotPasswordEmailResponse> {
+  return verifyForgotPasswordEmail(data);
 }

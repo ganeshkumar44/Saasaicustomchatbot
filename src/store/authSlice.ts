@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { AuthState } from '@/types/auth.types';
 import {
   loginUser,
@@ -100,6 +100,9 @@ const authSlice = createSlice({
     },
     clearLoginError: (state) => {
       state.loginError = null;
+    },
+    setRegisteredEmail: (state, action: PayloadAction<string>) => {
+      state.registeredEmail = action.payload.trim();
     },
     clearSignoutError: (state) => {
       state.signoutError = null;
@@ -247,6 +250,7 @@ export const {
   resetVerificationFlow,
   resetLoginState,
   clearLoginError,
+  setRegisteredEmail,
   clearSignoutError,
   resetSignoutState,
   logout,

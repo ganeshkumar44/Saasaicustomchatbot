@@ -44,6 +44,31 @@ export function validateVerificationForm(
 const PASSWORD_MIN_LENGTH = 8;
 const PASSWORD_MAX_LENGTH = 100;
 
+export function validateEmailForVerificationRedirect(
+  email: string,
+): ValidationResult {
+  const trimmedEmail = email.trim();
+
+  if (!trimmedEmail) {
+    return {
+      isValid: false,
+      errors: ['Please enter your email first.'],
+    };
+  }
+
+  if (!EMAIL_REGEX.test(trimmedEmail)) {
+    return {
+      isValid: false,
+      errors: ['Please enter a valid email address.'],
+    };
+  }
+
+  return {
+    isValid: true,
+    errors: [],
+  };
+}
+
 export function validateLoginForm(email: string, password: string): ValidationResult {
   const errors: string[] = [];
   const trimmedEmail = email.trim();

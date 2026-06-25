@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router';
 import { Bot, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { AuthBackground } from '@/app/components/AuthBackground';
+import { isAccountNotVerifiedError } from '@/constants/authMessages';
 import { useAuth } from '@/hooks/useAuth';
+import { useVerifyAccountRedirect } from '@/hooks/useVerifyAccountRedirect';
 import { useAppDispatch } from '@/store/hooks';
 import { resetLoginState } from '@/store/authSlice';
 import { validateLoginForm } from '@/utils/validation';
@@ -20,6 +22,7 @@ export function Login() {
     isAuthenticated,
     clearError,
   } = useAuth();
+  const { redirectToVerifyAccount } = useVerifyAccountRedirect();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -57,6 +60,14 @@ export function Login() {
       email: email.trim(),
       password,
     });
+  };
+
+  const handleVerifyAccountClick = () => {
+    const validation = redirectToVerifyAccount(email);
+
+    if (!validation.isValid) {
+      setValidationErrors(validation.errors);
+    }
   };
 
   return (
@@ -134,7 +145,19 @@ export function Login() {
         )}
 
         {loginError && (
-          <p className="text-sm text-red-600 dark:text-red-400 text-center">{loginError}</p>
+          <div className="text-center">
+            <p className="text-sm text-red-600 dark:text-red-400">{loginError}</p>
+            {isAccountNotVerifiedError(loginError) && (
+              <button
+                type="button"
+                onClick={handleVerifyAccountClick}
+                disabled={loginLoading}
+                className="text-sm text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium transition-colors mt-1"
+              >
+                Verify Account
+              </button>
+            )}
+          </div>
         )}
 
         <button

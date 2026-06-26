@@ -10,6 +10,7 @@ import type {
   PublishResponse,
   ReviewResponse,
 } from '@/types/chatbot.types';
+import type { ChatbotDetailsResponse } from '@/types/chatbotSettings.types';
 
 export async function createDraft(): Promise<CreateChatbotResponse> {
   const response = await apiClient.post<CreateChatbotResponse>('/v1/chatbots');
@@ -84,6 +85,15 @@ export async function getReview(chatbotId: number): Promise<ReviewResponse> {
 export async function publishChatbot(chatbotId: number): Promise<PublishResponse> {
   const response = await apiClient.post<PublishResponse>(
     `/v1/chatbots/${chatbotId}/publish`,
+  );
+  return response.data;
+}
+
+export async function getChatbotDetails(
+  chatbotId: number,
+): Promise<ChatbotDetailsResponse> {
+  const response = await apiClient.get<ChatbotDetailsResponse>(
+    `/v1/chatbots/${chatbotId}/details`,
   );
   return response.data;
 }

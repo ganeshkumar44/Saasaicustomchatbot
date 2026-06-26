@@ -1,4 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
+import accountSettingsReducer from '@/store/accountSettingsSlice';
 import authReducer from '@/store/authSlice';
 import chatbotReducer from '@/store/chatbotSlice';
 import chatbotSettingsReducer from '@/store/chatbotSettingsSlice';
@@ -7,6 +8,7 @@ import forgotPasswordReducer from '@/store/forgotPasswordSlice';
 export const store = configureStore({
   reducer: {
     auth: authReducer,
+    accountSettings: accountSettingsReducer,
     chatbot: chatbotReducer,
     chatbotSettings: chatbotSettingsReducer,
     forgotPassword: forgotPasswordReducer,

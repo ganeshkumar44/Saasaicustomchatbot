@@ -99,7 +99,6 @@ export interface ProfileFormState {
   phone: string;
   company: string;
   website: string;
-  timezone: string;
   language: string;
   bio: string;
 }

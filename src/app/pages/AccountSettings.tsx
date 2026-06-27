@@ -18,7 +18,6 @@ const defaultProfile: ProfileFormState = {
   phone: '',
   company: '',
   website: '',
-  timezone: 'America/New_York',
   language: 'English',
   bio: '',
 };
@@ -31,7 +30,6 @@ function mapUserDetailsToProfile(details: UserDetails): ProfileFormState {
     phone: details.mobile ?? '',
     company: details.company ?? '',
     website: details.website ?? '',
-    timezone: 'America/New_York',
     language: details.language,
     bio: details.bio ?? '',
   };
@@ -386,42 +384,22 @@ export function AccountSettings() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Timezone</label>
-                      <select
-                        value={profile.timezone}
-                        onChange={e => setProfile(p => ({ ...p, timezone: e.target.value }))}
-                        disabled={profileUpdating}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="America/New_York">Eastern Time (ET)</option>
-                        <option value="America/Chicago">Central Time (CT)</option>
-                        <option value="America/Denver">Mountain Time (MT)</option>
-                        <option value="America/Los_Angeles">Pacific Time (PT)</option>
-                        <option value="Europe/London">London (GMT)</option>
-                        <option value="Europe/Paris">Paris (CET)</option>
-                        <option value="Asia/Tokyo">Tokyo (JST)</option>
-                        <option value="Asia/Kolkata">India (IST)</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Language</label>
-                      <select
-                        value={profile.language}
-                        onChange={e => setProfile(p => ({ ...p, language: e.target.value }))}
-                        disabled={profileUpdating}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option>English</option>
-                        <option>Spanish</option>
-                        <option>French</option>
-                        <option>German</option>
-                        <option>Portuguese</option>
-                        <option>Japanese</option>
-                        <option>Hindi</option>
-                      </select>
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Language</label>
+                    <select
+                      value={profile.language}
+                      onChange={e => setProfile(p => ({ ...p, language: e.target.value }))}
+                      disabled={profileUpdating}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option>English</option>
+                      <option>Spanish</option>
+                      <option>French</option>
+                      <option>German</option>
+                      <option>Portuguese</option>
+                      <option>Japanese</option>
+                      <option>Hindi</option>
+                    </select>
                   </div>
 
                   <div>

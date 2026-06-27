@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { MessageSquare, Users, TrendingUp, Zap, ArrowUp, ArrowDown, MoreVertical, Bot, Plus, Settings, Trash2, BarChart3, Loader2 } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Skeleton } from '@/app/components/ui/skeleton';
 import { useChatbot } from '@/hooks/useChatbot';
+import { formatRelativeTime } from '@/utils/formatRelativeTime';
+import { isChatbotActive } from '@/utils/chatbotList';
 
 const statsData = [
   { id: 'mon', name: 'Mon', conversations: 240, users: 120 },
@@ -21,20 +24,20 @@ const recentChats = [
   { id: 4, user: 'David Brown', message: 'Product pricing question', time: '2 hours ago', status: 'resolved' },
 ];
 
-const mockChatbots = [
-  { id: 1, name: 'Customer Support Bot', model: 'GPT-4', conversations: 1243, status: 'active', lastActive: '2 min ago' },
-  { id: 2, name: 'Sales Assistant', model: 'GPT-3.5', conversations: 856, status: 'active', lastActive: '1 hour ago' },
-  { id: 3, name: 'Technical Support', model: 'Claude-3', conversations: 432, status: 'inactive', lastActive: '2 days ago' },
-];
-
 export function DashboardOverview() {
   const navigate = useNavigate();
-  const { createDraft, createDraftLoading } = useChatbot();
-  const [chatbots, setChatbots] = useState(mockChatbots);
+  const {
+    chatbotList,
+    loading,
+    error,
+    refetch,
+    createDraft,
+    createDraftLoading,
+  } = useChatbot();
 
-  const handleDeleteChatbot = (id: number) => {
-    setChatbots(chatbots.filter(bot => bot.id !== id));
-  };
+  useEffect(() => {
+    void refetch();
+  }, [refetch]);
 
   const handleCreateChatbot = () => {
     void createDraft();
@@ -53,7 +56,11 @@ export function DashboardOverview() {
           <div>
             <h2 className="text-xl font-semibold dark:text-white">Your Chatbots</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              {chatbots.length === 0 ? 'No chatbots created yet' : `${chatbots.length} ${chatbots.length === 1 ? 'chatbot' : 'chatbots'} active`}
+              {loading
+                ? 'Loading chatbots...'
+                : chatbotList.length === 0
+                  ? 'No chatbots created yet'
+                  : `${chatbotList.length} ${chatbotList.length === 1 ? 'chatbot' : 'chatbots'} active`}
             </p>
           </div>
           <button
@@ -70,7 +77,33 @@ export function DashboardOverview() {
           </button>
         </div>
 
-        {chatbots.length === 0 ? (
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+            {[1, 2, 3].map((item) => (
+              <div
+                key={item}
+                className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700"
+              >
+                <Skeleton className="w-12 h-12 rounded-lg mb-4" />
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-1/2 mb-4" />
+                <Skeleton className="h-4 w-2/3 mb-4" />
+                <Skeleton className="h-4 w-full pt-4" />
+                <Skeleton className="h-10 w-full mt-4 rounded-lg" />
+              </div>
+            ))}
+          </div>
+        ) : error ? (
+          <div className="p-12 flex flex-col items-center justify-center text-center">
+            <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
+            <button
+              onClick={() => refetch()}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : chatbotList.length === 0 ? (
           <div className="p-12 flex flex-col items-center justify-center text-center">
             <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
               <Bot className="w-10 h-10 text-gray-400" />
@@ -94,9 +127,12 @@ export function DashboardOverview() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-            {chatbots.map((chatbot) => (
+            {chatbotList.map((chatbot) => {
+              const isActive = isChatbotActive(chatbot.status);
+
+              return (
               <div
-                key={chatbot.id}
+                key={chatbot.chatbot_id}
                 className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-all group"
               >
                 <div className="flex items-start justify-between mb-4">
@@ -105,13 +141,12 @@ export function DashboardOverview() {
                   </div>
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => navigate(`/dashboard/chatbot/${chatbot.id}/settings`)}
+                      onClick={() => navigate(`/dashboard/chatbot/${chatbot.chatbot_id}/settings`)}
                       className="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                     >
                       <Settings className="w-5 h-5" />
                     </button>
                     <button
-                      onClick={() => handleDeleteChatbot(chatbot.id)}
                       className="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                     >
                       <Trash2 className="w-5 h-5" />
@@ -119,26 +154,36 @@ export function DashboardOverview() {
                   </div>
                 </div>
 
-                <h3 className="text-lg font-semibold dark:text-white mb-2">{chatbot.name}</h3>
+                <h3 className="text-lg font-semibold dark:text-white mb-2">
+                  {chatbot.chatbot_name ?? 'Untitled Chatbot'}
+                </h3>
 
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-sm text-gray-600 dark:text-gray-400">Model:</span>
-                  <span className="text-sm font-medium text-blue-600 dark:text-blue-400">{chatbot.model}</span>
+                  <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                    {chatbot.ai_model ?? '—'}
+                  </span>
                 </div>
 
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <MessageSquare className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">{chatbot.conversations.toLocaleString()} conversations</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      {chatbot.total_conversations.toLocaleString()} conversations
+                    </span>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                   <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${chatbot.status === 'active' ? 'bg-green-500' : 'bg-gray-400'}`} />
-                    <span className="text-xs text-gray-600 dark:text-gray-400 capitalize">{chatbot.status}</span>
+                    <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
+                    <span className="text-xs text-gray-600 dark:text-gray-400 capitalize">
+                      {isActive ? 'active' : chatbot.status}
+                    </span>
                   </div>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">{chatbot.lastActive}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    {formatRelativeTime(chatbot.updated_at)}
+                  </span>
                 </div>
 
                 <button
@@ -149,7 +194,8 @@ export function DashboardOverview() {
                   View Analytics
                 </button>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

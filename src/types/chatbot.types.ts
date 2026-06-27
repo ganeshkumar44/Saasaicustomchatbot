@@ -109,6 +109,10 @@ export interface ChatbotState {
   chatbotReview: ReviewData | null;
   publishResponse: PublishData | null;
   currentStep: number;
+  chatbotList: ChatbotListItem[];
+  chatbotListLoading: boolean;
+  chatbotListSuccess: boolean;
+  chatbotListError: string | null;
   createDraftLoading: boolean;
   createDraftSuccess: boolean;
   createDraftError: string | null;
@@ -128,4 +132,33 @@ export interface ChatbotState {
   publishLoading: boolean;
   publishSuccess: boolean;
   publishError: string | null;
+}
+
+export interface ChatbotListItem {
+  chatbot_id: number;
+  chatbot_name: string | null;
+  description: string | null;
+  ai_model: string | null;
+  language: string | null;
+  status: string;
+  public_key: string | null;
+  total_conversations: number;
+  total_messages: number;
+  total_uploaded_documents: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ChatbotListResponse {
+  success: true;
+  message: string;
+  total_chatbots: number;
+  data: ChatbotListItem[];
+}
+
+export interface DashboardChatbotListState {
+  chatbotList: ChatbotListItem[];
+  loading: boolean;
+  success: boolean;
+  error: string | null;
 }

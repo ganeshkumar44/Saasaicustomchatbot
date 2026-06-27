@@ -1,6 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
   createDraft as createDraftService,
+  getChatbotList as getChatbotListService,
   getReview as getReviewService,
   publishChatbot as publishChatbotService,
   updateBasicInfo as updateBasicInfoService,
@@ -14,6 +15,7 @@ import type {
   BasicInfoRequest,
   BehaviourData,
   BehaviourRequest,
+  ChatbotListItem,
   KnowledgeBaseUploadData,
   KnowledgeBaseUploadPayload,
   PublishData,
@@ -49,6 +51,23 @@ interface ReviewPayload extends ThunkMessagePayload {
 interface PublishPayload extends ThunkMessagePayload {
   data: PublishData;
 }
+
+interface ChatbotListPayload extends ThunkMessagePayload {
+  data: ChatbotListItem[];
+}
+
+export const fetchChatbotList = createAsyncThunk<
+  ChatbotListPayload,
+  void,
+  { rejectValue: string }
+>('chatbot/fetchList', async (_, { rejectWithValue }) => {
+  try {
+    const response = await getChatbotListService();
+    return { message: response.message, data: response.data };
+  } catch (error) {
+    return rejectWithValue(getApiErrorMessage(error));
+  }
+});
 
 export const createChatbotDraft = createAsyncThunk<
   CreateDraftPayload,

@@ -25,6 +25,9 @@ import {
   selectCreateDraftError,
   selectCreateDraftLoading,
   selectCreateDraftSuccess,
+  selectPublishedChatbotList,
+  selectChatbotListError,
+  selectChatbotListLoading,
   selectKnowledgeBaseError,
   selectKnowledgeBaseLoading,
   selectKnowledgeBaseSuccess,
@@ -38,6 +41,7 @@ import {
 } from '@/store/chatbotSelectors';
 import {
   createChatbotDraft,
+  fetchChatbotList,
   fetchChatbotReview,
   publishChatbotDraft,
   saveChatbotBasicInfo,
@@ -87,6 +91,15 @@ export function useChatbot() {
   const publishLoading = useAppSelector(selectPublishLoading);
   const publishSuccess = useAppSelector(selectPublishSuccess);
   const publishError = useAppSelector(selectPublishError);
+
+  const chatbotList = useAppSelector(selectPublishedChatbotList);
+  const loading = useAppSelector(selectChatbotListLoading);
+  const error = useAppSelector(selectChatbotListError);
+
+  const refetch = useCallback(
+    () => dispatch(fetchChatbotList()),
+    [dispatch],
+  );
 
   const createDraft = useCallback(
     async (options?: { navigateToWizard?: boolean }) => {
@@ -185,6 +198,9 @@ export function useChatbot() {
     publishLoading,
     publishSuccess,
     publishError,
+    chatbotList,
+    loading,
+    error,
     createDraft,
     ensureChatbotDraft,
     updateBasicInfo,
@@ -195,5 +211,6 @@ export function useChatbot() {
     goToStep,
     clearErrors,
     resetWizard,
+    refetch,
   };
 }

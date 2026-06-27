@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { setKnowledgeBaseUploadProgress } from '@/store/chatbotActions';
 import {
   createChatbotDraft,
+  fetchChatbotList,
   fetchChatbotReview,
   publishChatbotDraft,
   saveChatbotBasicInfo,
@@ -19,6 +20,10 @@ const initialState: ChatbotState = {
   chatbotReview: null,
   publishResponse: null,
   currentStep: 1,
+  chatbotList: [],
+  chatbotListLoading: false,
+  chatbotListSuccess: false,
+  chatbotListError: null,
   createDraftLoading: false,
   createDraftSuccess: false,
   createDraftError: null,
@@ -55,7 +60,13 @@ const chatbotSlice = createSlice({
     setChatbotStep: (state, action: { payload: number }) => {
       state.currentStep = action.payload;
     },
-    resetChatbotWizard: () => initialState,
+    resetChatbotWizard: (state) => ({
+      ...initialState,
+      chatbotList: state.chatbotList,
+      chatbotListLoading: state.chatbotListLoading,
+      chatbotListSuccess: state.chatbotListSuccess,
+      chatbotListError: state.chatbotListError,
+    }),
   },
   extraReducers: (builder) => {
     builder
@@ -174,6 +185,23 @@ const chatbotSlice = createSlice({
         state.publishSuccess = false;
         state.publishError =
           action.payload ?? 'Failed to publish chatbot. Please try again.';
+      })
+      .addCase(fetchChatbotList.pending, (state) => {
+        state.chatbotListLoading = true;
+        state.chatbotListSuccess = false;
+        state.chatbotListError = null;
+      })
+      .addCase(fetchChatbotList.fulfilled, (state, action) => {
+        state.chatbotListLoading = false;
+        state.chatbotListSuccess = true;
+        state.chatbotListError = null;
+        state.chatbotList = action.payload.data;
+      })
+      .addCase(fetchChatbotList.rejected, (state, action) => {
+        state.chatbotListLoading = false;
+        state.chatbotListSuccess = false;
+        state.chatbotListError =
+          action.payload ?? 'Failed to load chatbots. Please try again.';
       });
   },
 });

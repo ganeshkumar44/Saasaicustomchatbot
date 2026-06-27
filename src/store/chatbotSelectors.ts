@@ -1,4 +1,5 @@
 import type { RootState } from '@/store/index';
+import { filterPublishedChatbots } from '@/utils/chatbotList';
 
 export const selectChatbotId = (state: RootState): number | null =>
   state.chatbot.chatbotId;
@@ -80,3 +81,17 @@ export const selectPublishSuccess = (state: RootState): boolean =>
 
 export const selectPublishError = (state: RootState): string | null =>
   state.chatbot.publishError;
+
+export const selectChatbotList = (state: RootState) => state.chatbot.chatbotList;
+
+export const selectPublishedChatbotList = (state: RootState) =>
+  filterPublishedChatbots(state.chatbot.chatbotList);
+
+export const selectChatbotListLoading = (state: RootState): boolean =>
+  state.chatbot.chatbotListLoading;
+
+export const selectChatbotListSuccess = (state: RootState): boolean =>
+  state.chatbot.chatbotListSuccess;
+
+export const selectChatbotListError = (state: RootState): string | null =>
+  state.chatbot.chatbotListError;

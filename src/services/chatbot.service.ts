@@ -4,6 +4,7 @@ import type {
   BasicInfoResponse,
   BehaviourRequest,
   BehaviourResponse,
+  ChatbotListResponse,
   CreateChatbotResponse,
   KnowledgeBaseUploadPayload,
   KnowledgeBaseUploadResponse,
@@ -95,5 +96,10 @@ export async function getChatbotDetails(
   const response = await apiClient.get<ChatbotDetailsResponse>(
     `/v1/chatbots/${chatbotId}/details`,
   );
+  return response.data;
+}
+
+export async function getChatbotList(): Promise<ChatbotListResponse> {
+  const response = await apiClient.get<ChatbotListResponse>('/v1/chatbot-list');
   return response.data;
 }

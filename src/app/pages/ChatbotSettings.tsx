@@ -1,21 +1,94 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Bot, Save, Trash2, Copy, Eye, Code, Palette, MessageSquare, Shield, Database, ArrowLeft, Cpu, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { CHATBOT_AI_MODEL } from '@/constants/chatbot';
 import { useChatbotSettings } from '@/hooks/useChatbotSettings';
-import { getUploadedKnowledgebaseDocuments } from '@/utils/knowledgebaseDocuments';
+import type {
+  AppearanceSettingsForm,
+  GeneralSettingsForm,
+  MessageSettingsForm,
+  SecuritySettingsForm,
+} from '@/types/chatbotSettings.types';
+import {
+  mapDetailsToAppearanceForm,
+  mapDetailsToGeneralForm,
+  mapDetailsToMessageForm,
+  mapDetailsToSecurityForm,
+} from '@/utils/chatbotSettingsForm';
+import {
+  getKnowledgebaseDocumentsKey,
+  getUploadedKnowledgebaseDocuments,
+} from '@/utils/knowledgebaseDocuments';
+import { isAllowedKnowledgeFile } from '@/utils/chatbotValidation';
 
 export function ChatbotSettings() {
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeTab, setActiveTab] = useState('general');
+  const [generalForm, setGeneralForm] = useState<GeneralSettingsForm>({
+    chatbot_name: '',
+    description: '',
+    typing_indicator: true,
+  });
+  const [appearanceForm, setAppearanceForm] = useState<AppearanceSettingsForm>({
+    primary_color: '#000000',
+    widget_position: 'bottom-right',
+    show_avatar: true,
+  });
+  const [messageForm, setMessageForm] = useState<MessageSettingsForm>({
+    chat_title: '',
+    welcome_message: '',
+    input_placeholder: '',
+  });
+  const [securityForm, setSecurityForm] = useState<SecuritySettingsForm>({
+    ai_model: CHATBOT_AI_MODEL.apiValue,
+    allowed_domains: '',
+  });
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [deleteDocumentIds, setDeleteDocumentIds] = useState<number[]>([]);
+
   const {
+    chatbotId,
     chatbotDetails,
     loading,
     error,
     invalidChatbotId,
+    generalLoading,
+    appearanceLoading,
+    messageLoading,
+    securityLoading,
+    knowledgebaseLoading,
     refetch,
+    updateGeneralSettings,
+    updateAppearanceSettings,
+    updateMessageSettings,
+    updateSecuritySettings,
+    updateKnowledgeBase,
+    parseAllowedDomainsInput,
   } = useChatbotSettings();
+
+  const knowledgebaseDocumentsKey = getKnowledgebaseDocumentsKey(
+    chatbotDetails?.knowledgebase_documents,
+  );
+
+  useEffect(() => {
+    if (!chatbotDetails) {
+      return;
+    }
+
+    setGeneralForm(mapDetailsToGeneralForm(chatbotDetails));
+    setAppearanceForm(mapDetailsToAppearanceForm(chatbotDetails));
+    setMessageForm(mapDetailsToMessageForm(chatbotDetails));
+    setSecurityForm(mapDetailsToSecurityForm(chatbotDetails));
+    setNewFiles([]);
+    setDeleteDocumentIds([]);
+  }, [
+    chatbotDetails?.id,
+    chatbotDetails?.settings_updated_at,
+    chatbotDetails?.updated_at,
+    knowledgebaseDocumentsKey,
+  ]);
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -60,9 +133,123 @@ export function ChatbotSettings() {
     }
   };
 
-  const Toggle = ({ checked }: { checked: boolean }) => (
+  const isSaveLoading =
+    generalLoading
+    || appearanceLoading
+    || messageLoading
+    || securityLoading
+    || knowledgebaseLoading;
+
+  const isEditableTab = ['general', 'appearance', 'messages', 'knowledge', 'security'].includes(
+    activeTab,
+  );
+
+  const handleSaveChanges = async () => {
+    if (!chatbotId || !isEditableTab) {
+      return;
+    }
+
+    switch (activeTab) {
+      case 'general':
+        await updateGeneralSettings({
+          chatbot_id: chatbotId,
+          chatbot_name: generalForm.chatbot_name,
+          description: generalForm.description,
+          typing_indicator: generalForm.typing_indicator,
+        });
+        break;
+      case 'appearance':
+        await updateAppearanceSettings({
+          chatbot_id: chatbotId,
+          primary_color: appearanceForm.primary_color,
+          widget_position: appearanceForm.widget_position,
+          show_avatar: appearanceForm.show_avatar,
+        });
+        break;
+      case 'messages':
+        await updateMessageSettings({
+          chatbot_id: chatbotId,
+          chat_title: messageForm.chat_title,
+          welcome_message: messageForm.welcome_message,
+          input_placeholder: messageForm.input_placeholder,
+        });
+        break;
+      case 'security':
+        await updateSecuritySettings({
+          chatbot_id: chatbotId,
+          ai_model: securityForm.ai_model,
+          allowed_domains: parseAllowedDomainsInput(securityForm.allowed_domains),
+        });
+        break;
+      case 'knowledge': {
+        const saved = await updateKnowledgeBase({
+          chatbot_id: chatbotId,
+          delete_document_ids: deleteDocumentIds,
+          files: newFiles,
+          urls: [],
+        });
+
+        if (saved) {
+          setNewFiles([]);
+          setDeleteDocumentIds([]);
+        }
+        break;
+      }
+      default:
+        break;
+    }
+  };
+
+  const handleChooseFiles = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(event.target.files ?? []);
+    if (selectedFiles.length === 0) {
+      return;
+    }
+
+    const invalidFiles = selectedFiles.filter((file) => !isAllowedKnowledgeFile(file));
+    if (invalidFiles.length > 0) {
+      toast.error(`Unsupported file type: ${invalidFiles[0].name}`);
+      event.target.value = '';
+      return;
+    }
+
+    setNewFiles((previousFiles) => [...previousFiles, ...selectedFiles]);
+    event.target.value = '';
+  };
+
+  const handleRemoveExistingDocument = (documentId: number) => {
+    setDeleteDocumentIds((previousIds) =>
+      previousIds.includes(documentId)
+        ? previousIds
+        : [...previousIds, documentId],
+    );
+  };
+
+  const handleRemoveNewFile = (fileIndex: number) => {
+    setNewFiles((previousFiles) => previousFiles.filter((_, index) => index !== fileIndex));
+  };
+
+  const Toggle = ({
+    checked,
+    onChange,
+    disabled,
+  }: {
+    checked: boolean;
+    onChange?: (value: boolean) => void;
+    disabled?: boolean;
+  }) => (
     <label className="relative inline-flex items-center cursor-default">
-      <input type="checkbox" checked={checked} readOnly className="sr-only peer" />
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(event) => onChange?.(event.target.checked)}
+        disabled={disabled}
+        className="sr-only peer"
+      />
       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600" />
     </label>
   );
@@ -83,7 +270,7 @@ export function ChatbotSettings() {
     );
   }
 
-  if (loading) {
+  if (loading && !chatbotDetails) {
     return (
       <div className="p-6 flex items-center justify-center min-h-[400px]">
         <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
@@ -91,7 +278,7 @@ export function ChatbotSettings() {
     );
   }
 
-  if (error) {
+  if (error && !chatbotDetails) {
     return (
       <div className="p-6">
         <div className="bg-white dark:bg-gray-900 rounded-xl p-8 border border-gray-200 dark:border-gray-800 text-center space-y-4">
@@ -135,9 +322,21 @@ export function ChatbotSettings() {
   const uploadedFileDocuments = getUploadedKnowledgebaseDocuments(
     chatbotDetails.knowledgebase_documents,
   );
+  const visibleUploadedDocuments = uploadedFileDocuments.filter(
+    (document) => !deleteDocumentIds.includes(document.id),
+  );
 
   return (
     <div className="p-6">
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept=".pdf,.doc,.docx,.txt,.csv,.md"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+
       <div className="mb-8">
         <button
           onClick={() => navigate('/dashboard')}
@@ -184,8 +383,10 @@ export function ChatbotSettings() {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Chatbot Name</label>
                   <input
                     type="text"
-                    value={chatbotDetails.chatbot_name ?? ''}
-                    readOnly
+                    value={generalForm.chatbot_name}
+                    onChange={(event) =>
+                      setGeneralForm({ ...generalForm, chatbot_name: event.target.value })}
+                    disabled={generalLoading}
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
                   />
                 </div>
@@ -193,8 +394,10 @@ export function ChatbotSettings() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Chatbot Description</label>
                   <textarea
-                    value={chatbotDetails.description ?? ''}
-                    readOnly
+                    value={generalForm.description}
+                    onChange={(event) =>
+                      setGeneralForm({ ...generalForm, description: event.target.value })}
+                    disabled={generalLoading}
                     rows={3}
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white resize-none"
                   />
@@ -205,7 +408,12 @@ export function ChatbotSettings() {
                     <p className="font-medium dark:text-white">Typing Indicator</p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Show typing animation when bot is responding</p>
                   </div>
-                  <Toggle checked={chatbotDetails.typing_indicator} />
+                  <Toggle
+                    checked={generalForm.typing_indicator}
+                    onChange={(value) =>
+                      setGeneralForm({ ...generalForm, typing_indicator: value })}
+                    disabled={generalLoading}
+                  />
                 </div>
               </div>
             )}
@@ -220,14 +428,18 @@ export function ChatbotSettings() {
                   <div className="flex items-center gap-4">
                     <input
                       type="color"
-                      value={chatbotDetails.primary_color}
-                      readOnly
+                      value={appearanceForm.primary_color}
+                      onChange={(event) =>
+                        setAppearanceForm({ ...appearanceForm, primary_color: event.target.value })}
+                      disabled={appearanceLoading}
                       className="w-20 h-12 rounded-lg border border-gray-300 dark:border-gray-700 cursor-default"
                     />
                     <input
                       type="text"
-                      value={chatbotDetails.primary_color}
-                      readOnly
+                      value={appearanceForm.primary_color}
+                      onChange={(event) =>
+                        setAppearanceForm({ ...appearanceForm, primary_color: event.target.value })}
+                      disabled={appearanceLoading}
                       className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
                     />
                   </div>
@@ -240,8 +452,11 @@ export function ChatbotSettings() {
                       <button
                         key={position}
                         type="button"
+                        onClick={() =>
+                          setAppearanceForm({ ...appearanceForm, widget_position: position })}
+                        disabled={appearanceLoading}
                         className={`p-4 border-2 rounded-lg text-left transition-all ${
-                          chatbotDetails.widget_position === position
+                          appearanceForm.widget_position === position
                             ? 'border-blue-600 bg-blue-50 dark:bg-blue-950'
                             : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
                         }`}
@@ -257,7 +472,12 @@ export function ChatbotSettings() {
                     <p className="font-medium dark:text-white">Show Avatar</p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Display chatbot avatar in messages</p>
                   </div>
-                  <Toggle checked={chatbotDetails.show_avatar} />
+                  <Toggle
+                    checked={appearanceForm.show_avatar}
+                    onChange={(value) =>
+                      setAppearanceForm({ ...appearanceForm, show_avatar: value })}
+                    disabled={appearanceLoading}
+                  />
                 </div>
               </div>
             )}
@@ -276,8 +496,10 @@ export function ChatbotSettings() {
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Displayed in the header of the chat widget</p>
                   <input
                     type="text"
-                    value={chatbotDetails.chat_title}
-                    readOnly
+                    value={messageForm.chat_title}
+                    onChange={(event) =>
+                      setMessageForm({ ...messageForm, chat_title: event.target.value })}
+                    disabled={messageLoading}
                     placeholder="e.g., Chat with us"
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
                   />
@@ -288,13 +510,15 @@ export function ChatbotSettings() {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Welcome Message</label>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">The first message shown to users when they open the chat</p>
                   <textarea
-                    value={chatbotDetails.welcome_message}
-                    readOnly
+                    value={messageForm.welcome_message}
+                    onChange={(event) =>
+                      setMessageForm({ ...messageForm, welcome_message: event.target.value })}
+                    disabled={messageLoading}
                     rows={4}
                     placeholder="e.g., Hi there! 👋 How can we help you today?"
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white resize-none"
                   />
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 text-right">{chatbotDetails.welcome_message.length} / 500</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 text-right">{messageForm.welcome_message.length} / 500</p>
                 </div>
 
                 {/* Input Placeholder */}
@@ -303,8 +527,10 @@ export function ChatbotSettings() {
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Placeholder text shown inside the message input field</p>
                   <input
                     type="text"
-                    value={chatbotDetails.input_placeholder}
-                    readOnly
+                    value={messageForm.input_placeholder}
+                    onChange={(event) =>
+                      setMessageForm({ ...messageForm, input_placeholder: event.target.value })}
+                    disabled={messageLoading}
                     placeholder="e.g., Type your message..."
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
                   />
@@ -314,19 +540,19 @@ export function ChatbotSettings() {
                 <div>
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Preview</p>
                   <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden max-w-sm">
-                    <div className="px-4 py-3 flex items-center gap-3" style={{ backgroundColor: chatbotDetails.primary_color }}>
+                    <div className="px-4 py-3 flex items-center gap-3" style={{ backgroundColor: appearanceForm.primary_color }}>
                       <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
                         <Bot className="w-4 h-4 text-white" />
                       </div>
-                      <span className="text-white font-medium text-sm">{chatbotDetails.chat_title || 'Chat with us'}</span>
+                      <span className="text-white font-medium text-sm">{messageForm.chat_title || 'Chat with us'}</span>
                     </div>
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 min-h-[80px]">
                       <div className="bg-white dark:bg-gray-700 rounded-lg rounded-tl-none px-3 py-2 max-w-[85%] shadow-sm">
-                        <p className="text-sm dark:text-white">{chatbotDetails.welcome_message || '...'}</p>
+                        <p className="text-sm dark:text-white">{messageForm.welcome_message || '...'}</p>
                       </div>
                     </div>
                     <div className="px-3 py-2 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-                      <p className="text-xs text-gray-400">{chatbotDetails.input_placeholder || 'Type your message...'}</p>
+                      <p className="text-xs text-gray-400">{messageForm.input_placeholder || 'Type your message...'}</p>
                     </div>
                   </div>
                 </div>
@@ -345,19 +571,24 @@ export function ChatbotSettings() {
                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                       Supported: PDF, DOC, DOCX, TXT, CSV, MD (Max 10MB)
                     </p>
-                    <button type="button" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    <button
+                      type="button"
+                      onClick={handleChooseFiles}
+                      disabled={knowledgebaseLoading}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
                       Choose Files
                     </button>
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  {uploadedFileDocuments.length > 0 ? (
+                  {visibleUploadedDocuments.length > 0 || newFiles.length > 0 ? (
                     <>
                       <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Uploaded Files ({uploadedFileDocuments.length})
+                        Uploaded Files ({visibleUploadedDocuments.length + newFiles.length})
                       </p>
-                      {uploadedFileDocuments.map((document) => (
+                      {visibleUploadedDocuments.map((document) => (
                         <div
                           key={document.id}
                           className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
@@ -368,7 +599,33 @@ export function ChatbotSettings() {
                               {document.original_file_name}
                             </span>
                           </div>
-                          <button className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300">
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveExistingDocument(document.id)}
+                            disabled={knowledgebaseLoading}
+                            className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </div>
+                      ))}
+                      {newFiles.map((file, index) => (
+                        <div
+                          key={`${file.name}-${file.size}-${index}`}
+                          className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Database className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                            <span className="text-sm font-medium dark:text-white">
+                              {file.name}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveNewFile(index)}
+                            disabled={knowledgebaseLoading}
+                            className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
+                          >
                             <Trash2 className="w-5 h-5" />
                           </button>
                         </div>
@@ -398,8 +655,11 @@ export function ChatbotSettings() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <button
                       type="button"
+                      onClick={() =>
+                        setSecurityForm({ ...securityForm, ai_model: CHATBOT_AI_MODEL.apiValue })}
+                      disabled={securityLoading}
                       className={`p-4 border-2 rounded-lg text-left transition-all ${
-                        chatbotDetails.ai_model === CHATBOT_AI_MODEL.apiValue
+                        securityForm.ai_model === CHATBOT_AI_MODEL.apiValue
                           ? 'border-blue-600 bg-blue-50 dark:bg-blue-950'
                           : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                       }`}
@@ -413,9 +673,9 @@ export function ChatbotSettings() {
                       <p className="text-xs text-gray-500 dark:text-gray-400">{CHATBOT_AI_MODEL.desc}</p>
                     </button>
                   </div>
-                  {chatbotDetails.ai_model && (
+                  {securityForm.ai_model && (
                     <p className="mt-2 text-xs text-blue-600 dark:text-blue-400">
-                      Currently using: <strong>{chatbotDetails.ai_model}</strong>
+                      Currently using: <strong>{securityForm.ai_model}</strong>
                     </p>
                   )}
                 </div>
@@ -425,8 +685,10 @@ export function ChatbotSettings() {
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Restrict widget to specific domains (comma-separated). Leave empty to allow all.</p>
                   <input
                     type="text"
-                    value={chatbotDetails.allowed_domains}
-                    readOnly
+                    value={securityForm.allowed_domains}
+                    onChange={(event) =>
+                      setSecurityForm({ ...securityForm, allowed_domains: event.target.value })}
+                    disabled={securityLoading}
                     placeholder="e.g., mysite.com, app.mysite.com"
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
                   />
@@ -473,9 +735,16 @@ export function ChatbotSettings() {
                 Preview
               </button>
               <button
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                type="button"
+                onClick={() => void handleSaveChanges()}
+                disabled={!isEditableTab || isSaveLoading}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                <Save className="w-5 h-5" />
+                {isSaveLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Save className="w-5 h-5" />
+                )}
                 Save Changes
               </button>
             </div>

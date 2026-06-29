@@ -8,3 +8,12 @@ export function getUploadedKnowledgebaseDocuments(
       document.source_type === 'file' && document.original_file_name !== null,
   );
 }
+
+export function getKnowledgebaseDocumentsKey(
+  documents: KnowledgebaseDocument[] | undefined,
+): string {
+  return (documents ?? [])
+    .map((document) => document.id)
+    .sort((left, right) => left - right)
+    .join(',');
+}

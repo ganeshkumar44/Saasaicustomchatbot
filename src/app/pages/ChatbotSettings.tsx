@@ -704,17 +704,10 @@ export function ChatbotSettings() {
                   <p className="text-gray-600 dark:text-gray-400">Copy and paste this code into your website</p>
                 </div>
 
-                <div className="relative">
+                <div>
                   <pre className="bg-gray-900 text-gray-100 p-6 rounded-lg overflow-x-auto text-sm">
                     <code>{embedCode}</code>
                   </pre>
-                  <button
-                    onClick={() => copyToClipboard(embedCode)}
-                    className="absolute top-4 right-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-                  >
-                    <Copy className="w-4 h-4" />
-                    Copy
-                  </button>
                 </div>
               </div>
             )}
@@ -734,19 +727,30 @@ export function ChatbotSettings() {
                 <Eye className="w-5 h-5" />
                 Preview
               </button>
-              <button
-                type="button"
-                onClick={() => void handleSaveChanges()}
-                disabled={!isEditableTab || isSaveLoading}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                {isSaveLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <Save className="w-5 h-5" />
-                )}
-                Save Changes
-              </button>
+              {activeTab === 'embed' ? (
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(embedCode)}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                >
+                  <Copy className="w-5 h-5" />
+                  Copy
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => void handleSaveChanges()}
+                  disabled={!isEditableTab || isSaveLoading}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {isSaveLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Save className="w-5 h-5" />
+                  )}
+                  Save Changes
+                </button>
+              )}
             </div>
           </div>
         </div>

@@ -17,3 +17,11 @@ export function getKnowledgebaseDocumentsKey(
     .sort((left, right) => left - right)
     .join(',');
 }
+
+export function getKnowledgebaseUrlDocuments(
+  documents: KnowledgebaseDocument[] | undefined,
+): KnowledgebaseDocument[] {
+  return (documents ?? []).filter(
+    (document) => document.source_type === 'url' && document.url !== null,
+  );
+}

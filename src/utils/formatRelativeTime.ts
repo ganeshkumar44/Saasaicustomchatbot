@@ -38,3 +38,23 @@ export function formatRelativeTime(isoDate: string): string {
     year: 'numeric',
   });
 }
+
+export function formatDisplayDate(isoDate: string | null): string {
+  if (!isoDate) {
+    return '—';
+  }
+
+  const date = new Date(isoDate);
+
+  if (Number.isNaN(date.getTime())) {
+    return 'Unknown';
+  }
+
+  return date.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}

@@ -729,7 +729,15 @@ export function ChatbotSettings() {
               Delete Chatbot
             </button>
             <div className="flex items-center gap-3">
-              <button className="px-6 py-3 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (chatbotId) {
+                    navigate(`/dashboard/chatbot/${chatbotId}/preview`);
+                  }
+                }}
+                className="px-6 py-3 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-2"
+              >
                 <Eye className="w-5 h-5" />
                 Preview
               </button>

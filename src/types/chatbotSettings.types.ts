@@ -118,3 +118,8 @@ export interface ChatbotSettingsState {
   updateError: string | null;
   updateSuccessMessage: string | null;
 }
+
+export type PreviewState = Pick<
+  ChatbotSettingsState,
+  'chatbotDetails' | 'loading' | 'error' | 'success'
+>;

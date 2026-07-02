@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { MessageSquare, Users, TrendingUp, Zap, ArrowUp, ArrowDown, MoreVertical, Bot, Plus, Settings, Trash2, BarChart3, Loader2 } from 'lucide-react';
+import { MessageSquare, Users, TrendingUp, Zap, MoreVertical, Bot, Plus, Settings, Trash2, BarChart3, Loader2 } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AnalyticsTrendBadge } from '@/app/components/AnalyticsTrendBadge';
 import { Skeleton } from '@/app/components/ui/skeleton';
 import { useChatbot } from '@/hooks/useChatbot';
 import { useDashboardAnalytics } from '@/hooks/useDashboardAnalytics';
@@ -11,10 +12,8 @@ import { useAppSelector } from '@/store/hooks';
 import { selectUser } from '@/store/authSelectors';
 import { formatMessageTime, formatRelativeTime } from '@/utils/formatRelativeTime';
 import {
-  formatAnalyticsChange,
   formatAverageResponseTime,
   formatResolutionRate,
-  getAnalyticsTrendClassName,
 } from '@/utils/dashboardAnalyticsFormat';
 import {
   getAnalyticsRangeLabel,
@@ -23,27 +22,6 @@ import {
   mapUsersChartData,
 } from '@/utils/analyticsChart';
 import { isChatbotActive } from '@/utils/chatbotList';
-import type { AnalyticsTrend } from '@/types/dashboardAnalytics.types';
-
-function AnalyticsTrendBadge({
-  change,
-  trend,
-}: {
-  change: string;
-  trend: AnalyticsTrend;
-}) {
-  return (
-    <span className={`flex items-center gap-1 text-sm ${getAnalyticsTrendClassName(trend)}`}>
-      {trend === 'up' ? (
-        <ArrowUp className="w-4 h-4" />
-      ) : (
-        <ArrowDown className="w-4 h-4" />
-      )}
-      {formatAnalyticsChange(change)}
-    </span>
-  );
-}
-
 export function DashboardOverview() {
   const navigate = useNavigate();
   const {

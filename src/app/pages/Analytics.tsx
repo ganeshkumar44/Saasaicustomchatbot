@@ -1,5 +1,12 @@
-import { Users, MessageSquare, Clock, Target, ArrowUp, ArrowDown } from 'lucide-react';
+import { Users, MessageSquare, Clock, Target } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { AnalyticsTrendBadge } from '@/app/components/AnalyticsTrendBadge';
+import { Skeleton } from '@/app/components/ui/skeleton';
+import { useDashboardAnalytics } from '@/hooks/useDashboardAnalytics';
+import {
+  formatAverageResponseTime,
+  formatResolutionRate,
+} from '@/utils/dashboardAnalyticsFormat';
 
 const conversationData = [
   { id: 'jan1', date: 'Jan 1', conversations: 120, resolved: 110, escalated: 10 },
@@ -37,6 +44,13 @@ const topQuestions = [
 ];
 
 export function Analytics() {
+  const {
+    analytics,
+    loading: analyticsLoading,
+    error: analyticsError,
+    refresh: refreshAnalytics,
+  } = useDashboardAnalytics();
+
   return (
     <div className="p-6 space-y-6">
       <div>
@@ -46,65 +60,102 @@ export function Analytics() {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-950 rounded-lg flex items-center justify-center">
-              <MessageSquare className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+        {analyticsLoading ? (
+          [1, 2, 3, 4].map((item) => (
+            <div
+              key={item}
+              className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800"
+            >
+              <Skeleton className="w-12 h-12 rounded-lg mb-4" />
+              <Skeleton className="h-4 w-32 mb-2" />
+              <Skeleton className="h-9 w-24" />
             </div>
-            <span className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
-              <ArrowUp className="w-4 h-4" />
-              18%
-            </span>
+          ))
+        ) : analyticsError ? (
+          <div className="col-span-full bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800 text-center">
+            <p className="text-red-600 dark:text-red-400 mb-4">{analyticsError}</p>
+            <button
+              onClick={() => refreshAnalytics()}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </button>
           </div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm">Total Conversations</p>
-          <p className="text-3xl font-bold dark:text-white mt-1">8,543</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">vs last month</p>
-        </div>
+        ) : !analytics ? (
+          <div className="col-span-full bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800 text-center">
+            <p className="text-gray-600 dark:text-gray-400">No analytics data available.</p>
+          </div>
+        ) : (
+          <>
+            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-950 rounded-lg flex items-center justify-center">
+                  <MessageSquare className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <AnalyticsTrendBadge
+                  change={analytics.total_conversations_change}
+                  trend={analytics.total_conversations_trend}
+                />
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">Total Conversations</p>
+              <p className="text-3xl font-bold dark:text-white mt-1">
+                {analytics.total_conversations.toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">vs last month</p>
+            </div>
 
-        <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-green-100 dark:bg-green-950 rounded-lg flex items-center justify-center">
-              <Target className="w-6 h-6 text-green-600 dark:text-green-400" />
+            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-green-100 dark:bg-green-950 rounded-lg flex items-center justify-center">
+                  <Target className="w-6 h-6 text-green-600 dark:text-green-400" />
+                </div>
+                <AnalyticsTrendBadge
+                  change={analytics.resolution_rate_change}
+                  trend={analytics.resolution_rate_trend}
+                />
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">Resolution Rate</p>
+              <p className="text-3xl font-bold dark:text-white mt-1">
+                {formatResolutionRate(analytics.resolution_rate)}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">vs last month</p>
             </div>
-            <span className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
-              <ArrowUp className="w-4 h-4" />
-              5%
-            </span>
-          </div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm">Resolution Rate</p>
-          <p className="text-3xl font-bold dark:text-white mt-1">94.2%</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">vs last month</p>
-        </div>
 
-        <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-950 rounded-lg flex items-center justify-center">
-              <Clock className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-purple-100 dark:bg-purple-950 rounded-lg flex items-center justify-center">
+                  <Clock className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <AnalyticsTrendBadge
+                  change={analytics.average_response_time_change}
+                  trend={analytics.average_response_time_trend}
+                />
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">Avg Response Time</p>
+              <p className="text-3xl font-bold dark:text-white mt-1">
+                {formatAverageResponseTime(analytics.average_response_time)}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">vs last month</p>
             </div>
-            <span className="flex items-center gap-1 text-sm text-red-600 dark:text-red-400">
-              <ArrowDown className="w-4 h-4" />
-              12%
-            </span>
-          </div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm">Avg Response Time</p>
-          <p className="text-3xl font-bold dark:text-white mt-1">1.8s</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">vs last month</p>
-        </div>
 
-        <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-950 rounded-lg flex items-center justify-center">
-              <Users className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-orange-100 dark:bg-orange-950 rounded-lg flex items-center justify-center">
+                  <Users className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+                </div>
+                <AnalyticsTrendBadge
+                  change={analytics.total_visitors_change}
+                  trend={analytics.total_visitors_trend}
+                />
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">Total Users</p>
+              <p className="text-3xl font-bold dark:text-white mt-1">
+                {analytics.total_visitors.toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">vs last month</p>
             </div>
-            <span className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
-              <ArrowUp className="w-4 h-4" />
-              23%
-            </span>
-          </div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm">Unique Users</p>
-          <p className="text-3xl font-bold dark:text-white mt-1">3,421</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">vs last month</p>
-        </div>
+          </>
+        )}
       </div>
 
       {/* Charts Row 1 */}

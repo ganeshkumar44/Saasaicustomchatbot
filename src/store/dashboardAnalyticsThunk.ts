@@ -1,6 +1,8 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
   getConversationsChart,
+  getResolutionChart,
+  getResponseTimeChart,
   getUsersChart,
 } from '@/services/analytics.service';
 import { getDashboardAnalytics } from '@/services/dashboardAnalysis.service';
@@ -8,6 +10,8 @@ import type {
   AnalyticsRange,
   ChartPoint,
   DashboardAnalytics,
+  ResolutionChartItem,
+  ResponseTimeChartItem,
 } from '@/types/dashboardAnalytics.types';
 import { getApiErrorMessage } from '@/utils/apiError';
 
@@ -24,6 +28,16 @@ interface FetchConversationsChartPayload {
 interface FetchUsersChartPayload {
   range: AnalyticsRange;
   data: ChartPoint[];
+}
+
+interface FetchResolutionChartPayload {
+  range: AnalyticsRange;
+  data: ResolutionChartItem[];
+}
+
+interface FetchResponseTimeChartPayload {
+  range: AnalyticsRange;
+  data: ResponseTimeChartItem[];
 }
 
 export const fetchDashboardAnalytics = createAsyncThunk<
@@ -65,6 +79,38 @@ export const fetchUsersChart = createAsyncThunk<
 >('dashboardAnalytics/fetchUsersChart', async (range, { rejectWithValue }) => {
   try {
     const response = await getUsersChart(range);
+    return {
+      range,
+      data: response.data,
+    };
+  } catch (error) {
+    return rejectWithValue(getApiErrorMessage(error));
+  }
+});
+
+export const fetchResolutionChart = createAsyncThunk<
+  FetchResolutionChartPayload,
+  AnalyticsRange,
+  { rejectValue: string }
+>('dashboardAnalytics/fetchResolutionChart', async (range, { rejectWithValue }) => {
+  try {
+    const response = await getResolutionChart(range);
+    return {
+      range,
+      data: response.data,
+    };
+  } catch (error) {
+    return rejectWithValue(getApiErrorMessage(error));
+  }
+});
+
+export const fetchResponseTimeChart = createAsyncThunk<
+  FetchResponseTimeChartPayload,
+  AnalyticsRange,
+  { rejectValue: string }
+>('dashboardAnalytics/fetchResponseTimeChart', async (range, { rejectWithValue }) => {
+  try {
+    const response = await getResponseTimeChart(range);
     return {
       range,
       data: response.data,

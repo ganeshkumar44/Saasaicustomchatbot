@@ -58,15 +58,57 @@ export interface UsersChartRow {
   users: number;
 }
 
+export interface ResolutionChartItem {
+  label: string;
+  resolved: number;
+  unresolved: number;
+}
+
+export interface ResponseTimeChartItem {
+  label: string;
+  value: string;
+}
+
+export interface ResolutionChartResponse {
+  success: true;
+  range: string;
+  data: ResolutionChartItem[];
+}
+
+export interface ResponseTimeChartResponse {
+  success: true;
+  range: string;
+  data: ResponseTimeChartItem[];
+}
+
+export interface ResolutionChartRow {
+  id: string;
+  date: string;
+  resolved: number;
+  unresolved: number;
+}
+
+export interface ResponseTimeChartRow {
+  id: string;
+  hour: string;
+  time: number;
+}
+
 export interface DashboardAnalyticsState {
   analytics: DashboardAnalytics | null;
   loading: boolean;
   error: string | null;
   conversationsChart: ChartPoint[];
   usersChart: ChartPoint[];
+  resolutionChart: ResolutionChartItem[];
+  responseTimeChart: ResponseTimeChartItem[];
   selectedRange: AnalyticsRange;
   conversationsLoading: boolean;
   usersLoading: boolean;
+  resolutionLoading: boolean;
+  responseTimeLoading: boolean;
   conversationsError: string | null;
   usersError: string | null;
+  resolutionError: string | null;
+  responseTimeError: string | null;
 }

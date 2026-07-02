@@ -2,6 +2,8 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import {
   fetchConversationsChart,
   fetchDashboardAnalytics,
+  fetchResolutionChart,
+  fetchResponseTimeChart,
   fetchUsersChart,
 } from '@/store/dashboardAnalyticsThunk';
 import type {
@@ -16,11 +18,17 @@ const initialState: DashboardAnalyticsState = {
   error: null,
   conversationsChart: [],
   usersChart: [],
+  resolutionChart: [],
+  responseTimeChart: [],
   selectedRange: DEFAULT_ANALYTICS_RANGE,
   conversationsLoading: false,
   usersLoading: false,
+  resolutionLoading: false,
+  responseTimeLoading: false,
   conversationsError: null,
   usersError: null,
+  resolutionError: null,
+  responseTimeError: null,
 };
 
 const dashboardAnalyticsSlice = createSlice({
@@ -35,6 +43,12 @@ const dashboardAnalyticsSlice = createSlice({
     },
     clearUsersChartError: (state) => {
       state.usersError = null;
+    },
+    clearResolutionChartError: (state) => {
+      state.resolutionError = null;
+    },
+    clearResponseTimeChartError: (state) => {
+      state.responseTimeError = null;
     },
     setSelectedAnalyticsRange: (state, action: PayloadAction<AnalyticsRange>) => {
       state.selectedRange = action.payload;
@@ -89,6 +103,38 @@ const dashboardAnalyticsSlice = createSlice({
         state.usersChart = [];
         state.usersError =
           action.payload ?? 'Failed to load users chart. Please try again.';
+      })
+      .addCase(fetchResolutionChart.pending, (state) => {
+        state.resolutionLoading = true;
+        state.resolutionError = null;
+      })
+      .addCase(fetchResolutionChart.fulfilled, (state, action) => {
+        state.resolutionLoading = false;
+        state.resolutionError = null;
+        state.resolutionChart = action.payload.data;
+        state.selectedRange = action.payload.range;
+      })
+      .addCase(fetchResolutionChart.rejected, (state, action) => {
+        state.resolutionLoading = false;
+        state.resolutionChart = [];
+        state.resolutionError =
+          action.payload ?? 'Failed to load resolution chart. Please try again.';
+      })
+      .addCase(fetchResponseTimeChart.pending, (state) => {
+        state.responseTimeLoading = true;
+        state.responseTimeError = null;
+      })
+      .addCase(fetchResponseTimeChart.fulfilled, (state, action) => {
+        state.responseTimeLoading = false;
+        state.responseTimeError = null;
+        state.responseTimeChart = action.payload.data;
+        state.selectedRange = action.payload.range;
+      })
+      .addCase(fetchResponseTimeChart.rejected, (state, action) => {
+        state.responseTimeLoading = false;
+        state.responseTimeChart = [];
+        state.responseTimeError =
+          action.payload ?? 'Failed to load response time chart. Please try again.';
       });
   },
 });
@@ -97,6 +143,8 @@ export const {
   clearDashboardAnalyticsError,
   clearConversationsChartError,
   clearUsersChartError,
+  clearResolutionChartError,
+  clearResponseTimeChartError,
   setSelectedAnalyticsRange,
   resetDashboardAnalyticsState,
 } = dashboardAnalyticsSlice.actions;

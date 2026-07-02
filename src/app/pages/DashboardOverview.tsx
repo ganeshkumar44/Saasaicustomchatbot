@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { MessageSquare, Users, TrendingUp, Zap, MoreVertical, Bot, Plus, Settings, Trash2, BarChart3, Loader2 } from 'lucide-react';
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { AnalyticsTrendBadge } from '@/app/components/AnalyticsTrendBadge';
+import { UsersChartPanel } from '@/app/components/UsersChartPanel';
 import { Skeleton } from '@/app/components/ui/skeleton';
 import { useChatbot } from '@/hooks/useChatbot';
 import { useDashboardAnalytics } from '@/hooks/useDashboardAnalytics';
@@ -391,49 +392,15 @@ export function DashboardOverview() {
           )}
         </div>
 
-        <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-lg font-semibold dark:text-white">Total Users</h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{rangeLabel}</p>
-            </div>
-          </div>
-          {usersLoading ? (
-            <Skeleton className="w-full h-[300px] rounded-lg" />
-          ) : usersError ? (
-            <div className="h-[300px] flex flex-col items-center justify-center text-center">
-              <p className="text-red-600 dark:text-red-400 mb-4">{usersError}</p>
-              <button
-                onClick={() => refetchCharts()}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Try Again
-              </button>
-            </div>
-          ) : isChartDataEmpty(usersChart) ? (
-            <div className="h-[300px] flex items-center justify-center">
-              <p className="text-gray-600 dark:text-gray-400">No data available.</p>
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={usersChartData}>
-                <CartesianGrid key="users-grid" strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
-                <XAxis key="users-x" dataKey="name" stroke="#9ca3af" />
-                <YAxis key="users-y" stroke="#9ca3af" />
-                <Tooltip
-                  key="users-tooltip"
-                  contentStyle={{
-                    backgroundColor: '#1f2937',
-                    border: 'none',
-                    borderRadius: '8px',
-                    color: '#fff',
-                  }}
-                />
-                <Bar key="users-bar" dataKey="users" fill="#8b5cf6" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </div>
+        <UsersChartPanel
+          title="Total Users"
+          subtitle={rangeLabel}
+          data={usersChartData}
+          loading={usersLoading}
+          error={usersError}
+          isEmpty={isChartDataEmpty(usersChart)}
+          onRetry={() => refetchCharts()}
+        />
       </div>
 
       {/* Recent Chats */}

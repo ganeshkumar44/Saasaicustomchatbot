@@ -1,39 +1,25 @@
 import { Users, MessageSquare, Clock, Target } from 'lucide-react';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { AnalyticsTrendBadge } from '@/app/components/AnalyticsTrendBadge';
+import { AnalyticsRangeSelector } from '@/app/components/AnalyticsRangeSelector';
+import { UsersChartPanel } from '@/app/components/UsersChartPanel';
 import { Skeleton } from '@/app/components/ui/skeleton';
 import { useDashboardAnalytics } from '@/hooks/useDashboardAnalytics';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import {
   formatAverageResponseTime,
   formatResolutionRate,
 } from '@/utils/dashboardAnalyticsFormat';
-
-const conversationData = [
-  { id: 'jan1', date: 'Jan 1', conversations: 120, resolved: 110, escalated: 10 },
-  { id: 'jan2', date: 'Jan 2', conversations: 180, resolved: 165, escalated: 15 },
-  { id: 'jan3', date: 'Jan 3', conversations: 150, resolved: 140, escalated: 10 },
-  { id: 'jan4', date: 'Jan 4', conversations: 220, resolved: 200, escalated: 20 },
-  { id: 'jan5', date: 'Jan 5', conversations: 280, resolved: 260, escalated: 20 },
-  { id: 'jan6', date: 'Jan 6', conversations: 200, resolved: 185, escalated: 15 },
-  { id: 'jan7', date: 'Jan 7', conversations: 240, resolved: 225, escalated: 15 },
-];
-
-const responseTimeData = [
-  { id: 'h00', hour: '00:00', time: 1.2 },
-  { id: 'h04', hour: '04:00', time: 0.8 },
-  { id: 'h08', hour: '08:00', time: 2.1 },
-  { id: 'h12', hour: '12:00', time: 3.5 },
-  { id: 'h16', hour: '16:00', time: 2.8 },
-  { id: 'h20', hour: '20:00', time: 1.9 },
-];
-
-const categoriesData = [
-  { id: 'tech', name: 'Technical Support', value: 35, color: '#3b82f6' },
-  { id: 'bill', name: 'Billing', value: 25, color: '#8b5cf6' },
-  { id: 'gen', name: 'General Inquiry', value: 20, color: '#10b981' },
-  { id: 'prod', name: 'Product Info', value: 15, color: '#f59e0b' },
-  { id: 'other', name: 'Other', value: 5, color: '#6b7280' },
-];
+import {
+  getAnalyticsRangeLabel,
+  isChartDataEmpty,
+  isResolutionChartEmpty,
+  isResponseTimeChartEmpty,
+  mapConversationsChartData,
+  mapResolutionChartData,
+  mapResponseTimeChartData,
+  mapUsersChartData,
+} from '@/utils/analyticsChart';
 
 const topQuestions = [
   { id: 1, question: 'How do I reset my password?', count: 142 },
@@ -50,12 +36,45 @@ export function Analytics() {
     error: analyticsError,
     refresh: refreshAnalytics,
   } = useDashboardAnalytics();
+  const {
+    conversationsChart,
+    usersChart,
+    resolutionChart,
+    responseTimeChart,
+    selectedRange,
+    conversationsLoading,
+    usersLoading,
+    resolutionLoading,
+    responseTimeLoading,
+    conversationsError,
+    usersError,
+    resolutionError,
+    responseTimeError,
+    changeRange,
+    refetch,
+  } = useAnalytics();
+
+  const rangeLabel = getAnalyticsRangeLabel(selectedRange);
+  const conversationsChartData = mapConversationsChartData(conversationsChart);
+  const usersChartData = mapUsersChartData(usersChart);
+  const resolutionChartData = mapResolutionChartData(resolutionChart);
+  const responseTimeChartData = mapResponseTimeChartData(responseTimeChart);
+
+  const tooltipStyle = {
+    backgroundColor: '#1f2937',
+    border: 'none',
+    borderRadius: '8px',
+    color: '#fff',
+  };
 
   return (
     <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold dark:text-white">Analytics</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">Track performance and insights</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold dark:text-white">Analytics</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Track performance and insights</p>
+        </div>
+        <AnalyticsRangeSelector value={selectedRange} onChange={changeRange} />
       </div>
 
       {/* Key Metrics */}
@@ -163,31 +182,41 @@ export function Analytics() {
         <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
           <div className="mb-6">
             <h2 className="text-lg font-semibold dark:text-white">Conversation Trends</h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Last 7 days performance</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{rangeLabel} performance</p>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={conversationData}>
-              <defs>
-                <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid key="trend-grid" strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
-              <XAxis key="trend-x" dataKey="date" stroke="#9ca3af" />
-              <YAxis key="trend-y" stroke="#9ca3af" />
-              <Tooltip
-                key="trend-tooltip"
-                contentStyle={{
-                  backgroundColor: '#1f2937',
-                  border: 'none',
-                  borderRadius: '8px',
-                  color: '#fff',
-                }}
-              />
-              <Area key="conversations-trend" type="monotone" dataKey="conversations" stroke="#3b82f6" fillOpacity={1} fill="url(#colorTotal)" />
-            </AreaChart>
-          </ResponsiveContainer>
+          {conversationsLoading ? (
+            <Skeleton className="w-full h-[300px] rounded-lg" />
+          ) : conversationsError ? (
+            <div className="h-[300px] flex flex-col items-center justify-center text-center">
+              <p className="text-red-600 dark:text-red-400 mb-4">{conversationsError}</p>
+              <button
+                onClick={() => refetch()}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : isChartDataEmpty(conversationsChart) ? (
+            <div className="h-[300px] flex items-center justify-center">
+              <p className="text-gray-600 dark:text-gray-400">No analytics data available.</p>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={conversationsChartData}>
+                <defs>
+                  <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid key="trend-grid" strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
+                <XAxis key="trend-x" dataKey="name" stroke="#9ca3af" />
+                <YAxis key="trend-y" stroke="#9ca3af" />
+                <Tooltip key="trend-tooltip" contentStyle={tooltipStyle} />
+                <Area key="conversations-trend" type="monotone" dataKey="conversations" stroke="#3b82f6" fillOpacity={1} fill="url(#colorTotal)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
         </div>
 
         <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
@@ -195,25 +224,35 @@ export function Analytics() {
             <h2 className="text-lg font-semibold dark:text-white">Resolution Status</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">Resolved vs Escalated</p>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={conversationData}>
-              <CartesianGrid key="status-grid" strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
-              <XAxis key="status-x" dataKey="date" stroke="#9ca3af" />
-              <YAxis key="status-y" stroke="#9ca3af" />
-              <Tooltip
-                key="status-tooltip"
-                contentStyle={{
-                  backgroundColor: '#1f2937',
-                  border: 'none',
-                  borderRadius: '8px',
-                  color: '#fff',
-                }}
-              />
-              <Legend key="status-legend" />
-              <Bar key="resolved-bar" dataKey="resolved" fill="#10b981" radius={[8, 8, 0, 0]} />
-              <Bar key="escalated-bar" dataKey="escalated" fill="#f59e0b" radius={[8, 8, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          {resolutionLoading ? (
+            <Skeleton className="w-full h-[300px] rounded-lg" />
+          ) : resolutionError ? (
+            <div className="h-[300px] flex flex-col items-center justify-center text-center">
+              <p className="text-red-600 dark:text-red-400 mb-4">{resolutionError}</p>
+              <button
+                onClick={() => refetch()}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : isResolutionChartEmpty(resolutionChart) ? (
+            <div className="h-[300px] flex items-center justify-center">
+              <p className="text-gray-600 dark:text-gray-400">No analytics data available.</p>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={resolutionChartData}>
+                <CartesianGrid key="status-grid" strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
+                <XAxis key="status-x" dataKey="date" stroke="#9ca3af" />
+                <YAxis key="status-y" stroke="#9ca3af" />
+                <Tooltip key="status-tooltip" contentStyle={tooltipStyle} />
+                <Legend key="status-legend" />
+                <Bar key="resolved-bar" dataKey="resolved" fill="#10b981" radius={[8, 8, 0, 0]} />
+                <Bar key="unresolved-bar" dataKey="unresolved" fill="#f59e0b" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </div>
 
@@ -224,63 +263,44 @@ export function Analytics() {
             <h2 className="text-lg font-semibold dark:text-white">Response Time by Hour</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">Average response time (seconds)</p>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={responseTimeData}>
-              <CartesianGrid key="response-grid" strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
-              <XAxis key="response-x" dataKey="hour" stroke="#9ca3af" />
-              <YAxis key="response-y" stroke="#9ca3af" />
-              <Tooltip
-                key="response-tooltip"
-                contentStyle={{
-                  backgroundColor: '#1f2937',
-                  border: 'none',
-                  borderRadius: '8px',
-                  color: '#fff',
-                }}
-              />
-              <Line key="time-line" type="monotone" dataKey="time" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 5 }} />
-            </LineChart>
-          </ResponsiveContainer>
+          {responseTimeLoading ? (
+            <Skeleton className="w-full h-[300px] rounded-lg" />
+          ) : responseTimeError ? (
+            <div className="h-[300px] flex flex-col items-center justify-center text-center">
+              <p className="text-red-600 dark:text-red-400 mb-4">{responseTimeError}</p>
+              <button
+                onClick={() => refetch()}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : isResponseTimeChartEmpty(responseTimeChart) ? (
+            <div className="h-[300px] flex items-center justify-center">
+              <p className="text-gray-600 dark:text-gray-400">No analytics data available.</p>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={responseTimeChartData}>
+                <CartesianGrid key="response-grid" strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
+                <XAxis key="response-x" dataKey="hour" stroke="#9ca3af" />
+                <YAxis key="response-y" stroke="#9ca3af" />
+                <Tooltip key="response-tooltip" contentStyle={tooltipStyle} />
+                <Line key="time-line" type="monotone" dataKey="time" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 5 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </div>
 
-        <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold dark:text-white">Conversation Categories</h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Distribution by topic</p>
-          </div>
-          <div className="flex items-center gap-8">
-            <ResponsiveContainer width="50%" height={250}>
-              <PieChart>
-                <Pie
-                  key="categories-pie"
-                  data={categoriesData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={2}
-                  dataKey="value"
-                >
-                  {categoriesData.map((entry) => (
-                    <Cell key={`cell-${entry.id}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip key="pie-tooltip" />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="flex-1 space-y-3">
-              {categoriesData.map((category) => (
-                <div key={category.id} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: category.color }} />
-                    <span className="text-sm dark:text-white">{category.name}</span>
-                  </div>
-                  <span className="text-sm font-semibold dark:text-white">{category.value}%</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        <UsersChartPanel
+          title="Total Users"
+          subtitle={rangeLabel}
+          data={usersChartData}
+          loading={usersLoading}
+          error={usersError}
+          isEmpty={isChartDataEmpty(usersChart)}
+          onRetry={() => refetch()}
+        />
       </div>
 
       {/* Top Questions */}

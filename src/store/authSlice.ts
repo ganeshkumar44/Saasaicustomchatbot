@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { AuthState } from '@/types/auth.types';
+import type { AuthState, AuthUser } from '@/types/auth.types';
 import {
   loginUser,
   resendVerificationCode,
@@ -115,6 +115,22 @@ const authSlice = createSlice({
     },
     logout: (state) => {
       clearAuthenticatedSession(state);
+    },
+    updateAuthUser: (state, action: PayloadAction<Partial<AuthUser>>) => {
+      if (!state.user) {
+        return;
+      }
+
+      state.user = { ...state.user, ...action.payload };
+
+      if (state.accessToken && state.tokenType) {
+        saveAuthSession({
+          user: state.user,
+          accessToken: state.accessToken,
+          tokenType: state.tokenType,
+          refreshToken: state.refreshToken,
+        });
+      }
     },
     resetAuthState: () => initialState,
   },
@@ -254,6 +270,7 @@ export const {
   clearSignoutError,
   resetSignoutState,
   logout,
+  updateAuthUser,
   resetAuthState,
 } = authSlice.actions;
 

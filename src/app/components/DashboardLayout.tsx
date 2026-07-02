@@ -58,6 +58,24 @@ export function DashboardLayout() {
     return location.pathname.startsWith(path);
   };
 
+  const renderUserAvatar = (sizeClass: string, iconClass: string) => {
+    if (user?.profile_image) {
+      return (
+        <img
+          src={user.profile_image}
+          alt="Profile"
+          className={`${sizeClass} rounded-full object-cover flex-shrink-0`}
+        />
+      );
+    }
+
+    return (
+      <div className={`${sizeClass} rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0`}>
+        <User className={`${iconClass} text-white`} />
+      </div>
+    );
+  };
+
   return (
     <div className="h-screen flex overflow-hidden bg-white dark:bg-gray-950">
       {/* Sidebar */}
@@ -104,15 +122,11 @@ export function DashboardLayout() {
         <div className="border-t border-gray-200 dark:border-gray-800 p-3">
           {collapsed ? (
             <div className="flex justify-center">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                <User className="w-4 h-4 text-white" />
-              </div>
+              {renderUserAvatar('w-8 h-8', 'w-4 h-4')}
             </div>
           ) : (
             <div className="flex items-center gap-3 px-1">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-                <User className="w-4 h-4 text-white" />
-              </div>
+              {renderUserAvatar('w-8 h-8', 'w-4 h-4')}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium dark:text-white truncate">
                   {user ? `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}` : 'User'}

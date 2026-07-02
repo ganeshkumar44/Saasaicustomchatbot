@@ -13,6 +13,61 @@ const NAME_MAX_LENGTH = 50;
 const COMPANY_MAX_LENGTH = 150;
 const BIO_MAX_LENGTH = 1000;
 
+const ALLOWED_PROFILE_IMAGE_TYPES = new Set([
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+]);
+
+const ALLOWED_PROFILE_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp'];
+
+export function validateProfileImage(file: File): ValidationResult {
+  const errors: string[] = [];
+
+  if (!file || file.size === 0) {
+    errors.push('Please select a valid image file.');
+    return { isValid: false, errors };
+  }
+
+  const extension = file.name.includes('.')
+    ? file.name.slice(file.name.lastIndexOf('.')).toLowerCase()
+    : '';
+  const hasAllowedType = ALLOWED_PROFILE_IMAGE_TYPES.has(file.type.toLowerCase());
+  const hasAllowedExtension = ALLOWED_PROFILE_IMAGE_EXTENSIONS.includes(extension);
+
+  if (!hasAllowedType && !hasAllowedExtension) {
+    errors.push('Only JPG, JPEG, PNG, and WEBP images are allowed.');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+}
+
+export function validateProfileImageIntegrity(file: File): Promise<ValidationResult> {
+  return new Promise((resolve) => {
+    const objectUrl = URL.createObjectURL(file);
+    const image = new Image();
+
+    image.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve({ isValid: true, errors: [] });
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve({
+        isValid: false,
+        errors: ['The selected image file appears to be corrupted.'],
+      });
+    };
+
+    image.src = objectUrl;
+  });
+}
+
 export function validateUpdateProfileForm(data: UpdateUserRequest): ValidationResult {
   const errors: string[] = [];
   const firstName = data.first_name.trim();

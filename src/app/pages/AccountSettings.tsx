@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { User, Mail, Lock, Bell, Shield, Trash2, Camera, Save, Eye, EyeOff, Globe, Smartphone, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAccountSettings } from '@/hooks/useAccountSettings';
-import { updateUserPassword } from '@/store/accountSettingsThunk';
+import { updateUserPassword, updateUserProfile } from '@/store/accountSettingsThunk';
 import type { ProfileFormState, UserDetails } from '@/types/account.types';
 import {
+  validateProfileImage,
+  validateProfileImageIntegrity,
   validateUpdatePasswordForm,
   validateUpdateProfileForm,
 } from '@/utils/accountValidation';
@@ -63,6 +65,9 @@ export function AccountSettings() {
 
   const [profile, setProfile] = useState<ProfileFormState>(defaultProfile);
   const [profileValidationErrors, setProfileValidationErrors] = useState<string[]>([]);
+  const [selectedProfileImage, setSelectedProfileImage] = useState<File | null>(null);
+  const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
+  const profileImageInputRef = useRef<HTMLInputElement>(null);
   const [passwordValidationErrors, setPasswordValidationErrors] = useState<string[]>([]);
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
@@ -101,6 +106,73 @@ export function AccountSettings() {
 
   useEffect(() => {
     return () => {
+      if (profileImagePreview) {
+        URL.revokeObjectURL(profileImagePreview);
+      }
+    };
+  }, [profileImagePreview]);
+
+  const displayedProfileImage = profileImagePreview ?? userDetails?.profile_image ?? null;
+
+  const openProfileImagePicker = () => {
+    profileImageInputRef.current?.click();
+  };
+
+  const clearSelectedProfileImage = () => {
+    if (profileImagePreview) {
+      URL.revokeObjectURL(profileImagePreview);
+    }
+
+    setSelectedProfileImage(null);
+    setProfileImagePreview(null);
+
+    if (profileImageInputRef.current) {
+      profileImageInputRef.current.value = '';
+    }
+  };
+
+  const handleProfileImageChange = async (file: File | null) => {
+    if (!file) {
+      return;
+    }
+
+    const validation = validateProfileImage(file);
+    if (!validation.isValid) {
+      toast.error(validation.errors[0]);
+      if (profileImageInputRef.current) {
+        profileImageInputRef.current.value = '';
+      }
+      return;
+    }
+
+    const integrityValidation = await validateProfileImageIntegrity(file);
+    if (!integrityValidation.isValid) {
+      toast.error(integrityValidation.errors[0]);
+      if (profileImageInputRef.current) {
+        profileImageInputRef.current.value = '';
+      }
+      return;
+    }
+
+    if (profileImagePreview) {
+      URL.revokeObjectURL(profileImagePreview);
+    }
+
+    setSelectedProfileImage(file);
+    setProfileImagePreview(URL.createObjectURL(file));
+  };
+
+  const handleChangeAvatarClick = () => {
+    if (selectedProfileImage) {
+      clearSelectedProfileImage();
+      return;
+    }
+
+    openProfileImagePicker();
+  };
+
+  useEffect(() => {
+    return () => {
       resetState();
     };
   }, [resetState]);
@@ -118,6 +190,7 @@ export function AccountSettings() {
       website: profile.website.trim() || null,
       language: profile.language.trim(),
       bio: profile.bio.trim() || null,
+      ...(selectedProfileImage ? { profile_image: selectedProfileImage } : {}),
     };
 
     const validation = validateUpdateProfileForm(payload);
@@ -126,7 +199,24 @@ export function AccountSettings() {
       return;
     }
 
-    await updateProfile(payload);
+    if (selectedProfileImage) {
+      const imageValidation = validateProfileImage(selectedProfileImage);
+      if (!imageValidation.isValid) {
+        setProfileValidationErrors(imageValidation.errors);
+        return;
+      }
+
+      const integrityValidation = await validateProfileImageIntegrity(selectedProfileImage);
+      if (!integrityValidation.isValid) {
+        setProfileValidationErrors(integrityValidation.errors);
+        return;
+      }
+    }
+
+    const result = await updateProfile(payload);
+    if (updateUserProfile.fulfilled.match(result)) {
+      clearSelectedProfileImage();
+    }
   };
 
   const handleSavePassword = async () => {
@@ -283,11 +373,21 @@ export function AccountSettings() {
               ) : (
                 <>
                   {/* Avatar section */}
+                  <input
+                    ref={profileImageInputRef}
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0] ?? null;
+                      void handleProfileImageChange(file);
+                    }}
+                  />
                   <div className="flex items-center gap-5 pb-6 border-b border-gray-200 dark:border-gray-800">
                     <div className="relative">
-                      {userDetails?.profile_image ? (
+                      {displayedProfileImage ? (
                         <img
-                          src={userDetails.profile_image}
+                          src={displayedProfileImage}
                           alt="Profile"
                           className="w-20 h-20 rounded-full object-cover"
                         />
@@ -296,14 +396,24 @@ export function AccountSettings() {
                           <User className="w-8 h-8 text-white" />
                         </div>
                       )}
-                      <button className="absolute bottom-0 right-0 w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white dark:border-gray-900 hover:bg-blue-700 transition-colors">
+                      <button
+                        type="button"
+                        onClick={openProfileImagePicker}
+                        disabled={profileUpdating}
+                        className="absolute bottom-0 right-0 w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white dark:border-gray-900 hover:bg-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
                         <Camera className="w-3.5 h-3.5 text-white" />
                       </button>
                     </div>
                     <div>
                       <p className="font-semibold dark:text-white">{profile.firstName} {profile.lastName}</p>
                       <p className="text-sm text-gray-500 dark:text-gray-400">{profile.email}</p>
-                      <button className="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:underline">
+                      <button
+                        type="button"
+                        onClick={handleChangeAvatarClick}
+                        disabled={profileUpdating}
+                        className="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
                         Change avatar
                       </button>
                     </div>

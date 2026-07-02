@@ -7,6 +7,7 @@ import {
   updatePassword as updatePasswordService,
   updateUserDetails as updateUserDetailsService,
 } from '@/services/account.service';
+import { updateAuthUser } from '@/store/authSlice';
 import type {
   ActivateAccountRequest,
   DeleteAccountRequest,
@@ -15,6 +16,15 @@ import type {
   UserDetails,
 } from '@/types/account.types';
 import { getApiErrorMessage } from '@/utils/apiError';
+
+function syncAuthUserFromDetails(details: UserDetails) {
+  return updateAuthUser({
+    first_name: details.first_name,
+    last_name: details.last_name,
+    email: details.email,
+    profile_image: details.profile_image,
+  });
+}
 
 interface UserDetailsPayload {
   message: string;
@@ -29,9 +39,10 @@ export const fetchUserDetails = createAsyncThunk<
   UserDetailsPayload,
   void,
   { rejectValue: string }
->('accountSettings/fetchUserDetails', async (_, { rejectWithValue }) => {
+>('accountSettings/fetchUserDetails', async (_, { rejectWithValue, dispatch }) => {
   try {
     const response = await getUserDetailsService();
+    dispatch(syncAuthUserFromDetails(response.data));
     return { message: response.message, data: response.data };
   } catch (error) {
     return rejectWithValue(getApiErrorMessage(error));

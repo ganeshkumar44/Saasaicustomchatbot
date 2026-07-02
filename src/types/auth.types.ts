@@ -32,6 +32,7 @@ export interface AuthUser {
   email: string;
   role: string;
   is_email_verified: boolean;
+  profile_image?: string | null;
 }
 
 export interface LoginResponse {

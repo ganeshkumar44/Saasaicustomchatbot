@@ -34,6 +34,7 @@ export interface UpdateUserRequest {
   website: string | null;
   language: string;
   bio: string | null;
+  profile_image?: File;
 }
 
 export interface UpdateUserResponse {

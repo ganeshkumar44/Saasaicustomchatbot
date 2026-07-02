@@ -12,6 +12,24 @@ import type {
   UserDetailsResponse,
 } from '@/types/account.types';
 
+function buildUpdateUserFormData(data: UpdateUserRequest): FormData {
+  const formData = new FormData();
+  formData.append('first_name', data.first_name);
+  formData.append('last_name', data.last_name);
+  formData.append('email', data.email);
+  formData.append('mobile', data.mobile);
+  formData.append('company', data.company ?? '');
+  formData.append('website', data.website ?? '');
+  formData.append('language', data.language);
+  formData.append('bio', data.bio ?? '');
+
+  if (data.profile_image) {
+    formData.append('profile_image', data.profile_image);
+  }
+
+  return formData;
+}
+
 export async function getUserDetails(): Promise<UserDetailsResponse> {
   const response = await apiClient.get<UserDetailsResponse>('/v1/user-details');
   return response.data;
@@ -20,9 +38,15 @@ export async function getUserDetails(): Promise<UserDetailsResponse> {
 export async function updateUserDetails(
   data: UpdateUserRequest,
 ): Promise<UpdateUserResponse> {
+  const formData = buildUpdateUserFormData(data);
   const response = await apiClient.put<UpdateUserResponse>(
     '/v1/update-user-details',
-    data,
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    },
   );
   return response.data;
 }

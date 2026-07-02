@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { MessageSquare, Users, TrendingUp, Zap, MoreVertical, Bot, Plus, Settings, Trash2, BarChart3, Loader2 } from 'lucide-react';
+import { MessageSquare, Users, TrendingUp, Zap, ArrowUp, ArrowDown, MoreVertical, Bot, Plus, Settings, Trash2, BarChart3, Loader2 } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Skeleton } from '@/app/components/ui/skeleton';
 import { useChatbot } from '@/hooks/useChatbot';
@@ -11,8 +11,10 @@ import { useAppSelector } from '@/store/hooks';
 import { selectUser } from '@/store/authSelectors';
 import { formatMessageTime, formatRelativeTime } from '@/utils/formatRelativeTime';
 import {
+  formatAnalyticsChange,
   formatAverageResponseTime,
   formatResolutionRate,
+  getAnalyticsTrendClassName,
 } from '@/utils/dashboardAnalyticsFormat';
 import {
   getAnalyticsRangeLabel,
@@ -21,6 +23,26 @@ import {
   mapUsersChartData,
 } from '@/utils/analyticsChart';
 import { isChatbotActive } from '@/utils/chatbotList';
+import type { AnalyticsTrend } from '@/types/dashboardAnalytics.types';
+
+function AnalyticsTrendBadge({
+  change,
+  trend,
+}: {
+  change: string;
+  trend: AnalyticsTrend;
+}) {
+  return (
+    <span className={`flex items-center gap-1 text-sm ${getAnalyticsTrendClassName(trend)}`}>
+      {trend === 'up' ? (
+        <ArrowUp className="w-4 h-4" />
+      ) : (
+        <ArrowDown className="w-4 h-4" />
+      )}
+      {formatAnalyticsChange(change)}
+    </span>
+  );
+}
 
 export function DashboardOverview() {
   const navigate = useNavigate();
@@ -261,51 +283,79 @@ export function DashboardOverview() {
         ) : (
           <>
             <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
-              <div className="mb-4">
+              <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-blue-100 dark:bg-blue-950 rounded-lg flex items-center justify-center">
                   <MessageSquare className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
+                {analytics && (
+                  <AnalyticsTrendBadge
+                    change={analytics.total_conversations_change}
+                    trend={analytics.total_conversations_trend}
+                  />
+                )}
               </div>
               <p className="text-gray-600 dark:text-gray-400 text-sm">Total Conversations</p>
               <p className="text-3xl font-bold dark:text-white mt-1">
                 {analytics?.total_conversations.toLocaleString() ?? '0'}
               </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">vs last month</p>
             </div>
 
             <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
-              <div className="mb-4">
+              <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-purple-100 dark:bg-purple-950 rounded-lg flex items-center justify-center">
                   <Users className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                 </div>
+                {analytics && (
+                  <AnalyticsTrendBadge
+                    change={analytics.total_visitors_change}
+                    trend={analytics.total_visitors_trend}
+                  />
+                )}
               </div>
               <p className="text-gray-600 dark:text-gray-400 text-sm">Total Users</p>
               <p className="text-3xl font-bold dark:text-white mt-1">
                 {analytics?.total_visitors.toLocaleString() ?? '0'}
               </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">vs last month</p>
             </div>
 
             <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
-              <div className="mb-4">
+              <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-green-100 dark:bg-green-950 rounded-lg flex items-center justify-center">
                   <TrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
                 </div>
+                {analytics && (
+                  <AnalyticsTrendBadge
+                    change={analytics.resolution_rate_change}
+                    trend={analytics.resolution_rate_trend}
+                  />
+                )}
               </div>
               <p className="text-gray-600 dark:text-gray-400 text-sm">Resolution Rate</p>
               <p className="text-3xl font-bold dark:text-white mt-1">
                 {formatResolutionRate(analytics?.resolution_rate ?? '0')}
               </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">vs last month</p>
             </div>
 
             <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
-              <div className="mb-4">
+              <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-orange-100 dark:bg-orange-950 rounded-lg flex items-center justify-center">
                   <Zap className="w-6 h-6 text-orange-600 dark:text-orange-400" />
                 </div>
+                {analytics && (
+                  <AnalyticsTrendBadge
+                    change={analytics.average_response_time_change}
+                    trend={analytics.average_response_time_trend}
+                  />
+                )}
               </div>
               <p className="text-gray-600 dark:text-gray-400 text-sm">Average Response Time</p>
               <p className="text-3xl font-bold dark:text-white mt-1">
                 {formatAverageResponseTime(analytics?.average_response_time ?? '0')}
               </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">vs last month</p>
             </div>
           </>
         )}

@@ -1,11 +1,21 @@
+export type AnalyticsTrend = 'up' | 'down';
+
 export interface DashboardAnalytics {
   total_chatbots: number;
   total_conversations: number;
+  total_conversations_change: string;
+  total_conversations_trend: AnalyticsTrend;
   total_visitors: number;
+  total_visitors_change: string;
+  total_visitors_trend: AnalyticsTrend;
   resolved_conversations: number;
   unresolved_conversations: number;
   resolution_rate: string;
+  resolution_rate_change: string;
+  resolution_rate_trend: AnalyticsTrend;
   average_response_time: string;
+  average_response_time_change: string;
+  average_response_time_trend: AnalyticsTrend;
   total_messages: number;
   total_user_messages: number;
   total_bot_messages: number;

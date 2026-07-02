@@ -21,14 +21,6 @@ import {
   mapUsersChartData,
 } from '@/utils/analyticsChart';
 
-const topQuestions = [
-  { id: 1, question: 'How do I reset my password?', count: 142 },
-  { id: 2, question: 'What are your business hours?', count: 98 },
-  { id: 3, question: 'How can I track my order?', count: 87 },
-  { id: 4, question: 'Do you offer refunds?', count: 76 },
-  { id: 5, question: 'How to contact support?', count: 65 },
-];
-
 export function Analytics() {
   const {
     analytics,
@@ -301,35 +293,6 @@ export function Analytics() {
           isEmpty={isChartDataEmpty(usersChart)}
           onRetry={() => refetch()}
         />
-      </div>
-
-      {/* Top Questions */}
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
-        <div className="p-6 border-b border-gray-200 dark:border-gray-800">
-          <h2 className="text-lg font-semibold dark:text-white">Top Questions</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Most frequently asked questions</p>
-        </div>
-        <div className="p-6">
-          <div className="space-y-4">
-            {topQuestions.map((item, index) => (
-              <div key={item.id} className="flex items-center gap-4">
-                <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-950 flex items-center justify-center">
-                  <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">{index + 1}</span>
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium dark:text-white">{item.question}</p>
-                  <div className="mt-1 h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-blue-600 to-purple-600"
-                      style={{ width: `${(item.count / 142) * 100}%` }}
-                    />
-                  </div>
-                </div>
-                <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">{item.count}</span>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );

@@ -58,3 +58,57 @@ export function formatDisplayDate(isoDate: string | null): string {
     minute: '2-digit',
   });
 }
+
+function isSameCalendarDay(left: Date, right: Date): boolean {
+  return (
+    left.getFullYear() === right.getFullYear()
+    && left.getMonth() === right.getMonth()
+    && left.getDate() === right.getDate()
+  );
+}
+
+export function formatMessageTime(isoDate: string): string {
+  const date = new Date(isoDate);
+
+  if (Number.isNaN(date.getTime())) {
+    return 'Unknown';
+  }
+
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMinutes = Math.floor(diffMs / MINUTE_MS);
+
+  if (diffMinutes < 1) {
+    return 'Just now';
+  }
+
+  if (diffMinutes < 60) {
+    return diffMinutes === 1 ? '1 min ago' : `${diffMinutes} mins ago`;
+  }
+
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+
+  if (isSameCalendarDay(date, now)) {
+    return `Today, ${date.toLocaleTimeString(undefined, {
+      hour: 'numeric',
+      minute: '2-digit',
+    })}`;
+  }
+
+  if (isSameCalendarDay(date, yesterday)) {
+    return 'Yesterday';
+  }
+
+  const diffDays = Math.floor(diffMs / DAY_MS);
+
+  if (diffDays < 30) {
+    return diffDays === 1 ? '1 day ago' : `${diffDays} days ago`;
+  }
+
+  return date.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}

@@ -6,9 +6,10 @@ import { Skeleton } from '@/app/components/ui/skeleton';
 import { useChatbot } from '@/hooks/useChatbot';
 import { useDashboardAnalytics } from '@/hooks/useDashboardAnalytics';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import { useDashboard } from '@/hooks/useDashboard';
 import { useAppSelector } from '@/store/hooks';
 import { selectUser } from '@/store/authSelectors';
-import { formatRelativeTime } from '@/utils/formatRelativeTime';
+import { formatMessageTime, formatRelativeTime } from '@/utils/formatRelativeTime';
 import {
   formatAverageResponseTime,
   formatResolutionRate,
@@ -20,13 +21,6 @@ import {
   mapUsersChartData,
 } from '@/utils/analyticsChart';
 import { isChatbotActive } from '@/utils/chatbotList';
-
-const recentChats = [
-  { id: 1, user: 'Alice Johnson', message: 'How do I reset my password?', time: '2 min ago', status: 'active' },
-  { id: 2, user: 'Bob Smith', message: 'What are your business hours?', time: '15 min ago', status: 'resolved' },
-  { id: 3, user: 'Carol White', message: 'I need help with my order', time: '1 hour ago', status: 'active' },
-  { id: 4, user: 'David Brown', message: 'Product pricing question', time: '2 hours ago', status: 'resolved' },
-];
 
 export function DashboardOverview() {
   const navigate = useNavigate();
@@ -54,6 +48,12 @@ export function DashboardOverview() {
     usersError,
     refetch: refetchCharts,
   } = useAnalytics();
+  const {
+    recentConversations,
+    loading: recentConversationsLoading,
+    error: recentConversationsError,
+    refetchRecentConversations,
+  } = useDashboard();
   const user = useAppSelector(selectUser);
   const isAdmin = user?.role?.toLowerCase() === 'admin';
 
@@ -366,7 +366,7 @@ export function DashboardOverview() {
         <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-lg font-semibold dark:text-white">Active Users</h2>
+              <h2 className="text-lg font-semibold dark:text-white">Total Users</h2>
               <p className="text-sm text-gray-600 dark:text-gray-400">{rangeLabel}</p>
             </div>
           </div>
@@ -435,42 +435,92 @@ export function DashboardOverview() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
-              {recentChats.map((chat) => (
-                <tr key={chat.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium">
-                        {chat.user.charAt(0)}
+              {recentConversationsLoading ? (
+                Array.from({ length: 4 }).map((_, index) => (
+                  <tr key={`recent-conversation-skeleton-${index}`}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="w-10 h-10 rounded-full" />
+                        <Skeleton className="h-4 w-28" />
                       </div>
-                      <div className="ml-3">
-                        <p className="font-medium dark:text-white">{chat.user}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <p className="text-gray-900 dark:text-gray-300">{chat.message}</p>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                    {chat.time}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        chat.status === 'active'
-                          ? 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-400'
-                          : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400'
-                      }`}
+                    </td>
+                    <td className="px-6 py-4">
+                      <Skeleton className="h-4 w-full max-w-md" />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Skeleton className="h-4 w-24" />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Skeleton className="h-6 w-20 rounded-full" />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <Skeleton className="h-5 w-5 ml-auto" />
+                    </td>
+                  </tr>
+                ))
+              ) : recentConversationsError ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center">
+                    <p className="text-red-600 dark:text-red-400 mb-4">{recentConversationsError}</p>
+                    <button
+                      onClick={() => refetchRecentConversations()}
+                      className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
-                      {chat.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right">
-                    <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                      <MoreVertical className="w-5 h-5" />
+                      Try Again
                     </button>
                   </td>
                 </tr>
-              ))}
+              ) : recentConversations.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-gray-600 dark:text-gray-400">
+                    No recent conversations found.
+                  </td>
+                </tr>
+              ) : (
+                recentConversations.map((conversation) => {
+                  const visitorName = conversation.visitor_name?.trim() || 'Visitor';
+
+                  return (
+                    <tr
+                      key={conversation.chat_session_id}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-800"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium">
+                            {visitorName.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="ml-3">
+                            <p className="font-medium dark:text-white">{visitorName}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="text-gray-900 dark:text-gray-300">{conversation.user_question}</p>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                        {formatMessageTime(conversation.message_time)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            conversation.status === 'active'
+                              ? 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-400'
+                              : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400'
+                          }`}
+                        >
+                          {conversation.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                          <MoreVertical className="w-5 h-5" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

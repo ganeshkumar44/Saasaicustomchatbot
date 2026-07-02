@@ -1,10 +1,15 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { MessageSquare, Users, TrendingUp, Zap, ArrowUp, ArrowDown, MoreVertical, Bot, Plus, Settings, Trash2, BarChart3, Loader2 } from 'lucide-react';
+import { MessageSquare, Users, TrendingUp, Zap, MoreVertical, Bot, Plus, Settings, Trash2, BarChart3, Loader2 } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Skeleton } from '@/app/components/ui/skeleton';
 import { useChatbot } from '@/hooks/useChatbot';
+import { useDashboardAnalytics } from '@/hooks/useDashboardAnalytics';
 import { formatRelativeTime } from '@/utils/formatRelativeTime';
+import {
+  formatAverageResponseTime,
+  formatResolutionRate,
+} from '@/utils/dashboardAnalyticsFormat';
 import { isChatbotActive } from '@/utils/chatbotList';
 
 const statsData = [
@@ -34,6 +39,12 @@ export function DashboardOverview() {
     createDraft,
     createDraftLoading,
   } = useChatbot();
+  const {
+    analytics,
+    loading: analyticsLoading,
+    error: analyticsError,
+    refresh: refreshAnalytics,
+  } = useDashboardAnalytics();
 
   useEffect(() => {
     void refetch();
@@ -202,61 +213,78 @@ export function DashboardOverview() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-950 rounded-lg flex items-center justify-center">
-              <MessageSquare className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+        {analyticsLoading ? (
+          [1, 2, 3, 4].map((item) => (
+            <div
+              key={item}
+              className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800"
+            >
+              <Skeleton className="w-12 h-12 rounded-lg mb-4" />
+              <Skeleton className="h-4 w-32 mb-2" />
+              <Skeleton className="h-9 w-24" />
             </div>
-            <span className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
-              <ArrowUp className="w-4 h-4" />
-              12%
-            </span>
+          ))
+        ) : analyticsError ? (
+          <div className="col-span-full bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800 text-center">
+            <p className="text-red-600 dark:text-red-400 mb-4">{analyticsError}</p>
+            <button
+              onClick={() => refreshAnalytics()}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </button>
           </div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm">Total Conversations</p>
-          <p className="text-3xl font-bold dark:text-white mt-1">2,543</p>
-        </div>
+        ) : (
+          <>
+            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+              <div className="mb-4">
+                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-950 rounded-lg flex items-center justify-center">
+                  <MessageSquare className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">Total Conversations</p>
+              <p className="text-3xl font-bold dark:text-white mt-1">
+                {analytics?.total_conversations.toLocaleString() ?? '0'}
+              </p>
+            </div>
 
-        <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-950 rounded-lg flex items-center justify-center">
-              <Users className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+              <div className="mb-4">
+                <div className="w-12 h-12 bg-purple-100 dark:bg-purple-950 rounded-lg flex items-center justify-center">
+                  <Users className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                </div>
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">Total Users</p>
+              <p className="text-3xl font-bold dark:text-white mt-1">
+                {analytics?.total_visitors.toLocaleString() ?? '0'}
+              </p>
             </div>
-            <span className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
-              <ArrowUp className="w-4 h-4" />
-              8%
-            </span>
-          </div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm">Active Users</p>
-          <p className="text-3xl font-bold dark:text-white mt-1">1,234</p>
-        </div>
 
-        <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-green-100 dark:bg-green-950 rounded-lg flex items-center justify-center">
-              <TrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
+            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+              <div className="mb-4">
+                <div className="w-12 h-12 bg-green-100 dark:bg-green-950 rounded-lg flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
+                </div>
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">Resolution Rate</p>
+              <p className="text-3xl font-bold dark:text-white mt-1">
+                {formatResolutionRate(analytics?.resolution_rate ?? '0')}
+              </p>
             </div>
-            <span className="flex items-center gap-1 text-sm text-red-600 dark:text-red-400">
-              <ArrowDown className="w-4 h-4" />
-              3%
-            </span>
-          </div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm">Resolution Rate</p>
-          <p className="text-3xl font-bold dark:text-white mt-1">94.5%</p>
-        </div>
 
-        <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-950 rounded-lg flex items-center justify-center">
-              <Zap className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+              <div className="mb-4">
+                <div className="w-12 h-12 bg-orange-100 dark:bg-orange-950 rounded-lg flex items-center justify-center">
+                  <Zap className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+                </div>
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">Average Response Time</p>
+              <p className="text-3xl font-bold dark:text-white mt-1">
+                {formatAverageResponseTime(analytics?.average_response_time ?? '0')}
+              </p>
             </div>
-            <span className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
-              <ArrowUp className="w-4 h-4" />
-              15%
-            </span>
-          </div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm">Avg Response Time</p>
-          <p className="text-3xl font-bold dark:text-white mt-1">1.2s</p>
-        </div>
+          </>
+        )}
       </div>
 
       {/* Charts */}

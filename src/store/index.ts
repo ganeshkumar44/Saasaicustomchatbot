@@ -3,6 +3,7 @@ import accountSettingsReducer from '@/store/accountSettingsSlice';
 import authReducer from '@/store/authSlice';
 import chatbotReducer from '@/store/chatbotSlice';
 import chatbotSettingsReducer from '@/store/chatbotSettingsSlice';
+import dashboardAnalyticsReducer from '@/store/dashboardAnalyticsSlice';
 import forgotPasswordReducer from '@/store/forgotPasswordSlice';
 
 export const store = configureStore({
@@ -11,6 +12,7 @@ export const store = configureStore({
     accountSettings: accountSettingsReducer,
     chatbot: chatbotReducer,
     chatbotSettings: chatbotSettingsReducer,
+    dashboardAnalytics: dashboardAnalyticsReducer,
     forgotPassword: forgotPasswordReducer,
   },
 });

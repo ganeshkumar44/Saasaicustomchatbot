@@ -5,6 +5,7 @@ import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 import { Skeleton } from '@/app/components/ui/skeleton';
 import { useChatbot } from '@/hooks/useChatbot';
 import { useDashboardAnalytics } from '@/hooks/useDashboardAnalytics';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import { useAppSelector } from '@/store/hooks';
 import { selectUser } from '@/store/authSelectors';
 import { formatRelativeTime } from '@/utils/formatRelativeTime';
@@ -12,17 +13,13 @@ import {
   formatAverageResponseTime,
   formatResolutionRate,
 } from '@/utils/dashboardAnalyticsFormat';
+import {
+  getAnalyticsRangeLabel,
+  isChartDataEmpty,
+  mapConversationsChartData,
+  mapUsersChartData,
+} from '@/utils/analyticsChart';
 import { isChatbotActive } from '@/utils/chatbotList';
-
-const statsData = [
-  { id: 'mon', name: 'Mon', conversations: 240, users: 120 },
-  { id: 'tue', name: 'Tue', conversations: 380, users: 180 },
-  { id: 'wed', name: 'Wed', conversations: 320, users: 150 },
-  { id: 'thu', name: 'Thu', conversations: 450, users: 220 },
-  { id: 'fri', name: 'Fri', conversations: 520, users: 280 },
-  { id: 'sat', name: 'Sat', conversations: 290, users: 140 },
-  { id: 'sun', name: 'Sun', conversations: 350, users: 170 },
-];
 
 const recentChats = [
   { id: 1, user: 'Alice Johnson', message: 'How do I reset my password?', time: '2 min ago', status: 'active' },
@@ -47,6 +44,16 @@ export function DashboardOverview() {
     error: analyticsError,
     refresh: refreshAnalytics,
   } = useDashboardAnalytics();
+  const {
+    conversationsChart,
+    usersChart,
+    selectedRange,
+    conversationsLoading,
+    usersLoading,
+    conversationsError,
+    usersError,
+    refetch: refetchCharts,
+  } = useAnalytics();
   const user = useAppSelector(selectUser);
   const isAdmin = user?.role?.toLowerCase() === 'admin';
 
@@ -57,6 +64,10 @@ export function DashboardOverview() {
   const handleCreateChatbot = () => {
     void createDraft();
   };
+
+  const conversationsChartData = mapConversationsChartData(conversationsChart);
+  const usersChartData = mapUsersChartData(usersChart);
+  const rangeLabel = getAnalyticsRangeLabel(selectedRange);
 
   return (
     <div className="p-6 space-y-6">
@@ -306,58 +317,94 @@ export function DashboardOverview() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-lg font-semibold dark:text-white">Conversations</h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Last 7 days</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{rangeLabel}</p>
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={statsData}>
-              <defs>
-                <linearGradient id="colorConversations" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid key="conv-grid" strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
-              <XAxis key="conv-x" dataKey="name" stroke="#9ca3af" />
-              <YAxis key="conv-y" stroke="#9ca3af" />
-              <Tooltip
-                key="conv-tooltip"
-                contentStyle={{
-                  backgroundColor: '#1f2937',
-                  border: 'none',
-                  borderRadius: '8px',
-                  color: '#fff',
-                }}
-              />
-              <Area key="conversations-area" type="monotone" dataKey="conversations" stroke="#3b82f6" fillOpacity={1} fill="url(#colorConversations)" />
-            </AreaChart>
-          </ResponsiveContainer>
+          {conversationsLoading ? (
+            <Skeleton className="w-full h-[300px] rounded-lg" />
+          ) : conversationsError ? (
+            <div className="h-[300px] flex flex-col items-center justify-center text-center">
+              <p className="text-red-600 dark:text-red-400 mb-4">{conversationsError}</p>
+              <button
+                onClick={() => refetchCharts()}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : isChartDataEmpty(conversationsChart) ? (
+            <div className="h-[300px] flex items-center justify-center">
+              <p className="text-gray-600 dark:text-gray-400">No data available.</p>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={conversationsChartData}>
+                <defs>
+                  <linearGradient id="colorConversations" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid key="conv-grid" strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
+                <XAxis key="conv-x" dataKey="name" stroke="#9ca3af" />
+                <YAxis key="conv-y" stroke="#9ca3af" />
+                <Tooltip
+                  key="conv-tooltip"
+                  contentStyle={{
+                    backgroundColor: '#1f2937',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: '#fff',
+                  }}
+                />
+                <Area key="conversations-area" type="monotone" dataKey="conversations" stroke="#3b82f6" fillOpacity={1} fill="url(#colorConversations)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
         </div>
 
         <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-lg font-semibold dark:text-white">Active Users</h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Last 7 days</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{rangeLabel}</p>
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={statsData}>
-              <CartesianGrid key="users-grid" strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
-              <XAxis key="users-x" dataKey="name" stroke="#9ca3af" />
-              <YAxis key="users-y" stroke="#9ca3af" />
-              <Tooltip
-                key="users-tooltip"
-                contentStyle={{
-                  backgroundColor: '#1f2937',
-                  border: 'none',
-                  borderRadius: '8px',
-                  color: '#fff',
-                }}
-              />
-              <Bar key="users-bar" dataKey="users" fill="#8b5cf6" radius={[8, 8, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          {usersLoading ? (
+            <Skeleton className="w-full h-[300px] rounded-lg" />
+          ) : usersError ? (
+            <div className="h-[300px] flex flex-col items-center justify-center text-center">
+              <p className="text-red-600 dark:text-red-400 mb-4">{usersError}</p>
+              <button
+                onClick={() => refetchCharts()}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : isChartDataEmpty(usersChart) ? (
+            <div className="h-[300px] flex items-center justify-center">
+              <p className="text-gray-600 dark:text-gray-400">No data available.</p>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={usersChartData}>
+                <CartesianGrid key="users-grid" strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
+                <XAxis key="users-x" dataKey="name" stroke="#9ca3af" />
+                <YAxis key="users-y" stroke="#9ca3af" />
+                <Tooltip
+                  key="users-tooltip"
+                  contentStyle={{
+                    backgroundColor: '#1f2937',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: '#fff',
+                  }}
+                />
+                <Bar key="users-bar" dataKey="users" fill="#8b5cf6" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </div>
 

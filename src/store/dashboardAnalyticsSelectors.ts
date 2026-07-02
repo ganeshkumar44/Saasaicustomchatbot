@@ -8,3 +8,28 @@ export const selectDashboardAnalyticsLoading = (state: RootState): boolean =>
 
 export const selectDashboardAnalyticsError = (state: RootState): string | null =>
   state.dashboardAnalytics.error;
+
+export const selectConversationsChart = (state: RootState) =>
+  state.dashboardAnalytics.conversationsChart;
+
+export const selectUsersChart = (state: RootState) =>
+  state.dashboardAnalytics.usersChart;
+
+export const selectSelectedAnalyticsRange = (state: RootState) =>
+  state.dashboardAnalytics.selectedRange;
+
+export const selectConversationsChartLoading = (state: RootState): boolean =>
+  state.dashboardAnalytics.conversationsLoading;
+
+export const selectUsersChartLoading = (state: RootState): boolean =>
+  state.dashboardAnalytics.usersLoading;
+
+export const selectConversationsChartError = (state: RootState): string | null =>
+  state.dashboardAnalytics.conversationsError;
+
+export const selectUsersChartError = (state: RootState): string | null =>
+  state.dashboardAnalytics.usersError;
+
+export const selectChartsLoading = (state: RootState): boolean =>
+  state.dashboardAnalytics.conversationsLoading
+  || state.dashboardAnalytics.usersLoading;

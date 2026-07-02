@@ -123,10 +123,10 @@ export function ChatHistory() {
         <p className="text-gray-600 dark:text-gray-400 mt-1">View and analyze past conversations</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-stretch">
         {/* Conversations List */}
         <div className="lg:col-span-1">
-          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden h-[calc(100vh-180px)] flex flex-col">
             <div className="p-4 border-b border-gray-200 dark:border-gray-800">
               <div className="relative mb-4">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -150,7 +150,7 @@ export function ChatHistory() {
               </div>
             </div>
 
-            <div className="overflow-y-auto max-h-[calc(100vh-360px)]">
+            <div className="flex-1 overflow-y-auto min-h-0">
               {loadingSessions ? (
                 <SessionListSkeleton />
               ) : error && sessions.length === 0 ? (

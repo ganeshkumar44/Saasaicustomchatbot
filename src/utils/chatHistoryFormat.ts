@@ -1,5 +1,3 @@
-const MINUTE_MS = 60_000;
-
 export function getVisitorDisplayName(
   visitorName: string | null,
   visitorEmail: string | null,
@@ -17,22 +15,6 @@ export function getVisitorDisplayName(
   }
 
   return 'Visitor';
-}
-
-export function formatSessionDuration(
-  sessionStartedAt: string,
-  lastActivity: string,
-): string {
-  const start = new Date(sessionStartedAt);
-  const end = new Date(lastActivity);
-
-  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-    return '—';
-  }
-
-  const diffMinutes = Math.max(1, Math.round((end.getTime() - start.getTime()) / MINUTE_MS));
-
-  return `${diffMinutes} min`;
 }
 
 export function formatSessionTimestamp(isoDate: string): string {

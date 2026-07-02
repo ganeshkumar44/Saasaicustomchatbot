@@ -13,11 +13,11 @@ import { useChatHistory } from '@/hooks/useChatHistory';
 import type { ChatSession } from '@/types/chatHistory.types';
 import {
   formatChatMessageTime,
-  formatSessionDuration,
   formatSessionTimestamp,
   getSessionStatusClassName,
   getVisitorDisplayName,
 } from '@/utils/chatHistoryFormat';
+import { formatRelativeLastActivity } from '@/utils/timeFormatter';
 
 function SessionListSkeleton() {
   return (
@@ -105,8 +105,8 @@ export function ChatHistory() {
   const selectedVisitorName = selectedSession
     ? getVisitorDisplayName(selectedSession.visitor_name, selectedSession.visitor_email)
     : '';
-  const selectedDuration = selectedSession
-    ? formatSessionDuration(selectedSession.session_started_at, selectedSession.last_activity)
+  const selectedElapsedTime = selectedSession
+    ? formatRelativeLastActivity(selectedSession.last_activity)
     : '';
   const selectedTimestamp = selectedSession
     ? formatSessionTimestamp(selectedSession.session_started_at)
@@ -212,10 +212,7 @@ export function ChatHistory() {
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock className="w-3 h-3" />
-                          {formatSessionDuration(
-                            session.session_started_at,
-                            session.last_activity,
-                          )}
+                          {formatRelativeLastActivity(session.last_activity)}
                         </span>
                         <span
                           className={`px-2 py-0.5 rounded-full text-xs font-medium ${getSessionStatusClassName(session.status)}`}
@@ -297,7 +294,7 @@ export function ChatHistory() {
                   </div>
                   <div className="text-right">
                     <p className="text-sm text-gray-600 dark:text-gray-400">{selectedTimestamp}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{selectedDuration}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{selectedElapsedTime}</p>
                   </div>
                 </div>
               </div>

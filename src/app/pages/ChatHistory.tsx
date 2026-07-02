@@ -1,75 +1,120 @@
 import { useState } from 'react';
 import { Search, Filter, Download, MessageSquare, Clock, ChevronRight } from 'lucide-react';
+import { Skeleton } from '@/app/components/ui/skeleton';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/app/components/ui/pagination';
+import { useChatHistory } from '@/hooks/useChatHistory';
+import type { ChatSession } from '@/types/chatHistory.types';
+import {
+  formatChatMessageTime,
+  formatSessionDuration,
+  formatSessionTimestamp,
+  getSessionStatusClassName,
+  getVisitorDisplayName,
+} from '@/utils/chatHistoryFormat';
 
-const mockConversations = [
-  {
-    id: 1,
-    user: 'Alice Johnson',
-    email: 'alice@example.com',
-    messages: 12,
-    duration: '8 min',
-    timestamp: '2024-01-15 14:32',
-    status: 'resolved',
-    preview: 'How do I reset my password?',
-  },
-  {
-    id: 2,
-    user: 'Bob Smith',
-    email: 'bob@example.com',
-    messages: 5,
-    duration: '3 min',
-    timestamp: '2024-01-15 13:45',
-    status: 'resolved',
-    preview: 'What are your business hours?',
-  },
-  {
-    id: 3,
-    user: 'Carol White',
-    email: 'carol@example.com',
-    messages: 18,
-    duration: '15 min',
-    timestamp: '2024-01-15 12:20',
-    status: 'active',
-    preview: 'I need help with my order',
-  },
-  {
-    id: 4,
-    user: 'David Brown',
-    email: 'david@example.com',
-    messages: 7,
-    duration: '5 min',
-    timestamp: '2024-01-15 11:10',
-    status: 'resolved',
-    preview: 'Product pricing question',
-  },
-  {
-    id: 5,
-    user: 'Emma Wilson',
-    email: 'emma@example.com',
-    messages: 23,
-    duration: '22 min',
-    timestamp: '2024-01-15 10:05',
-    status: 'escalated',
-    preview: 'Technical issue with payment',
-  },
-];
+function SessionListSkeleton() {
+  return (
+    <>
+      {Array.from({ length: 5 }).map((_, index) => (
+        <div
+          key={`session-skeleton-${index}`}
+          className="w-full p-4 border-b border-gray-200 dark:border-gray-800"
+        >
+          <div className="flex items-start justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Skeleton className="w-8 h-8 rounded-full" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-3 w-32" />
+              </div>
+            </div>
+            <Skeleton className="w-5 h-5" />
+          </div>
+          <Skeleton className="h-4 w-full mb-2" />
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-3 w-10" />
+            <Skeleton className="h-3 w-12" />
+            <Skeleton className="h-5 w-16 rounded-full" />
+          </div>
+        </div>
+      ))}
+    </>
+  );
+}
+
+function ConversationSkeleton() {
+  return (
+    <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div
+          key={`message-skeleton-${index}`}
+          className={`flex ${index % 2 === 0 ? 'justify-end' : 'justify-start'}`}
+        >
+          <Skeleton className={`h-16 rounded-2xl ${index % 2 === 0 ? 'w-1/2' : 'w-2/3'}`} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function matchesSearchQuery(session: ChatSession, searchTerm: string): boolean {
+  const query = searchTerm.trim().toLowerCase();
+
+  if (!query) {
+    return true;
+  }
+
+  const visitorName = getVisitorDisplayName(session.visitor_name, session.visitor_email).toLowerCase();
+  const visitorEmail = session.visitor_email?.toLowerCase() ?? '';
+  const firstMessage = session.first_message?.toLowerCase() ?? '';
+  const chatbotName = session.chatbot_name?.toLowerCase() ?? '';
+
+  return (
+    visitorName.includes(query)
+    || visitorEmail.includes(query)
+    || firstMessage.includes(query)
+    || chatbotName.includes(query)
+  );
+}
 
 export function ChatHistory() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
+  const {
+    sessions,
+    selectedSession,
+    sessionDetails,
+    currentPage,
+    totalPages,
+    loadingSessions,
+    loadingMessages,
+    error,
+    changePage,
+    selectSession,
+    refetch,
+    refetchDetails,
+  } = useChatHistory();
 
-  const conversation = selectedConversation
-    ? mockConversations.find((c) => c.id === selectedConversation)
-    : null;
+  const filteredSessions = sessions.filter((session) => matchesSearchQuery(session, searchTerm));
+  const selectedVisitorName = selectedSession
+    ? getVisitorDisplayName(selectedSession.visitor_name, selectedSession.visitor_email)
+    : '';
+  const selectedDuration = selectedSession
+    ? formatSessionDuration(selectedSession.session_started_at, selectedSession.last_activity)
+    : '';
+  const selectedTimestamp = selectedSession
+    ? formatSessionTimestamp(selectedSession.session_started_at)
+    : '';
 
-  const mockMessages = [
-    { id: 1, sender: 'user', text: 'How do I reset my password?', time: '14:32' },
-    { id: 2, sender: 'bot', text: 'I can help you reset your password. Please click on the "Forgot Password" link on the login page.', time: '14:32' },
-    { id: 3, sender: 'user', text: "I don't see that link", time: '14:33' },
-    { id: 4, sender: 'bot', text: 'The link is located below the password input field. Would you like me to send you a direct link via email?', time: '14:33' },
-    { id: 5, sender: 'user', text: 'Yes, please', time: '14:34' },
-    { id: 6, sender: 'bot', text: 'I\'ve sent a password reset link to your registered email address. Please check your inbox.', time: '14:34' },
-  ];
+  const showConversationPanel = Boolean(selectedSession);
+  const activeSessionDetails =
+    selectedSession && sessionDetails && !loadingMessages ? sessionDetails : null;
 
   return (
     <div className="p-6">
@@ -105,110 +150,217 @@ export function ChatHistory() {
               </div>
             </div>
 
-            <div className="overflow-y-auto max-h-[calc(100vh-280px)]">
-              {mockConversations
-                .filter(
-                  (conv) =>
-                    conv.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    conv.preview.toLowerCase().includes(searchTerm.toLowerCase())
-                )
-                .map((conv) => (
+            <div className="overflow-y-auto max-h-[calc(100vh-360px)]">
+              {loadingSessions ? (
+                <SessionListSkeleton />
+              ) : error && sessions.length === 0 ? (
+                <div className="p-8 text-center">
+                  <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
                   <button
-                    key={conv.id}
-                    onClick={() => setSelectedConversation(conv.id)}
-                    className={`w-full p-4 border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left ${
-                      selectedConversation === conv.id ? 'bg-blue-50 dark:bg-blue-950' : ''
-                    }`}
+                    onClick={() => refetch()}
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium">
-                          {conv.user.charAt(0)}
-                        </div>
-                        <div>
-                          <p className="font-medium dark:text-white text-sm">{conv.user}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">{conv.email}</p>
-                        </div>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-gray-400" />
-                    </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
-                      {conv.preview}
-                    </p>
-                    <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                      <span className="flex items-center gap-1">
-                        <MessageSquare className="w-3 h-3" />
-                        {conv.messages}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {conv.duration}
-                      </span>
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                          conv.status === 'resolved'
-                            ? 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-400'
-                            : conv.status === 'active'
-                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-400'
-                            : 'bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-400'
-                        }`}
-                      >
-                        {conv.status}
-                      </span>
-                    </div>
+                    Try Again
                   </button>
-                ))}
+                </div>
+              ) : sessions.length === 0 ? (
+                <div className="p-8 text-center text-gray-600 dark:text-gray-400">
+                  No chat history found.
+                </div>
+              ) : filteredSessions.length === 0 ? (
+                <div className="p-8 text-center text-gray-600 dark:text-gray-400">
+                  No conversations match your search.
+                </div>
+              ) : (
+                filteredSessions.map((session) => {
+                  const visitorName = getVisitorDisplayName(
+                    session.visitor_name,
+                    session.visitor_email,
+                  );
+                  const isSelected =
+                    selectedSession?.chat_session_id === session.chat_session_id;
+
+                  return (
+                    <button
+                      key={session.chat_session_id}
+                      onClick={() => selectSession(session)}
+                      className={`w-full p-4 border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left ${
+                        isSelected ? 'bg-blue-50 dark:bg-blue-950' : ''
+                      }`}
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium">
+                            {visitorName.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-medium dark:text-white text-sm">{visitorName}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {session.visitor_email ?? '—'}
+                            </p>
+                          </div>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-gray-400" />
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
+                        {session.first_message ?? 'No message preview'}
+                      </p>
+                      <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                        <span className="flex items-center gap-1">
+                          <MessageSquare className="w-3 h-3" />
+                          {session.total_messages}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {formatSessionDuration(
+                            session.session_started_at,
+                            session.last_activity,
+                          )}
+                        </span>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-xs font-medium ${getSessionStatusClassName(session.status)}`}
+                        >
+                          {session.status}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })
+              )}
             </div>
+
+            {totalPages > 1 && (
+              <div className="p-4 border-t border-gray-200 dark:border-gray-800">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href="#"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          if (currentPage > 1) {
+                            changePage(currentPage - 1);
+                          }
+                        }}
+                        className={currentPage <= 1 ? 'pointer-events-none opacity-50' : ''}
+                      />
+                    </PaginationItem>
+                    {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          href="#"
+                          isActive={page === currentPage}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            changePage(page);
+                          }}
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          if (currentPage < totalPages) {
+                            changePage(currentPage + 1);
+                          }
+                        }}
+                        className={currentPage >= totalPages ? 'pointer-events-none opacity-50' : ''}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Conversation Details */}
         <div className="lg:col-span-2">
-          {selectedConversation && conversation ? (
+          {showConversationPanel ? (
             <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden h-[calc(100vh-180px)] flex flex-col">
               <div className="p-6 border-b border-gray-200 dark:border-gray-800">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium">
-                      {conversation.user.charAt(0)}
+                      {selectedVisitorName.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <h2 className="text-xl font-semibold dark:text-white">{conversation.user}</h2>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{conversation.email}</p>
+                      <h2 className="text-xl font-semibold dark:text-white">{selectedVisitorName}</h2>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {selectedSession?.visitor_email ?? '—'}
+                      </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{conversation.timestamp}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{conversation.duration}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{selectedTimestamp}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{selectedDuration}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                {mockMessages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+              {loadingMessages ? (
+                <ConversationSkeleton />
+              ) : error && !sessionDetails ? (
+                <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+                  <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
+                  <button
+                    onClick={() => refetchDetails()}
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
-                    <div
-                      className={`max-w-[70%] ${
-                        message.sender === 'user'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
-                      } rounded-2xl px-4 py-3`}
-                    >
-                      <p className="text-sm">{message.text}</p>
-                      <p
-                        className={`text-xs mt-1 ${
-                          message.sender === 'user' ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'
-                        }`}
-                      >
-                        {message.time}
-                      </p>
+                    Try Again
+                  </button>
+                </div>
+              ) : activeSessionDetails && activeSessionDetails.messages.length === 0 ? (
+                <div className="flex-1 flex items-center justify-center p-6 text-gray-600 dark:text-gray-400">
+                  No messages available.
+                </div>
+              ) : activeSessionDetails ? (
+                <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                  {activeSessionDetails.messages.map((message, index) => (
+                    <div key={`${activeSessionDetails.chat_session_id}-${index}`}>
+                      <div className="flex justify-end">
+                        <div className="max-w-[70%] bg-blue-600 text-white rounded-2xl px-4 py-3">
+                          <p className="text-sm">{message.user_message}</p>
+                          <p className="text-xs mt-1 text-blue-100">
+                            {formatChatMessageTime(message.created_at)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex justify-start mt-4">
+                        <div className="max-w-[70%] bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-2xl px-4 py-3">
+                          <p className="text-sm">{message.bot_response}</p>
+                          <p className="text-xs mt-1 text-gray-500 dark:text-gray-400">
+                            {formatChatMessageTime(message.created_at)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          ) : loadingSessions ? (
+            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden h-[calc(100vh-180px)] flex flex-col">
+              <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="w-12 h-12 rounded-full" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-6 w-40" />
+                      <Skeleton className="h-4 w-48" />
                     </div>
                   </div>
-                ))}
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-32 ml-auto" />
+                    <Skeleton className="h-4 w-16 ml-auto" />
+                  </div>
+                </div>
               </div>
+              <ConversationSkeleton />
             </div>
           ) : (
             <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 h-[calc(100vh-180px)] flex items-center justify-center">

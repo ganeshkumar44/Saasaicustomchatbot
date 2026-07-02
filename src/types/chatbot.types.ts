@@ -147,6 +147,7 @@ export interface ChatbotListItem {
   total_uploaded_documents: number;
   created_at: string;
   updated_at: string;
+  owner_name: string | null;
 }
 
 export interface ChatbotListResponse {

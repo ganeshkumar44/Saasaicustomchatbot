@@ -5,6 +5,8 @@ import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 import { Skeleton } from '@/app/components/ui/skeleton';
 import { useChatbot } from '@/hooks/useChatbot';
 import { useDashboardAnalytics } from '@/hooks/useDashboardAnalytics';
+import { useAppSelector } from '@/store/hooks';
+import { selectUser } from '@/store/authSelectors';
 import { formatRelativeTime } from '@/utils/formatRelativeTime';
 import {
   formatAverageResponseTime,
@@ -45,6 +47,8 @@ export function DashboardOverview() {
     error: analyticsError,
     refresh: refreshAnalytics,
   } = useDashboardAnalytics();
+  const user = useAppSelector(selectUser);
+  const isAdmin = user?.role?.toLowerCase() === 'admin';
 
   useEffect(() => {
     void refetch();
@@ -175,6 +179,15 @@ export function DashboardOverview() {
                     {chatbot.ai_model ?? '—'}
                   </span>
                 </div>
+
+                {isAdmin && (
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Owner:</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-200">
+                      {chatbot.owner_name ?? '—'}
+                    </span>
+                  </div>
+                )}
 
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">

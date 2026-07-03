@@ -10,6 +10,7 @@ import {
   validateUpdatePasswordForm,
   validateUpdateProfileForm,
 } from '@/utils/accountValidation';
+import { formatRoleLabel, getRoleBadgeClassName, isAdminRole } from '@/utils/userRole';
 
 type ConfirmAction = 'activate' | 'deactivate' | 'delete';
 
@@ -273,6 +274,10 @@ export function AccountSettings() {
   const isConfirmLoading =
     activateLoading || deactivateLoading || deleteLoading;
 
+  const isAdmin = isAdminRole(userDetails?.role);
+  const roleLabel = formatRoleLabel(userDetails?.role);
+  const roleBadgeClassName = getRoleBadgeClassName(userDetails?.role);
+
   return (
     <div className="p-6 max-w-4xl mx-auto">
       {confirmAction && (
@@ -408,6 +413,11 @@ export function AccountSettings() {
                     <div>
                       <p className="font-semibold dark:text-white">{profile.firstName} {profile.lastName}</p>
                       <p className="text-sm text-gray-500 dark:text-gray-400">{profile.email}</p>
+                      {userDetails?.role && (
+                        <span className={`inline-flex mt-2 px-2 py-0.5 rounded-full text-xs font-medium mr-2 ${roleBadgeClassName}`}>
+                          {roleLabel}
+                        </span>
+                      )}
                       <button
                         type="button"
                         onClick={handleChangeAvatarClick}
@@ -784,8 +794,8 @@ export function AccountSettings() {
                       </div>
                       <button
                         onClick={() => setConfirmAction('deactivate')}
-                        disabled={deactivateLoading}
-                        className="flex-shrink-0 ml-4 px-4 py-2 border border-orange-200 dark:border-orange-900/50 text-orange-600 dark:text-orange-400 rounded-lg text-sm font-medium hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors disabled:opacity-40"
+                        disabled={deactivateLoading || isAdmin}
+                        className="flex-shrink-0 ml-4 px-4 py-2 border border-orange-200 dark:border-orange-900/50 text-orange-600 dark:text-orange-400 rounded-lg text-sm font-medium hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         Deactivate
                       </button>
@@ -799,8 +809,8 @@ export function AccountSettings() {
                     </div>
                     <button
                       onClick={() => setConfirmAction('delete')}
-                      disabled={deleteLoading}
-                      className="flex-shrink-0 ml-4 flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-40"
+                      disabled={deleteLoading || isAdmin}
+                      className="flex-shrink-0 ml-4 flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       <Trash2 className="w-4 h-4" />
                       Delete

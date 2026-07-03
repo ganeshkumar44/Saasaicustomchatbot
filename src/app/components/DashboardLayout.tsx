@@ -4,6 +4,7 @@ import { useAppSelector } from '@/store/hooks';
 import { selectUser } from '@/store/authSelectors';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppTheme } from '@/hooks/useTheme';
+import { formatRoleLabel, getRoleBadgeClassName } from '@/utils/userRole';
 import { useChatbot } from '@/hooks/useChatbot';
 import {
   LayoutDashboard,
@@ -28,6 +29,8 @@ export function DashboardLayout() {
   const location = useLocation();
   const { theme, toggleTheme, loading: themeLoading } = useAppTheme();
   const user = useAppSelector(selectUser);
+  const roleLabel = formatRoleLabel(user?.role);
+  const roleBadgeClassName = getRoleBadgeClassName(user?.role);
   const { signout, signoutLoading } = useAuth();
   const { createDraft, createDraftLoading } = useChatbot();
 
@@ -134,6 +137,11 @@ export function DashboardLayout() {
                 <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                   {user?.email ?? ''}
                 </p>
+                {user?.role && (
+                  <span className={`inline-flex mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${roleBadgeClassName}`}>
+                    {roleLabel}
+                  </span>
+                )}
               </div>
             </div>
           )}

@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router';
-import { MessageSquare, Users, TrendingUp, Zap, MoreVertical, Plus, Loader2 } from 'lucide-react';
+import { ArrowRight, MessageSquare, Users, TrendingUp, Zap, MoreVertical, Plus, Loader2 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { AnalyticsTrendBadge } from '@/app/components/AnalyticsTrendBadge';
 import { UsersChartPanel } from '@/app/components/UsersChartPanel';
@@ -131,12 +131,13 @@ export function DashboardOverview() {
             </div>
 
             {showViewAllChatbots && (
-              <div className="pb-6 flex justify-center">
+              <div className="border-t border-gray-200 dark:border-gray-800 px-6 py-4 flex justify-center bg-gray-50/80 dark:bg-gray-950/50">
                 <Link
                   to="/dashboard/chatbots"
-                  className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                  className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors group"
                 >
-                  View All Chatbots →
+                  View All Chatbots
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                 </Link>
               </div>
             )}

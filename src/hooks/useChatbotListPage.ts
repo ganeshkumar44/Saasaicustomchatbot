@@ -14,7 +14,8 @@ import {
   CHATBOT_LIST_PAGE_SIZE,
   filterChatbotsBySearch,
   filterChatbotsByStatus,
-  getAvailableStatusFilters,
+  filterPublishedChatbots,
+  getChatbotsPageStatusFilters,
   sortChatbotsByUpdatedAtDesc,
 } from '@/utils/chatbotList';
 import { getTotalPages, paginateItems } from '@/utils/pagination';
@@ -45,15 +46,20 @@ export function useChatbotListPage() {
     setCurrentPage(1);
   }, [searchTerm, statusFilter]);
 
-  const availableStatusFilters = useMemo(
-    () => getAvailableStatusFilters(allChatbotList),
+  const publishedChatbotList = useMemo(
+    () => filterPublishedChatbots(allChatbotList),
     [allChatbotList],
   );
 
+  const availableStatusFilters = useMemo(
+    () => getChatbotsPageStatusFilters(publishedChatbotList),
+    [publishedChatbotList],
+  );
+
   const filteredChatbots = useMemo(() => {
-    const searched = filterChatbotsBySearch(allChatbotList, searchTerm);
+    const searched = filterChatbotsBySearch(publishedChatbotList, searchTerm);
     return filterChatbotsByStatus(searched, statusFilter);
-  }, [allChatbotList, searchTerm, statusFilter]);
+  }, [publishedChatbotList, searchTerm, statusFilter]);
 
   const sortedChatbots = useMemo(
     () => sortChatbotsByUpdatedAtDesc(filteredChatbots),
@@ -72,7 +78,7 @@ export function useChatbotListPage() {
   }, []);
 
   return {
-    allChatbotList,
+    chatbotList: publishedChatbotList,
     filteredChatbots,
     paginatedChatbots,
     loading,

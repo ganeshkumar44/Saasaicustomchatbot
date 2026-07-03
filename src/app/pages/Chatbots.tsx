@@ -1,19 +1,17 @@
-import { Filter, Loader2, Plus, Search } from 'lucide-react';
+import { Loader2, Plus, Search } from 'lucide-react';
 import { ChatbotCard } from '@/app/components/chatbot/ChatbotCard';
 import { ChatbotCardsSkeleton } from '@/app/components/chatbot/ChatbotCardsSkeleton';
 import { ChatbotListEmptyState } from '@/app/components/chatbot/ChatbotListEmptyState';
 import { ChatbotListErrorState } from '@/app/components/chatbot/ChatbotListErrorState';
 import { ChatbotListPagination } from '@/app/components/chatbot/ChatbotListPagination';
-import { ChatbotViewModeToggle } from '@/app/components/chatbot/ChatbotViewModeToggle';
+import { ChatbotListToolbar } from '@/app/components/chatbot/ChatbotListToolbar';
 import { useChatbot } from '@/hooks/useChatbot';
 import { useChatbotListPage } from '@/hooks/useChatbotListPage';
-import type { ChatbotStatusFilter } from '@/types/chatbot.types';
-import { getStatusFilterLabel } from '@/utils/chatbotList';
 
 export function Chatbots() {
   const { createDraft, createDraftLoading } = useChatbot();
   const {
-    allChatbotList,
+    chatbotList,
     filteredChatbots,
     paginatedChatbots,
     loading,
@@ -75,24 +73,13 @@ export function Chatbots() {
               />
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <Filter className="w-5 h-5 text-gray-400" />
-                <select
-                  value={statusFilter}
-                  onChange={(event) => setStatusFilter(event.target.value as ChatbotStatusFilter)}
-                  className="px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
-                >
-                  {availableStatusFilters.map((filter) => (
-                    <option key={filter} value={filter}>
-                      {getStatusFilterLabel(filter)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <ChatbotViewModeToggle viewMode={viewMode} onChange={setViewMode} />
-            </div>
+            <ChatbotListToolbar
+              statusFilter={statusFilter}
+              availableStatusFilters={availableStatusFilters}
+              onStatusFilterChange={setStatusFilter}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+            />
           </div>
 
           <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -106,7 +93,7 @@ export function Chatbots() {
           <ChatbotCardsSkeleton count={6} />
         ) : error ? (
           <ChatbotListErrorState error={error} onRetry={() => void refetch()} />
-        ) : allChatbotList.length === 0 ? (
+        ) : chatbotList.length === 0 ? (
           <ChatbotListEmptyState
             onCreateChatbot={handleCreateChatbot}
             createLoading={createDraftLoading}

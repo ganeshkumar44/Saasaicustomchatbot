@@ -78,6 +78,21 @@ export function getAvailableStatusFilters(
   return filters;
 }
 
+export function getChatbotsPageStatusFilters(
+  chatbots: ChatbotListItem[],
+): ChatbotStatusFilter[] {
+  const filters: ChatbotStatusFilter[] = ['all', 'published'];
+  const hasArchived = chatbots.some(
+    (chatbot) => chatbot.status.toLowerCase() === 'archived',
+  );
+
+  if (hasArchived) {
+    filters.push('archived');
+  }
+
+  return filters;
+}
+
 export function getStatusFilterLabel(statusFilter: ChatbotStatusFilter): string {
   switch (statusFilter) {
     case 'all':

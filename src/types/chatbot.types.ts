@@ -135,6 +135,10 @@ export interface ChatbotState {
   publishError: string | null;
 }
 
+export type ChatbotStatusFilter = 'all' | 'published' | 'draft' | 'archived';
+
+export type ChatbotViewMode = 'grid' | 'list';
+
 export interface ChatbotListItem {
   chatbot_id: number;
   chatbot_name: string | null;

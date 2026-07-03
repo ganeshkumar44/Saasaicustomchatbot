@@ -1,17 +1,19 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router';
-import { MessageSquare, Users, TrendingUp, Zap, MoreVertical, Bot, Plus, Settings, Trash2, BarChart3, Loader2 } from 'lucide-react';
+import { useEffect, useMemo } from 'react';
+import { Link } from 'react-router';
+import { MessageSquare, Users, TrendingUp, Zap, MoreVertical, Plus, Loader2 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { AnalyticsTrendBadge } from '@/app/components/AnalyticsTrendBadge';
 import { UsersChartPanel } from '@/app/components/UsersChartPanel';
+import { ChatbotCard } from '@/app/components/chatbot/ChatbotCard';
+import { ChatbotCardsSkeleton } from '@/app/components/chatbot/ChatbotCardsSkeleton';
+import { ChatbotListEmptyState } from '@/app/components/chatbot/ChatbotListEmptyState';
+import { ChatbotListErrorState } from '@/app/components/chatbot/ChatbotListErrorState';
 import { Skeleton } from '@/app/components/ui/skeleton';
 import { useChatbot } from '@/hooks/useChatbot';
 import { useDashboardAnalytics } from '@/hooks/useDashboardAnalytics';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useDashboard } from '@/hooks/useDashboard';
-import { useAppSelector } from '@/store/hooks';
-import { selectUser } from '@/store/authSelectors';
-import { formatMessageTime, formatRelativeTime } from '@/utils/formatRelativeTime';
+import { formatMessageTime } from '@/utils/formatRelativeTime';
 import {
   formatAverageResponseTime,
   formatResolutionRate,
@@ -22,9 +24,11 @@ import {
   mapConversationsChartData,
   mapUsersChartData,
 } from '@/utils/analyticsChart';
-import { isChatbotActive } from '@/utils/chatbotList';
+import {
+  DASHBOARD_RECENT_CHATBOT_LIMIT,
+  getRecentChatbots,
+} from '@/utils/chatbotList';
 export function DashboardOverview() {
-  const navigate = useNavigate();
   const {
     chatbotList,
     loading,
@@ -55,8 +59,13 @@ export function DashboardOverview() {
     error: recentConversationsError,
     refetchRecentConversations,
   } = useDashboard();
-  const user = useAppSelector(selectUser);
-  const isAdmin = user?.role?.toLowerCase() === 'admin';
+
+  const recentChatbots = useMemo(
+    () => getRecentChatbots(chatbotList, DASHBOARD_RECENT_CHATBOT_LIMIT),
+    [chatbotList],
+  );
+
+  const showViewAllChatbots = chatbotList.length > DASHBOARD_RECENT_CHATBOT_LIMIT;
 
   useEffect(() => {
     void refetch();
@@ -81,7 +90,7 @@ export function DashboardOverview() {
       <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
         <div className="p-6 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-semibold dark:text-white">Your Chatbots</h2>
+            <h2 className="text-xl font-semibold dark:text-white">Recent Chatbots</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
               {loading
                 ? 'Loading chatbots...'
@@ -105,134 +114,33 @@ export function DashboardOverview() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-            {[1, 2, 3].map((item) => (
-              <div
-                key={item}
-                className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700"
-              >
-                <Skeleton className="w-12 h-12 rounded-lg mb-4" />
-                <Skeleton className="h-6 w-3/4 mb-2" />
-                <Skeleton className="h-4 w-1/2 mb-4" />
-                <Skeleton className="h-4 w-2/3 mb-4" />
-                <Skeleton className="h-4 w-full pt-4" />
-                <Skeleton className="h-10 w-full mt-4 rounded-lg" />
-              </div>
-            ))}
-          </div>
+          <ChatbotCardsSkeleton count={3} />
         ) : error ? (
-          <div className="p-12 flex flex-col items-center justify-center text-center">
-            <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
-            <button
-              onClick={() => refetch()}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Try Again
-            </button>
-          </div>
+          <ChatbotListErrorState error={error} onRetry={() => void refetch()} />
         ) : chatbotList.length === 0 ? (
-          <div className="p-12 flex flex-col items-center justify-center text-center">
-            <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
-              <Bot className="w-10 h-10 text-gray-400" />
-            </div>
-            <h3 className="text-xl font-semibold dark:text-white mb-2">No Chatbots Yet</h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
-              You haven't created any chatbots yet. Get started by creating your first AI-powered chatbot to assist your customers.
-            </p>
-            <button
-              onClick={handleCreateChatbot}
-              disabled={createDraftLoading}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              {createDraftLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <Plus className="w-5 h-5" />
-              )}
-              Create Your First Chatbot
-            </button>
-          </div>
+          <ChatbotListEmptyState
+            onCreateChatbot={handleCreateChatbot}
+            createLoading={createDraftLoading}
+          />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-            {chatbotList.map((chatbot) => {
-              const isActive = isChatbotActive(chatbot.status);
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+              {recentChatbots.map((chatbot) => (
+                <ChatbotCard key={chatbot.chatbot_id} chatbot={chatbot} />
+              ))}
+            </div>
 
-              return (
-              <div
-                key={chatbot.chatbot_id}
-                className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-all group"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                    <Bot className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => navigate(`/dashboard/chatbot/${chatbot.chatbot_id}/settings`)}
-                      className="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                    >
-                      <Settings className="w-5 h-5" />
-                    </button>
-                    <button
-                      className="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-
-                <h3 className="text-lg font-semibold dark:text-white mb-2">
-                  {chatbot.chatbot_name ?? 'Untitled Chatbot'}
-                </h3>
-
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Model:</span>
-                  <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                    {chatbot.ai_model ?? '—'}
-                  </span>
-                </div>
-
-                {isAdmin && (
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Owner:</span>
-                    <span className="text-sm font-medium text-gray-900 dark:text-gray-200">
-                      {chatbot.owner_name ?? '—'}
-                    </span>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {chatbot.total_conversations.toLocaleString()} conversations
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
-                    <span className="text-xs text-gray-600 dark:text-gray-400 capitalize">
-                      {isActive ? 'active' : chatbot.status}
-                    </span>
-                  </div>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    {formatRelativeTime(chatbot.updated_at)}
-                  </span>
-                </div>
-
-                <button
-                  onClick={() => navigate('/dashboard/analytics')}
-                  className="w-full mt-4 px-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 group-hover:border-blue-500"
+            {showViewAllChatbots && (
+              <div className="pb-6 flex justify-center">
+                <Link
+                  to="/dashboard/chatbots"
+                  className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
                 >
-                  <BarChart3 className="w-4 h-4" />
-                  View Analytics
-                </button>
+                  View All Chatbots →
+                </Link>
               </div>
-              );
-            })}
-          </div>
+            )}
+          </>
         )}
       </div>
 

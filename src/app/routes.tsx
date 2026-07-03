@@ -5,6 +5,7 @@ import { Register } from "@/pages/Register";
 import { ForgotPassword } from "@/pages/ForgotPassword";
 import { VerifyAccount } from "@/pages/VerifyAccount";
 import { DashboardOverview } from "./pages/DashboardOverview";
+import { Chatbots } from "./pages/Chatbots";
 import { CreateChatbot } from "./pages/CreateChatbot";
 import { ChatbotSettings } from "./pages/ChatbotSettings";
 import { ChatbotPreview } from "./pages/ChatbotPreview";
@@ -40,6 +41,7 @@ export const router = createBrowserRouter([
         Component: DashboardLayout,
         children: [
           { index: true, Component: DashboardOverview },
+          { path: "chatbots", Component: Chatbots },
           { path: "create", Component: CreateChatbot },
           { path: "chatbot/:id/settings", Component: ChatbotSettings },
           { path: "chatbot/:id/preview", Component: ChatbotPreview },

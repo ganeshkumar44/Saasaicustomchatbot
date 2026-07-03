@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router';
-import { useTheme } from 'next-themes';
 import { useAppSelector } from '@/store/hooks';
 import { selectUser } from '@/store/authSelectors';
 import { useAuth } from '@/hooks/useAuth';
+import { useAppTheme } from '@/hooks/useTheme';
 import { useChatbot } from '@/hooks/useChatbot';
 import {
   LayoutDashboard,
@@ -26,7 +26,7 @@ export function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
-  const { theme, setTheme } = useTheme();
+  const { theme, toggleTheme, loading: themeLoading } = useAppTheme();
   const user = useAppSelector(selectUser);
   const { signout, signoutLoading } = useAuth();
   const { createDraft, createDraftLoading } = useChatbot();
@@ -160,8 +160,9 @@ export function DashboardLayout() {
           <div className="flex-1" />
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              onClick={() => void toggleTheme()}
+              disabled={themeLoading}
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {theme === 'dark' ? (
                 <Sun className="w-5 h-5 text-gray-600 dark:text-gray-300" />

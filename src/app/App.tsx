@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { RouterProvider } from 'react-router';
-import { ThemeProvider } from 'next-themes';
 import { Toaster } from 'sonner';
 import { router } from './routes';
 import { store } from '@/store/index';
 import { logout } from '@/store/authSlice';
+import { ThemeProviderBridge } from '@/app/components/ThemeProviderBridge';
+import { ThemeInitializer } from '@/app/components/ThemeInitializer';
 
 function AuthSessionSync() {
   useEffect(() => {
@@ -24,10 +25,12 @@ export default function App() {
   return (
     <Provider store={store}>
       <AuthSessionSync />
-      <ThemeProvider attribute="class" defaultTheme="dark">
-        <RouterProvider router={router} />
+      <ThemeProviderBridge>
+        <ThemeInitializer>
+          <RouterProvider router={router} />
+        </ThemeInitializer>
         <Toaster richColors position="top-right" />
-      </ThemeProvider>
+      </ThemeProviderBridge>
     </Provider>
   );
 }

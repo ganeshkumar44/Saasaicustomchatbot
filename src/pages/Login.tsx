@@ -6,8 +6,9 @@ import { AuthBackground } from '@/app/components/AuthBackground';
 import { isAccountNotVerifiedError } from '@/constants/authMessages';
 import { useAuth } from '@/hooks/useAuth';
 import { useVerifyAccountRedirect } from '@/hooks/useVerifyAccountRedirect';
-import { useAppDispatch } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { resetLoginState } from '@/store/authSlice';
+import { selectThemeInitialized } from '@/store/themeSelectors';
 import { validateLoginForm } from '@/utils/validation';
 
 export function Login() {
@@ -22,6 +23,7 @@ export function Login() {
     isAuthenticated,
     clearError,
   } = useAuth();
+  const themeInitialized = useAppSelector(selectThemeInitialized);
   const { redirectToVerifyAccount } = useVerifyAccountRedirect();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
@@ -33,17 +35,16 @@ export function Login() {
   }, [dispatch]);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && themeInitialized) {
       navigate('/dashboard');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, themeInitialized, navigate]);
 
   useEffect(() => {
     if (loginSuccess && loginSuccessMessage) {
       toast.success(loginSuccessMessage);
-      navigate('/dashboard');
     }
-  }, [loginSuccess, loginSuccessMessage, navigate]);
+  }, [loginSuccess, loginSuccessMessage]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

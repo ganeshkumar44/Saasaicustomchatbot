@@ -21,6 +21,7 @@ import type {
 import { getApiErrorMessage } from '@/utils/apiError';
 import { getSignoutErrorMessage } from '@/utils/signoutError';
 import { validateSignoutSession } from '@/utils/signoutValidation';
+import { fetchThemeMode } from '@/store/themeThunk';
 
 export const signupUser = createAsyncThunk<
   SignupResponse,
@@ -38,9 +39,11 @@ export const loginUser = createAsyncThunk<
   LoginResponse,
   LoginRequest,
   { rejectValue: string }
->('auth/login', async (payload, { rejectWithValue }) => {
+>('auth/login', async (payload, { rejectWithValue, dispatch }) => {
   try {
-    return await loginService(payload);
+    const response = await loginService(payload);
+    await dispatch(fetchThemeMode());
+    return response;
   } catch (error) {
     return rejectWithValue(getApiErrorMessage(error));
   }

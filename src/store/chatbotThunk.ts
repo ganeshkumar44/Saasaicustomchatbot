@@ -22,6 +22,11 @@ import type {
   ReviewData,
 } from '@/types/chatbot.types';
 import { getApiErrorMessage } from '@/utils/apiError';
+import { getResumeStepFromReview } from '@/utils/chatbotDraft';
+import {
+  clearCurrentDraftChatbotId,
+  setCurrentDraftChatbotId,
+} from '@/utils/chatbotDraftStorage';
 
 interface ThunkMessagePayload {
   message: string;
@@ -30,6 +35,38 @@ interface ThunkMessagePayload {
 interface CreateDraftPayload extends ThunkMessagePayload {
   chatbotId: number;
   status: string;
+  isExistingDraft: boolean;
+  resumeStep: number;
+  reviewData: ReviewData | null;
+}
+
+async function buildDraftPayload(
+  chatbotId: number,
+  status: string,
+  message: string,
+  isExistingDraft: boolean,
+): Promise<CreateDraftPayload> {
+  if (!isExistingDraft) {
+    return {
+      chatbotId,
+      status,
+      message,
+      isExistingDraft,
+      resumeStep: 1,
+      reviewData: null,
+    };
+  }
+
+  const reviewResponse = await getReviewService(chatbotId);
+
+  return {
+    chatbotId,
+    status: reviewResponse.data.status,
+    message,
+    isExistingDraft,
+    resumeStep: getResumeStepFromReview(reviewResponse.data),
+    reviewData: reviewResponse.data,
+  };
 }
 
 interface BasicInfoPayload extends ThunkMessagePayload {
@@ -76,12 +113,30 @@ export const createChatbotDraft = createAsyncThunk<
 >('chatbot/createDraft', async (_, { rejectWithValue }) => {
   try {
     const response = await createDraftService();
-    return {
-      chatbotId: response.data.chatbot_id,
-      status: response.data.status,
-      message: response.message,
-    };
+    const chatbotId = response.data.chatbot_id;
+
+    setCurrentDraftChatbotId(chatbotId);
+
+    return await buildDraftPayload(
+      chatbotId,
+      response.data.status,
+      response.message,
+      response.is_existing_draft,
+    );
   } catch (error) {
+    return rejectWithValue(getApiErrorMessage(error));
+  }
+});
+
+export const restoreChatbotDraft = createAsyncThunk<
+  CreateDraftPayload,
+  number,
+  { rejectValue: string }
+>('chatbot/restoreDraft', async (chatbotId, { rejectWithValue }) => {
+  try {
+    return await buildDraftPayload(chatbotId, '', '', true);
+  } catch (error) {
+    clearCurrentDraftChatbotId();
     return rejectWithValue(getApiErrorMessage(error));
   }
 });
@@ -184,6 +239,7 @@ export const publishChatbotDraft = createAsyncThunk<
 
   try {
     const response = await publishChatbotService(chatbotId);
+    clearCurrentDraftChatbotId();
     return { message: response.message, data: response.data };
   } catch (error) {
     return rejectWithValue(getApiErrorMessage(error));

@@ -6,6 +6,7 @@ export interface CreateChatbotDraftData {
 export interface CreateChatbotResponse {
   success: true;
   message: string;
+  is_existing_draft: boolean;
   data: CreateChatbotDraftData;
 }
 

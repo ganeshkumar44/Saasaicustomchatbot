@@ -5,6 +5,7 @@ import {
   fetchChatbotList,
   fetchChatbotReview,
   publishChatbotDraft,
+  restoreChatbotDraft,
   saveChatbotBasicInfo,
   saveChatbotBehaviour,
   uploadChatbotKnowledgeBase,
@@ -84,9 +85,30 @@ const chatbotSlice = createSlice({
         state.createDraftError = null;
         state.chatbotId = action.payload.chatbotId;
         state.chatbotStatus = action.payload.status;
-        state.currentStep = 1;
+        state.currentStep = action.payload.resumeStep;
+        state.chatbotReview = action.payload.reviewData;
       })
       .addCase(createChatbotDraft.rejected, (state, action) => {
+        state.createDraftLoading = false;
+        state.createDraftSuccess = false;
+        state.createDraftError =
+          action.payload ?? 'Failed to create chatbot draft. Please try again.';
+      })
+      .addCase(restoreChatbotDraft.pending, (state) => {
+        state.createDraftLoading = true;
+        state.createDraftSuccess = false;
+        state.createDraftError = null;
+      })
+      .addCase(restoreChatbotDraft.fulfilled, (state, action) => {
+        state.createDraftLoading = false;
+        state.createDraftSuccess = true;
+        state.createDraftError = null;
+        state.chatbotId = action.payload.chatbotId;
+        state.chatbotStatus = action.payload.status;
+        state.currentStep = action.payload.resumeStep;
+        state.chatbotReview = action.payload.reviewData;
+      })
+      .addCase(restoreChatbotDraft.rejected, (state, action) => {
         state.createDraftLoading = false;
         state.createDraftSuccess = false;
         state.createDraftError =

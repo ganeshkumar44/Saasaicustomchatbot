@@ -44,10 +44,12 @@ import {
   fetchChatbotList,
   fetchChatbotReview,
   publishChatbotDraft,
+  restoreChatbotDraft,
   saveChatbotBasicInfo,
   saveChatbotBehaviour,
   uploadChatbotKnowledgeBase,
 } from '@/store/chatbotThunk';
+import { getCurrentDraftChatbotId } from '@/utils/chatbotDraftStorage';
 import type {
   BasicInfoRequest,
   BehaviourRequest,
@@ -108,7 +110,11 @@ export function useChatbot() {
       const result = await dispatch(createChatbotDraft());
 
       if (createChatbotDraft.fulfilled.match(result)) {
-        toast.success(result.payload.message);
+        if (result.payload.isExistingDraft) {
+          toast.success('Resuming your existing draft chatbot.');
+        } else {
+          toast.success(result.payload.message);
+        }
 
         if (options?.navigateToWizard !== false) {
           navigate('/dashboard/create');
@@ -123,6 +129,12 @@ export function useChatbot() {
   const ensureChatbotDraft = useCallback(async () => {
     if (chatbotId) {
       return null;
+    }
+
+    const storedChatbotId = getCurrentDraftChatbotId();
+    if (storedChatbotId) {
+      dispatch(clearChatbotErrors());
+      return dispatch(restoreChatbotDraft(storedChatbotId));
     }
 
     dispatch(clearChatbotErrors());

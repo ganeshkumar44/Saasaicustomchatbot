@@ -19,6 +19,7 @@ import type {
   VerificationResponse,
 } from '@/types/auth.types';
 import { getApiErrorMessage } from '@/utils/apiError';
+import { saveAuthSession } from '@/utils/authStorage';
 import { getSignoutErrorMessage } from '@/utils/signoutError';
 import { validateSignoutSession } from '@/utils/signoutValidation';
 import { fetchThemeMode } from '@/store/themeThunk';
@@ -42,6 +43,12 @@ export const loginUser = createAsyncThunk<
 >('auth/login', async (payload, { rejectWithValue, dispatch }) => {
   try {
     const response = await loginService(payload);
+    saveAuthSession({
+      user: response.data,
+      accessToken: response.access_token,
+      tokenType: response.token_type,
+      refreshToken: null,
+    });
     await dispatch(fetchThemeMode());
     return response;
   } catch (error) {

@@ -101,6 +101,17 @@ export interface PublishResponse {
   data: PublishData;
 }
 
+export interface DeleteChatbotData {
+  chatbot_id: number;
+  status: string;
+}
+
+export interface DeleteChatbotResponse {
+  success: true;
+  message: string;
+  data: DeleteChatbotData;
+}
+
 export interface ChatbotState {
   chatbotId: number | null;
   chatbotStatus: string | null;
@@ -133,6 +144,9 @@ export interface ChatbotState {
   publishLoading: boolean;
   publishSuccess: boolean;
   publishError: string | null;
+  deleteLoading: boolean;
+  deleteSuccess: boolean;
+  deleteError: string | null;
 }
 
 export type ChatbotStatusFilter = 'all' | 'published' | 'draft' | 'archived';

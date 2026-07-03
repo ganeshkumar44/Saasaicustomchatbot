@@ -9,6 +9,7 @@ import {
   saveChatbotBasicInfo,
   saveChatbotBehaviour,
   uploadChatbotKnowledgeBase,
+  deleteChatbot,
 } from '@/store/chatbotThunk';
 import type { ChatbotState } from '@/types/chatbot.types';
 
@@ -44,6 +45,9 @@ const initialState: ChatbotState = {
   publishLoading: false,
   publishSuccess: false,
   publishError: null,
+  deleteLoading: false,
+  deleteSuccess: false,
+  deleteError: null,
 };
 
 const chatbotSlice = createSlice({
@@ -57,6 +61,9 @@ const chatbotSlice = createSlice({
       state.knowledgeBaseError = null;
       state.reviewError = null;
       state.publishError = null;
+    },
+    clearDeleteChatbotError: (state) => {
+      state.deleteError = null;
     },
     setChatbotStep: (state, action: { payload: number }) => {
       state.currentStep = action.payload;
@@ -224,11 +231,37 @@ const chatbotSlice = createSlice({
         state.chatbotListSuccess = false;
         state.chatbotListError =
           action.payload ?? 'Failed to load chatbots. Please try again.';
+      })
+      .addCase(deleteChatbot.pending, (state) => {
+        state.deleteLoading = true;
+        state.deleteSuccess = false;
+        state.deleteError = null;
+      })
+      .addCase(deleteChatbot.fulfilled, (state, action) => {
+        const deletedChatbotId = action.payload.data.chatbot_id;
+
+        state.deleteLoading = false;
+        state.deleteSuccess = true;
+        state.deleteError = null;
+        state.chatbotList = state.chatbotList.filter(
+          (chatbot) => chatbot.chatbot_id !== deletedChatbotId,
+        );
+
+        if (state.chatbotId === deletedChatbotId) {
+          state.chatbotId = null;
+          state.chatbotStatus = null;
+        }
+      })
+      .addCase(deleteChatbot.rejected, (state, action) => {
+        state.deleteLoading = false;
+        state.deleteSuccess = false;
+        state.deleteError =
+          action.payload ?? 'Failed to delete chatbot. Please try again.';
       });
   },
 });
 
-export const { clearChatbotErrors, setChatbotStep, resetChatbotWizard } =
+export const { clearChatbotErrors, clearDeleteChatbotError, setChatbotStep, resetChatbotWizard } =
   chatbotSlice.actions;
 
 export default chatbotSlice.reducer;

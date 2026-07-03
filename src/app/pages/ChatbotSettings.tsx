@@ -1,9 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 import { Bot, Save, Trash2, Copy, Eye, Code, Palette, MessageSquare, Shield, Database, ArrowLeft, Cpu, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { CHATBOT_AI_MODEL } from '@/constants/chatbot';
+import { DeleteChatbotConfirmDialog } from '@/app/components/chatbot/DeleteChatbotConfirmDialog';
 import { useChatbotSettings } from '@/hooks/useChatbotSettings';
+import { useDeleteChatbot } from '@/hooks/useDeleteChatbot';
+import { useAppSelector } from '@/store/hooks';
+import { selectUser } from '@/store/authSelectors';
 import type {
   AppearanceSettingsForm,
   GeneralSettingsForm,
@@ -21,9 +25,11 @@ import {
   getUploadedKnowledgebaseDocuments,
 } from '@/utils/knowledgebaseDocuments';
 import { isAllowedKnowledgeFile } from '@/utils/chatbotValidation';
+import { canDeleteChatbot } from '@/utils/chatbotPermissions';
 
 export function ChatbotSettings() {
   const navigate = useNavigate();
+  const user = useAppSelector(selectUser);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeTab, setActiveTab] = useState('general');
   const [generalForm, setGeneralForm] = useState<GeneralSettingsForm>({
@@ -67,6 +73,23 @@ export function ChatbotSettings() {
     updateKnowledgeBase,
     parseAllowedDomainsInput,
   } = useChatbotSettings();
+
+  const handleDeleteSuccess = useCallback(() => {
+    navigate('/dashboard/chatbots');
+  }, [navigate]);
+
+  const {
+    deleteLoading,
+    deleteError,
+    isDialogOpen,
+    openDeleteDialog,
+    closeDeleteDialog,
+    confirmDelete,
+  } = useDeleteChatbot({
+    onSuccess: handleDeleteSuccess,
+  });
+
+  const showDeleteButton = canDeleteChatbot(user, chatbotDetails?.user_id);
 
   const knowledgebaseDocumentsKey = getKnowledgebaseDocumentsKey(
     chatbotDetails?.knowledgebase_documents,
@@ -125,13 +148,6 @@ export function ChatbotSettings() {
     { id: 'security', label: 'Security', icon: Shield },
     { id: 'embed', label: 'Embed Code', icon: Code },
   ];
-
-  const handleDelete = () => {
-    if (confirm('Are you sure you want to delete this chatbot? This action cannot be undone.')) {
-      toast.success('Chatbot deleted successfully!');
-      navigate('/dashboard');
-    }
-  };
 
   const isSaveLoading =
     generalLoading
@@ -334,6 +350,14 @@ export function ChatbotSettings() {
 
   return (
     <div className="p-6">
+      <DeleteChatbotConfirmDialog
+        open={isDialogOpen}
+        loading={deleteLoading}
+        error={deleteError}
+        onCancel={closeDeleteDialog}
+        onConfirm={() => void confirmDelete()}
+      />
+
       <input
         ref={fileInputRef}
         type="file"
@@ -721,13 +745,27 @@ export function ChatbotSettings() {
 
           {/* Action Buttons */}
           <div className="flex items-center justify-between mt-6">
-            <button
-              onClick={handleDelete}
-              className="px-6 py-3 border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-950 transition-colors flex items-center gap-2"
-            >
-              <Trash2 className="w-5 h-5" />
-              Delete Chatbot
-            </button>
+            {showDeleteButton ? (
+              <button
+                type="button"
+                onClick={() => {
+                  if (chatbotId) {
+                    openDeleteDialog(chatbotId);
+                  }
+                }}
+                disabled={deleteLoading}
+                className="px-6 py-3 border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-950 transition-colors flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {deleteLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Trash2 className="w-5 h-5" />
+                )}
+                Delete Chatbot
+              </button>
+            ) : (
+              <div />
+            )}
             <div className="flex items-center gap-3">
               <button
                 type="button"

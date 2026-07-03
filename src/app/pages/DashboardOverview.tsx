@@ -8,8 +8,10 @@ import { ChatbotCard } from '@/app/components/chatbot/ChatbotCard';
 import { ChatbotCardsSkeleton } from '@/app/components/chatbot/ChatbotCardsSkeleton';
 import { ChatbotListEmptyState } from '@/app/components/chatbot/ChatbotListEmptyState';
 import { ChatbotListErrorState } from '@/app/components/chatbot/ChatbotListErrorState';
+import { DeleteChatbotConfirmDialog } from '@/app/components/chatbot/DeleteChatbotConfirmDialog';
 import { Skeleton } from '@/app/components/ui/skeleton';
 import { useChatbot } from '@/hooks/useChatbot';
+import { useDeleteChatbot } from '@/hooks/useDeleteChatbot';
 import { useDashboardAnalytics } from '@/hooks/useDashboardAnalytics';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useDashboard } from '@/hooks/useDashboard';
@@ -60,6 +62,16 @@ export function DashboardOverview() {
     refetchRecentConversations,
   } = useDashboard();
 
+  const {
+    deleteLoading,
+    deleteError,
+    isDialogOpen,
+    openDeleteDialog,
+    closeDeleteDialog,
+    confirmDelete,
+    pendingChatbotId,
+  } = useDeleteChatbot();
+
   const recentChatbots = useMemo(
     () => getRecentChatbots(chatbotList, DASHBOARD_RECENT_CHATBOT_LIMIT),
     [chatbotList],
@@ -81,6 +93,14 @@ export function DashboardOverview() {
 
   return (
     <div className="p-6 space-y-6">
+      <DeleteChatbotConfirmDialog
+        open={isDialogOpen}
+        loading={deleteLoading}
+        error={deleteError}
+        onCancel={closeDeleteDialog}
+        onConfirm={() => void confirmDelete()}
+      />
+
       <div>
         <h1 className="text-3xl font-bold dark:text-white">Dashboard</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">Welcome back! Here's what's happening.</p>
@@ -126,7 +146,12 @@ export function DashboardOverview() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
               {recentChatbots.map((chatbot) => (
-                <ChatbotCard key={chatbot.chatbot_id} chatbot={chatbot} />
+                <ChatbotCard
+                  key={chatbot.chatbot_id}
+                  chatbot={chatbot}
+                  onDelete={openDeleteDialog}
+                  deleteDisabled={deleteLoading && pendingChatbotId === chatbot.chatbot_id}
+                />
               ))}
             </div>
 

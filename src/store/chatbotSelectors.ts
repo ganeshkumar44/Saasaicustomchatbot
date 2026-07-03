@@ -95,3 +95,12 @@ export const selectChatbotListSuccess = (state: RootState): boolean =>
 
 export const selectChatbotListError = (state: RootState): string | null =>
   state.chatbot.chatbotListError;
+
+export const selectDeleteChatbotLoading = (state: RootState): boolean =>
+  state.chatbot.deleteLoading;
+
+export const selectDeleteChatbotSuccess = (state: RootState): boolean =>
+  state.chatbot.deleteSuccess;
+
+export const selectDeleteChatbotError = (state: RootState): string | null =>
+  state.chatbot.deleteError;

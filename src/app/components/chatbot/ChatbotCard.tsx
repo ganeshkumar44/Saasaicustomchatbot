@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router';
 import {
   BarChart3,
   Bot,
+  Loader2,
   MessageSquare,
   Settings,
   Trash2,
@@ -11,16 +12,24 @@ import { selectUser } from '@/store/authSelectors';
 import type { ChatbotListItem } from '@/types/chatbot.types';
 import { formatRelativeTime } from '@/utils/formatRelativeTime';
 import { isChatbotActive } from '@/utils/chatbotList';
+import { canDeleteChatbot } from '@/utils/chatbotPermissions';
 
 interface ChatbotCardProps {
   chatbot: ChatbotListItem;
+  onDelete?: (chatbotId: number) => void;
+  deleteDisabled?: boolean;
 }
 
-export function ChatbotCard({ chatbot }: ChatbotCardProps) {
+export function ChatbotCard({
+  chatbot,
+  onDelete,
+  deleteDisabled = false,
+}: ChatbotCardProps) {
   const navigate = useNavigate();
   const user = useAppSelector(selectUser);
   const isAdmin = user?.role?.toLowerCase() === 'admin';
   const isActive = isChatbotActive(chatbot.status);
+  const showDeleteButton = canDeleteChatbot(user) && Boolean(onDelete);
 
   return (
     <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-all group">
@@ -30,16 +39,26 @@ export function ChatbotCard({ chatbot }: ChatbotCardProps) {
         </div>
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={() => navigate(`/dashboard/chatbot/${chatbot.chatbot_id}/settings`)}
             className="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
           >
             <Settings className="w-5 h-5" />
           </button>
-          <button
-            className="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-          >
-            <Trash2 className="w-5 h-5" />
-          </button>
+          {showDeleteButton && (
+            <button
+              type="button"
+              onClick={() => onDelete?.(chatbot.chatbot_id)}
+              disabled={deleteDisabled}
+              className="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {deleteDisabled ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <Trash2 className="w-5 h-5" />
+              )}
+            </button>
+          )}
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
   createDraft as createDraftService,
+  deleteChatbot as deleteChatbotService,
   getChatbotList as getChatbotListService,
   getReview as getReviewService,
   publishChatbot as publishChatbotService,
@@ -20,11 +21,13 @@ import type {
   KnowledgeBaseUploadPayload,
   PublishData,
   ReviewData,
+  DeleteChatbotData,
 } from '@/types/chatbot.types';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { getResumeStepFromReview } from '@/utils/chatbotDraft';
 import {
   clearCurrentDraftChatbotId,
+  getCurrentDraftChatbotId,
   setCurrentDraftChatbotId,
 } from '@/utils/chatbotDraftStorage';
 
@@ -87,6 +90,10 @@ interface ReviewPayload extends ThunkMessagePayload {
 
 interface PublishPayload extends ThunkMessagePayload {
   data: PublishData;
+}
+
+interface DeleteChatbotPayload extends ThunkMessagePayload {
+  data: DeleteChatbotData;
 }
 
 interface ChatbotListPayload extends ThunkMessagePayload {
@@ -240,6 +247,24 @@ export const publishChatbotDraft = createAsyncThunk<
   try {
     const response = await publishChatbotService(chatbotId);
     clearCurrentDraftChatbotId();
+    return { message: response.message, data: response.data };
+  } catch (error) {
+    return rejectWithValue(getApiErrorMessage(error));
+  }
+});
+
+export const deleteChatbot = createAsyncThunk<
+  DeleteChatbotPayload,
+  number,
+  { rejectValue: string }
+>('chatbot/delete', async (chatbotId, { rejectWithValue }) => {
+  try {
+    const response = await deleteChatbotService(chatbotId);
+
+    if (getCurrentDraftChatbotId() === chatbotId) {
+      clearCurrentDraftChatbotId();
+    }
+
     return { message: response.message, data: response.data };
   } catch (error) {
     return rejectWithValue(getApiErrorMessage(error));

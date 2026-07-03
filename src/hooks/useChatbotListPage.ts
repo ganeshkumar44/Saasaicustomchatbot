@@ -73,6 +73,14 @@ export function useChatbotListPage() {
     [sortedChatbots, currentPage],
   );
 
+  useEffect(() => {
+    const nextTotalPages = getTotalPages(sortedChatbots.length, CHATBOT_LIST_PAGE_SIZE);
+
+    if (currentPage > nextTotalPages && nextTotalPages > 0) {
+      setCurrentPage(nextTotalPages);
+    }
+  }, [sortedChatbots.length, currentPage]);
+
   const changePage = useCallback((page: number) => {
     setCurrentPage(page);
   }, []);

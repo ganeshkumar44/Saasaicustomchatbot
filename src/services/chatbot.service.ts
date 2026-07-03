@@ -10,6 +10,7 @@ import type {
   KnowledgeBaseUploadResponse,
   PublishResponse,
   ReviewResponse,
+  DeleteChatbotResponse,
 } from '@/types/chatbot.types';
 import type {
   AppearanceSettingsRequest,
@@ -94,6 +95,13 @@ export async function getReview(chatbotId: number): Promise<ReviewResponse> {
 export async function publishChatbot(chatbotId: number): Promise<PublishResponse> {
   const response = await apiClient.post<PublishResponse>(
     `/v1/chatbots/${chatbotId}/publish`,
+  );
+  return response.data;
+}
+
+export async function deleteChatbot(chatbotId: number): Promise<DeleteChatbotResponse> {
+  const response = await apiClient.delete<DeleteChatbotResponse>(
+    `/v1/chatbots/${chatbotId}/delete`,
   );
   return response.data;
 }

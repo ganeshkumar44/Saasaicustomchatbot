@@ -5,7 +5,9 @@ import { ChatbotListEmptyState } from '@/app/components/chatbot/ChatbotListEmpty
 import { ChatbotListErrorState } from '@/app/components/chatbot/ChatbotListErrorState';
 import { ChatbotListPagination } from '@/app/components/chatbot/ChatbotListPagination';
 import { ChatbotListToolbar } from '@/app/components/chatbot/ChatbotListToolbar';
+import { DeleteChatbotConfirmDialog } from '@/app/components/chatbot/DeleteChatbotConfirmDialog';
 import { useChatbot } from '@/hooks/useChatbot';
+import { useDeleteChatbot } from '@/hooks/useDeleteChatbot';
 import { useChatbotListPage } from '@/hooks/useChatbotListPage';
 
 export function Chatbots() {
@@ -29,6 +31,16 @@ export function Chatbots() {
     changePage,
   } = useChatbotListPage();
 
+  const {
+    deleteLoading,
+    deleteError,
+    isDialogOpen,
+    openDeleteDialog,
+    closeDeleteDialog,
+    confirmDelete,
+    pendingChatbotId,
+  } = useDeleteChatbot();
+
   const handleCreateChatbot = () => {
     void createDraft();
   };
@@ -38,6 +50,14 @@ export function Chatbots() {
 
   return (
     <div className="p-6 space-y-6">
+      <DeleteChatbotConfirmDialog
+        open={isDialogOpen}
+        loading={deleteLoading}
+        error={deleteError}
+        onCancel={closeDeleteDialog}
+        onConfirm={() => void confirmDelete()}
+      />
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold dark:text-white">Chatbots</h1>
@@ -131,7 +151,12 @@ export function Chatbots() {
               }
             >
               {paginatedChatbots.map((chatbot) => (
-                <ChatbotCard key={chatbot.chatbot_id} chatbot={chatbot} />
+                <ChatbotCard
+                  key={chatbot.chatbot_id}
+                  chatbot={chatbot}
+                  onDelete={openDeleteDialog}
+                  deleteDisabled={deleteLoading && pendingChatbotId === chatbot.chatbot_id}
+                />
               ))}
             </div>
 

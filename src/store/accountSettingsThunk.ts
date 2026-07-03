@@ -22,6 +22,7 @@ function syncAuthUserFromDetails(details: UserDetails) {
     first_name: details.first_name,
     last_name: details.last_name,
     email: details.email,
+    role: details.role,
     profile_image: details.profile_image,
   });
 }

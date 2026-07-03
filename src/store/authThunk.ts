@@ -23,6 +23,7 @@ import { saveAuthSession } from '@/utils/authStorage';
 import { getSignoutErrorMessage } from '@/utils/signoutError';
 import { validateSignoutSession } from '@/utils/signoutValidation';
 import { fetchThemeMode } from '@/store/themeThunk';
+import { fetchUserDetails } from '@/store/accountSettingsThunk';
 
 export const signupUser = createAsyncThunk<
   SignupResponse,
@@ -49,7 +50,10 @@ export const loginUser = createAsyncThunk<
       tokenType: response.token_type,
       refreshToken: null,
     });
-    await dispatch(fetchThemeMode());
+    await Promise.all([
+      dispatch(fetchThemeMode()),
+      dispatch(fetchUserDetails()),
+    ]);
     return response;
   } catch (error) {
     return rejectWithValue(getApiErrorMessage(error));

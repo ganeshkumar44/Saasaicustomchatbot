@@ -12,6 +12,7 @@ import {
   validateChatbotBasicInfo,
   validateChatbotBehaviour,
   validateKnowledgeBaseFiles,
+  validateKnowledgeBaseUpload,
 } from '@/utils/chatbotValidation';
 
 export function CreateChatbot() {
@@ -192,7 +193,7 @@ export function CreateChatbot() {
 
   const handleKnowledgeNext = async () => {
     clearErrors();
-    const validation = validateKnowledgeBaseFiles(uploadedFiles);
+    const validation = validateKnowledgeBaseUpload(uploadedFiles, []);
 
     if (!validation.isValid) {
       setValidationErrors(validation.errors);
@@ -204,12 +205,6 @@ export function CreateChatbot() {
       files: uploadedFiles,
       urls: [],
     });
-  };
-
-  const handleSkipKnowledge = () => {
-    clearErrors();
-    setValidationErrors([]);
-    goToStep(4);
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -243,7 +238,7 @@ export function CreateChatbot() {
     ? `${chatbotReview.knowledgebase.total_knowledge_sources} source(s)`
     : hasFiles
       ? `${uploadedFiles.length} file(s)`
-      : 'None (can add later)';
+      : '—';
 
   const stepError =
     createDraftError
@@ -515,9 +510,9 @@ export function CreateChatbot() {
             )}
 
             {!hasFiles && (
-              <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                <p className="text-sm text-blue-800 dark:text-blue-200">
-                  <strong>Optional:</strong> You can skip this step and add knowledge base files later from chatbot settings.
+              <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+                <p className="text-sm text-amber-800 dark:text-amber-200">
+                  <strong>Required:</strong> Upload at least one knowledge base file to continue.
                 </p>
               </div>
             )}
@@ -590,40 +585,24 @@ export function CreateChatbot() {
           )}
 
           {step < 4 ? (
-            <div className="flex items-center gap-3">
-              {/* Step 3: show "Skip & Continue" only when no files are selected */}
-              {step === 3 && !hasFiles && (
-                <button
-                  type="button"
-                  onClick={handleSkipKnowledge}
-                  className="px-6 py-3 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-2"
-                  disabled={knowledgeBaseLoading}
-                >
-                  Skip & Continue
+            <button
+              type="button"
+              onClick={() => void handleNext()}
+              disabled={isStepLoading}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {(step === 1 && basicInfoLoading) || (step === 2 && behaviourLoading) || (step === 3 && knowledgeBaseLoading) ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  {step === 3 ? 'Uploading...' : 'Saving...'}
+                </>
+              ) : (
+                <>
+                  {step === 3 ? 'Continue' : 'Next'}
                   <ArrowRight className="w-5 h-5" />
-                </button>
+                </>
               )}
-              {(step !== 3 || hasFiles) && (
-                <button
-                  type="button"
-                  onClick={() => void handleNext()}
-                  disabled={isStepLoading}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  {(step === 1 && basicInfoLoading) || (step === 2 && behaviourLoading) || (step === 3 && knowledgeBaseLoading) ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      {step === 3 ? 'Uploading...' : 'Saving...'}
-                    </>
-                  ) : (
-                    <>
-                      {step === 3 ? 'Continue' : 'Next'}
-                      <ArrowRight className="w-5 h-5" />
-                    </>
-                  )}
-                </button>
-              )}
-            </div>
+            </button>
           ) : (
             <button
               type="submit"

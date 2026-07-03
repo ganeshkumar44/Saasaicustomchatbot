@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router';
-import { useAppSelector } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { selectUser } from '@/store/authSelectors';
+import { selectUserDetails } from '@/store/accountSettingsSelectors';
+import { fetchUserDetails } from '@/store/accountSettingsThunk';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppTheme } from '@/hooks/useTheme';
 import { formatRoleLabel, getRoleBadgeClassName } from '@/utils/userRole';
@@ -27,12 +29,20 @@ export function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useAppDispatch();
   const { theme, toggleTheme, loading: themeLoading } = useAppTheme();
   const user = useAppSelector(selectUser);
+  const userDetails = useAppSelector(selectUserDetails);
   const roleLabel = formatRoleLabel(user?.role);
   const roleBadgeClassName = getRoleBadgeClassName(user?.role);
   const { signout, signoutLoading } = useAuth();
   const { createDraft, createDraftLoading } = useChatbot();
+
+  useEffect(() => {
+    void dispatch(fetchUserDetails());
+  }, [dispatch]);
+
+  const profileImage = user?.profile_image ?? userDetails?.profile_image ?? null;
 
   const handleLogout = () => {
     void signout();
@@ -62,10 +72,10 @@ export function DashboardLayout() {
   };
 
   const renderUserAvatar = (sizeClass: string, iconClass: string) => {
-    if (user?.profile_image) {
+    if (profileImage) {
       return (
         <img
-          src={user.profile_image}
+          src={profileImage}
           alt="Profile"
           className={`${sizeClass} rounded-full object-cover flex-shrink-0`}
         />

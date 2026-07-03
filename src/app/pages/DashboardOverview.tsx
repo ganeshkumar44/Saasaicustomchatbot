@@ -116,7 +116,7 @@ export function DashboardOverview() {
                 ? 'Loading chatbots...'
                 : chatbotList.length === 0
                   ? 'No chatbots created yet'
-                  : `${chatbotList.length} ${chatbotList.length === 1 ? 'chatbot' : 'chatbots'} active`}
+                  : `${chatbotList.length} ${chatbotList.length === 1 ? 'chatbot' : 'chatbots'} found`}
             </p>
           </div>
           <button

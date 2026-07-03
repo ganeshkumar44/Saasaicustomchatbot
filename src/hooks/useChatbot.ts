@@ -25,7 +25,7 @@ import {
   selectCreateDraftError,
   selectCreateDraftLoading,
   selectCreateDraftSuccess,
-  selectPublishedChatbotList,
+  selectChatbotList,
   selectChatbotListError,
   selectChatbotListLoading,
   selectKnowledgeBaseError,
@@ -94,7 +94,7 @@ export function useChatbot() {
   const publishSuccess = useAppSelector(selectPublishSuccess);
   const publishError = useAppSelector(selectPublishError);
 
-  const chatbotList = useAppSelector(selectPublishedChatbotList);
+  const chatbotList = useAppSelector(selectChatbotList);
   const loading = useAppSelector(selectChatbotListLoading);
   const error = useAppSelector(selectChatbotListError);
 

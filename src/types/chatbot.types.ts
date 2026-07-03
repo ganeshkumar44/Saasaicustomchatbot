@@ -149,7 +149,9 @@ export interface ChatbotState {
   deleteError: string | null;
 }
 
-export type ChatbotStatusFilter = 'all' | 'published' | 'draft' | 'archived';
+export type ChatbotStatus = 'published' | 'draft' | 'deleted' | 'archived';
+
+export type ChatbotStatusFilter = 'all' | 'published' | 'draft' | 'deleted' | 'archived';
 
 export type ChatbotViewMode = 'grid' | 'list';
 
@@ -159,7 +161,7 @@ export interface ChatbotListItem {
   description: string | null;
   ai_model: string | null;
   language: string | null;
-  status: string;
+  status: ChatbotStatus | string;
   public_key: string | null;
   total_conversations: number;
   total_messages: number;

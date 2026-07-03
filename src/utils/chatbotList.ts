@@ -6,6 +6,13 @@ import type {
 export const DASHBOARD_RECENT_CHATBOT_LIMIT = 3;
 export const CHATBOT_LIST_PAGE_SIZE = 9;
 
+export const CHATBOTS_PAGE_STATUS_FILTERS: ChatbotStatusFilter[] = [
+  'all',
+  'published',
+  'draft',
+  'deleted',
+];
+
 export function filterPublishedChatbots(
   chatbots: ChatbotListItem[],
 ): ChatbotListItem[] {
@@ -14,6 +21,26 @@ export function filterPublishedChatbots(
 
 export function isChatbotActive(status: string): boolean {
   return status === 'published';
+}
+
+export function getChatbotStatusDisplay(status: string): {
+  label: string;
+  dotClassName: string;
+} {
+  const normalizedStatus = status.toLowerCase();
+
+  if (normalizedStatus === 'published') {
+    return { label: 'active', dotClassName: 'bg-green-500' };
+  }
+
+  if (normalizedStatus === 'deleted') {
+    return { label: 'Deleted', dotClassName: 'bg-red-500' };
+  }
+
+  return {
+    label: normalizedStatus,
+    dotClassName: 'bg-gray-400',
+  };
 }
 
 export function sortChatbotsByUpdatedAtDesc(
@@ -66,22 +93,7 @@ export function filterChatbotsByStatus(
 export function getAvailableStatusFilters(
   chatbots: ChatbotListItem[],
 ): ChatbotStatusFilter[] {
-  const filters: ChatbotStatusFilter[] = ['all', 'published', 'draft'];
-  const hasArchived = chatbots.some(
-    (chatbot) => chatbot.status.toLowerCase() === 'archived',
-  );
-
-  if (hasArchived) {
-    filters.push('archived');
-  }
-
-  return filters;
-}
-
-export function getChatbotsPageStatusFilters(
-  chatbots: ChatbotListItem[],
-): ChatbotStatusFilter[] {
-  const filters: ChatbotStatusFilter[] = ['all', 'published'];
+  const filters: ChatbotStatusFilter[] = [...CHATBOTS_PAGE_STATUS_FILTERS];
   const hasArchived = chatbots.some(
     (chatbot) => chatbot.status.toLowerCase() === 'archived',
   );
@@ -101,6 +113,8 @@ export function getStatusFilterLabel(statusFilter: ChatbotStatusFilter): string 
       return 'Published';
     case 'draft':
       return 'Draft';
+    case 'deleted':
+      return 'Deleted';
     case 'archived':
       return 'Archived';
     default:

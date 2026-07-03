@@ -11,7 +11,7 @@ import { useAppSelector } from '@/store/hooks';
 import { selectUser } from '@/store/authSelectors';
 import type { ChatbotListItem } from '@/types/chatbot.types';
 import { formatRelativeTime } from '@/utils/formatRelativeTime';
-import { isChatbotActive } from '@/utils/chatbotList';
+import { getChatbotStatusDisplay } from '@/utils/chatbotList';
 import { canDeleteChatbot } from '@/utils/chatbotPermissions';
 
 interface ChatbotCardProps {
@@ -28,7 +28,7 @@ export function ChatbotCard({
   const navigate = useNavigate();
   const user = useAppSelector(selectUser);
   const isAdmin = user?.role?.toLowerCase() === 'admin';
-  const isActive = isChatbotActive(chatbot.status);
+  const statusDisplay = getChatbotStatusDisplay(chatbot.status);
   const showDeleteButton = canDeleteChatbot(user) && Boolean(onDelete);
 
   return (
@@ -93,9 +93,9 @@ export function ChatbotCard({
 
       <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
+          <div className={`w-2 h-2 rounded-full ${statusDisplay.dotClassName}`} />
           <span className="text-xs text-gray-600 dark:text-gray-400 capitalize">
-            {isActive ? 'active' : chatbot.status}
+            {statusDisplay.label}
           </span>
         </div>
         <span className="text-xs text-gray-500 dark:text-gray-400">

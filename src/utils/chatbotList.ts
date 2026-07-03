@@ -23,6 +23,10 @@ export function isChatbotActive(status: string): boolean {
   return status === 'published';
 }
 
+export function isChatbotDeleted(status: string): boolean {
+  return status.toLowerCase() === 'deleted';
+}
+
 export function getChatbotStatusDisplay(status: string): {
   label: string;
   dotClassName: string;

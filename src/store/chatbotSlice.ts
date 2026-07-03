@@ -10,6 +10,7 @@ import {
   saveChatbotBehaviour,
   uploadChatbotKnowledgeBase,
   deleteChatbot,
+  activateChatbot,
 } from '@/store/chatbotThunk';
 import type { ChatbotState } from '@/types/chatbot.types';
 
@@ -48,6 +49,9 @@ const initialState: ChatbotState = {
   deleteLoading: false,
   deleteSuccess: false,
   deleteError: null,
+  activateLoading: false,
+  activateSuccess: false,
+  activateError: null,
 };
 
 const chatbotSlice = createSlice({
@@ -64,6 +68,9 @@ const chatbotSlice = createSlice({
     },
     clearDeleteChatbotError: (state) => {
       state.deleteError = null;
+    },
+    clearActivateChatbotError: (state) => {
+      state.activateError = null;
     },
     setChatbotStep: (state, action: { payload: number }) => {
       state.currentStep = action.payload;
@@ -257,11 +264,40 @@ const chatbotSlice = createSlice({
         state.deleteSuccess = false;
         state.deleteError =
           action.payload ?? 'Failed to delete chatbot. Please try again.';
+      })
+      .addCase(activateChatbot.pending, (state) => {
+        state.activateLoading = true;
+        state.activateSuccess = false;
+        state.activateError = null;
+      })
+      .addCase(activateChatbot.fulfilled, (state, action) => {
+        const activatedChatbotId = action.payload.data.chatbot_id;
+        const activatedStatus = action.payload.data.status;
+
+        state.activateLoading = false;
+        state.activateSuccess = true;
+        state.activateError = null;
+
+        state.chatbotList = state.chatbotList.map((chatbot) =>
+          chatbot.chatbot_id === activatedChatbotId
+            ? { ...chatbot, status: activatedStatus }
+            : chatbot,
+        );
+
+        if (state.chatbotId === activatedChatbotId) {
+          state.chatbotStatus = activatedStatus;
+        }
+      })
+      .addCase(activateChatbot.rejected, (state, action) => {
+        state.activateLoading = false;
+        state.activateSuccess = false;
+        state.activateError =
+          action.payload ?? 'Failed to activate chatbot. Please try again.';
       });
   },
 });
 
-export const { clearChatbotErrors, clearDeleteChatbotError, setChatbotStep, resetChatbotWizard } =
+export const { clearChatbotErrors, clearDeleteChatbotError, clearActivateChatbotError, setChatbotStep, resetChatbotWizard } =
   chatbotSlice.actions;
 
 export default chatbotSlice.reducer;

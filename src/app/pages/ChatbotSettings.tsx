@@ -6,6 +6,7 @@ import { CHATBOT_AI_MODEL } from '@/constants/chatbot';
 import { DeleteChatbotConfirmDialog } from '@/app/components/chatbot/DeleteChatbotConfirmDialog';
 import { useChatbotSettings } from '@/hooks/useChatbotSettings';
 import { useDeleteChatbot } from '@/hooks/useDeleteChatbot';
+import { useActivateChatbot } from '@/hooks/useActivateChatbot';
 import { useAppSelector } from '@/store/hooks';
 import { selectUser } from '@/store/authSelectors';
 import type {
@@ -25,7 +26,8 @@ import {
   getUploadedKnowledgebaseDocuments,
 } from '@/utils/knowledgebaseDocuments';
 import { isAllowedKnowledgeFile } from '@/utils/chatbotValidation';
-import { canDeleteChatbot } from '@/utils/chatbotPermissions';
+import { canDeleteChatbot, canActivateChatbot } from '@/utils/chatbotPermissions';
+import { isChatbotDeleted } from '@/utils/chatbotList';
 
 export function ChatbotSettings() {
   const navigate = useNavigate();
@@ -89,7 +91,20 @@ export function ChatbotSettings() {
     onSuccess: handleDeleteSuccess,
   });
 
+  const handleActivateSuccess = useCallback(() => {
+    refetch();
+  }, [refetch]);
+
+  const {
+    activateLoading,
+    activateChatbot: activateChatbotHandler,
+  } = useActivateChatbot({
+    onSuccess: handleActivateSuccess,
+  });
+
+  const isDeletedChatbot = isChatbotDeleted(chatbotDetails?.status ?? '');
   const showDeleteButton = canDeleteChatbot(user, chatbotDetails?.user_id);
+  const showActivateButton = isDeletedChatbot && canActivateChatbot(user);
 
   const knowledgebaseDocumentsKey = getKnowledgebaseDocumentsKey(
     chatbotDetails?.knowledgebase_documents,
@@ -745,27 +760,45 @@ export function ChatbotSettings() {
 
           {/* Action Buttons */}
           <div className="flex items-center justify-between mt-6">
-            {showDeleteButton ? (
-              <button
-                type="button"
-                onClick={() => {
-                  if (chatbotId) {
-                    openDeleteDialog(chatbotId);
-                  }
-                }}
-                disabled={deleteLoading}
-                className="px-6 py-3 border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-950 transition-colors flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                {deleteLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <Trash2 className="w-5 h-5" />
-                )}
-                Delete Chatbot
-              </button>
-            ) : (
-              <div />
-            )}
+            <div className="flex items-center gap-3">
+              {showDeleteButton && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (chatbotId) {
+                      openDeleteDialog(chatbotId);
+                    }
+                  }}
+                  disabled={isDeletedChatbot || deleteLoading}
+                  className="px-6 py-3 border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-950 transition-colors flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {deleteLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-5 h-5" />
+                  )}
+                  Delete Chatbot
+                </button>
+              )}
+              {showActivateButton && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (chatbotId) {
+                      void activateChatbotHandler(chatbotId);
+                    }
+                  }}
+                  disabled={activateLoading}
+                  className="px-6 py-3 border border-green-300 dark:border-green-700 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-50 dark:hover:bg-green-950 transition-colors flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {activateLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : null}
+                  Activate Chatbot
+                </button>
+              )}
+              {!showDeleteButton && !showActivateButton && <div />}
+            </div>
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -792,7 +825,7 @@ export function ChatbotSettings() {
                 <button
                   type="button"
                   onClick={() => void handleSaveChanges()}
-                  disabled={!isEditableTab || isSaveLoading}
+                  disabled={isDeletedChatbot || !isEditableTab || isSaveLoading}
                   className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {isSaveLoading ? (

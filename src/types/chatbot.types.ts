@@ -112,6 +112,17 @@ export interface DeleteChatbotResponse {
   data: DeleteChatbotData;
 }
 
+export interface ActivateChatbotData {
+  chatbot_id: number;
+  status: 'published';
+}
+
+export interface ActivateChatbotResponse {
+  success: true;
+  message: string;
+  data: ActivateChatbotData;
+}
+
 export interface ChatbotState {
   chatbotId: number | null;
   chatbotStatus: string | null;
@@ -147,6 +158,9 @@ export interface ChatbotState {
   deleteLoading: boolean;
   deleteSuccess: boolean;
   deleteError: string | null;
+  activateLoading: boolean;
+  activateSuccess: boolean;
+  activateError: string | null;
 }
 
 export type ChatbotStatus = 'published' | 'draft' | 'deleted' | 'archived';

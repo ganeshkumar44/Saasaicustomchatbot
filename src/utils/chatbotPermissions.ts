@@ -19,3 +19,9 @@ export function canDeleteChatbot(
 
   return ownerUserId === user.id;
 }
+
+export function canActivateChatbot(
+  user: Pick<AuthUser, 'role'> | null,
+): boolean {
+  return isAdminRole(user?.role);
+}

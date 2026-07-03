@@ -2,6 +2,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
   createDraft as createDraftService,
   deleteChatbot as deleteChatbotService,
+  activateChatbot as activateChatbotService,
   getChatbotList as getChatbotListService,
   getReview as getReviewService,
   publishChatbot as publishChatbotService,
@@ -22,6 +23,7 @@ import type {
   PublishData,
   ReviewData,
   DeleteChatbotData,
+  ActivateChatbotData,
 } from '@/types/chatbot.types';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { getResumeStepFromReview } from '@/utils/chatbotDraft';
@@ -94,6 +96,10 @@ interface PublishPayload extends ThunkMessagePayload {
 
 interface DeleteChatbotPayload extends ThunkMessagePayload {
   data: DeleteChatbotData;
+}
+
+interface ActivateChatbotPayload extends ThunkMessagePayload {
+  data: ActivateChatbotData;
 }
 
 interface ChatbotListPayload extends ThunkMessagePayload {
@@ -265,6 +271,19 @@ export const deleteChatbot = createAsyncThunk<
       clearCurrentDraftChatbotId();
     }
 
+    return { message: response.message, data: response.data };
+  } catch (error) {
+    return rejectWithValue(getApiErrorMessage(error));
+  }
+});
+
+export const activateChatbot = createAsyncThunk<
+  ActivateChatbotPayload,
+  number,
+  { rejectValue: string }
+>('chatbot/activate', async (chatbotId, { rejectWithValue }) => {
+  try {
+    const response = await activateChatbotService(chatbotId);
     return { message: response.message, data: response.data };
   } catch (error) {
     return rejectWithValue(getApiErrorMessage(error));

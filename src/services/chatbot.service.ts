@@ -11,6 +11,7 @@ import type {
   PublishResponse,
   ReviewResponse,
   DeleteChatbotResponse,
+  ActivateChatbotResponse,
 } from '@/types/chatbot.types';
 import type {
   AppearanceSettingsRequest,
@@ -102,6 +103,15 @@ export async function publishChatbot(chatbotId: number): Promise<PublishResponse
 export async function deleteChatbot(chatbotId: number): Promise<DeleteChatbotResponse> {
   const response = await apiClient.delete<DeleteChatbotResponse>(
     `/v1/chatbots/${chatbotId}/delete`,
+  );
+  return response.data;
+}
+
+export async function activateChatbot(
+  chatbotId: number,
+): Promise<ActivateChatbotResponse> {
+  const response = await apiClient.put<ActivateChatbotResponse>(
+    `/v1/chatbots/${chatbotId}/activate`,
   );
   return response.data;
 }

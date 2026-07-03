@@ -104,3 +104,12 @@ export const selectDeleteChatbotSuccess = (state: RootState): boolean =>
 
 export const selectDeleteChatbotError = (state: RootState): string | null =>
   state.chatbot.deleteError;
+
+export const selectActivateChatbotLoading = (state: RootState): boolean =>
+  state.chatbot.activateLoading;
+
+export const selectActivateChatbotSuccess = (state: RootState): boolean =>
+  state.chatbot.activateSuccess;
+
+export const selectActivateChatbotError = (state: RootState): string | null =>
+  state.chatbot.activateError;

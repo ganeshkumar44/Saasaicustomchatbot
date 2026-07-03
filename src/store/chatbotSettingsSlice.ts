@@ -7,6 +7,7 @@ import {
   updateMessageSettings,
   updateSecuritySettings,
 } from '@/store/chatbotSettingsThunk';
+import { activateChatbot } from '@/store/chatbotThunk';
 import type { ChatbotSettingsState } from '@/types/chatbotSettings.types';
 
 const initialState: ChatbotSettingsState = {
@@ -140,6 +141,11 @@ const chatbotSettingsSlice = createSlice({
         state.knowledgebaseLoading = false;
         state.updateError =
           action.payload ?? 'Failed to update knowledge base. Please try again.';
+      })
+      .addCase(activateChatbot.fulfilled, (state, action) => {
+        if (state.chatbotDetails?.id === action.payload.data.chatbot_id) {
+          state.chatbotDetails.status = action.payload.data.status;
+        }
       });
   },
 });

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Bot, Mail, Lock, User, Eye, EyeOff, Phone, Loader2 } from 'lucide-react';
 import { AuthBackground } from '@/app/components/AuthBackground';
+import { PasswordValidationBox } from '@/components/auth/PasswordValidationBox';
 import { useSignup } from '@/hooks/useSignup';
 import type { SignupRequest } from '@/types/auth.types';
 import { validateSignupForm } from '@/utils/validation';
@@ -82,7 +83,7 @@ export function Register() {
               value={formData.firstName}
               onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
               className={inputClass}
-              placeholder="John"
+              placeholder="Enter your first name"
               maxLength={50}
               disabled={loading}
             />
@@ -98,7 +99,7 @@ export function Register() {
               value={formData.lastName}
               onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
               className={inputClass}
-              placeholder="Doe"
+              placeholder="Enter your last name"
               maxLength={50}
               disabled={loading}
             />
@@ -114,7 +115,7 @@ export function Register() {
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className={inputClass}
-              placeholder="you@example.com"
+              placeholder="Enter your email address"
               disabled={loading}
             />
           </div>
@@ -130,7 +131,7 @@ export function Register() {
               value={formData.mobile}
               onChange={(e) => handleMobileChange(e.target.value)}
               className={inputClass}
-              placeholder="9999042212"
+              placeholder="Enter your mobile number"
               maxLength={10}
               disabled={loading}
             />
@@ -146,7 +147,7 @@ export function Register() {
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               className="w-full pl-10 pr-12 py-3 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] placeholder-[var(--color-text-tertiary)] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              placeholder="••••••••"
+              placeholder="Enter your password"
               disabled={loading}
             />
             <button
@@ -158,6 +159,7 @@ export function Register() {
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
+          <PasswordValidationBox password={formData.password} />
         </div>
 
         <div>
@@ -169,10 +171,15 @@ export function Register() {
               value={formData.confirmPassword}
               onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
               className={inputClass}
-              placeholder="••••••••"
+              placeholder="Confirm your password"
               disabled={loading}
             />
           </div>
+          <PasswordValidationBox
+            password={formData.password}
+            confirmPassword={formData.confirmPassword}
+            showMatchCheck
+          />
         </div>
 
         {validationErrors.length > 0 && (

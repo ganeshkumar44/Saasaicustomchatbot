@@ -48,6 +48,51 @@ const PASSWORD_LOWERCASE = /[a-z]/;
 const PASSWORD_DIGIT = /\d/;
 const PASSWORD_SPECIAL = /[!@#$%^&*(),.?":{}|<>_\-+=[\]\\;/'`~]/;
 
+export type PasswordStrength = 'weak' | 'medium' | 'strong';
+
+export interface PasswordRequirementChecks {
+  minLength: boolean;
+  uppercase: boolean;
+  lowercase: boolean;
+  digit: boolean;
+}
+
+export function getPasswordRequirementChecks(password: string): PasswordRequirementChecks {
+  return {
+    minLength: password.length >= PASSWORD_MIN_LENGTH,
+    uppercase: PASSWORD_UPPERCASE.test(password),
+    lowercase: PASSWORD_LOWERCASE.test(password),
+    digit: PASSWORD_DIGIT.test(password),
+  };
+}
+
+export function getPasswordStrength(password: string): PasswordStrength {
+  if (!password) {
+    return 'weak';
+  }
+
+  const checks = getPasswordRequirementChecks(password);
+  const metCount = Object.values(checks).filter(Boolean).length;
+
+  if (metCount <= 1) {
+    return 'weak';
+  }
+
+  if (metCount <= 3) {
+    return 'medium';
+  }
+
+  return 'strong';
+}
+
+export function arePasswordRequirementsMet(password: string): boolean {
+  const checks = getPasswordRequirementChecks(password);
+  return checks.minLength && checks.uppercase && checks.lowercase && checks.digit;
+}
+
+export const PASSWORD_REQUIREMENT_SUMMARY =
+  'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.';
+
 export function validatePasswordPolicy(password: string): string | null {
   if (!password) {
     return 'Password is required.';

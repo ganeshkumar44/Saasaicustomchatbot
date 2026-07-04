@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Bot, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useForgotPassword } from '@/hooks/useForgotPassword';
+import { PasswordValidationBox } from '@/components/auth/PasswordValidationBox';
 import { validateResetPasswordForm } from '@/utils/validation';
 
 export function ForgotPasswordResetStep() {
@@ -58,7 +59,7 @@ export function ForgotPasswordResetStep() {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               className={inputClass}
-              placeholder="••••••••"
+              placeholder="Enter your new password"
               disabled={loading}
             />
             <button
@@ -70,6 +71,7 @@ export function ForgotPasswordResetStep() {
               {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
+          <PasswordValidationBox password={newPassword} />
         </div>
 
         <div>
@@ -81,7 +83,7 @@ export function ForgotPasswordResetStep() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className={inputClass}
-              placeholder="••••••••"
+              placeholder="Confirm your new password"
               disabled={loading}
             />
             <button
@@ -93,6 +95,11 @@ export function ForgotPasswordResetStep() {
               {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
+          <PasswordValidationBox
+            password={newPassword}
+            confirmPassword={confirmPassword}
+            showMatchCheck
+          />
         </div>
 
         {validationErrors.length > 0 && (

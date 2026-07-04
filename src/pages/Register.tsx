@@ -159,7 +159,6 @@ export function Register() {
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
-          <PasswordValidationBox password={formData.password} />
         </div>
 
         <div>

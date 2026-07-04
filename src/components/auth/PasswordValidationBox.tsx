@@ -97,7 +97,7 @@ export function PasswordValidationBox({
       )}
 
       <div>
-        <p className="text-sm font-semibold text-[var(--color-text)] mb-2">
+        <p className="text-sm font-semibold text-[#D4A017] mb-2">
           Password must contain:
         </p>
         <ul className="space-y-1">

@@ -29,17 +29,19 @@ export function useProfileImageUpload({
   }, [disabled]);
 
   const clearSelection = useCallback(() => {
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-    }
+    setPreviewUrl((currentPreview) => {
+      if (currentPreview) {
+        URL.revokeObjectURL(currentPreview);
+      }
 
+      return null;
+    });
     setSelectedFile(null);
-    setPreviewUrl(null);
 
     if (inputRef.current) {
       inputRef.current.value = '';
     }
-  }, [previewUrl]);
+  }, []);
 
   const handleFileChange = useCallback(
     async (file: File | null) => {
@@ -65,14 +67,16 @@ export function useProfileImageUpload({
         return;
       }
 
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
+      setPreviewUrl((currentPreview) => {
+        if (currentPreview) {
+          URL.revokeObjectURL(currentPreview);
+        }
 
+        return URL.createObjectURL(file);
+      });
       setSelectedFile(file);
-      setPreviewUrl(URL.createObjectURL(file));
     },
-    [disabled, previewUrl],
+    [disabled],
   );
 
   const handleChangeAvatarClick = useCallback(() => {

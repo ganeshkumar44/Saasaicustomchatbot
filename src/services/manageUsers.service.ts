@@ -22,7 +22,7 @@ function buildUpdateManageUserFormData(data: UpdateManageUserRequest): FormData 
   formData.append('role', data.role);
 
   if (data.profile_image) {
-    formData.append('profile_image', data.profile_image);
+    formData.append('profile_image', data.profile_image, data.profile_image.name);
   }
 
   return formData;
@@ -56,11 +56,6 @@ export async function updateUser(
   const response = await apiClient.put<UpdateManageUserResponse>(
     `/v1/manage-users/${userId}`,
     formData,
-    {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    },
   );
   return response.data;
 }

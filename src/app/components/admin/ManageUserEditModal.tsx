@@ -71,12 +71,15 @@ export function ManageUserEditModal({
   });
 
   useEffect(() => {
-    if (user) {
-      setForm(mapManageUserDetailToForm(user));
-      resetProfileImageUpload();
-      setValidationErrors([]);
+    if (!user) {
+      return;
     }
-  }, [user, resetProfileImageUpload]);
+
+    setForm(mapManageUserDetailToForm(user));
+    resetProfileImageUpload();
+    setValidationErrors([]);
+    // Only reset the form when switching users — not when profile preview state changes.
+  }, [user?.user_id]);
 
   if (!open) {
     return null;

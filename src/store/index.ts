@@ -7,6 +7,7 @@ import chatHistoryReducer from '@/store/chatHistorySlice';
 import dashboardAnalyticsReducer from '@/store/dashboardAnalyticsSlice';
 import dashboardReducer from '@/store/dashboardSlice';
 import forgotPasswordReducer from '@/store/forgotPasswordSlice';
+import manageUsersReducer from '@/store/manageUsersSlice';
 import themeReducer from '@/store/themeSlice';
 
 export const store = configureStore({
@@ -19,6 +20,7 @@ export const store = configureStore({
     dashboardAnalytics: dashboardAnalyticsReducer,
     dashboard: dashboardReducer,
     forgotPassword: forgotPasswordReducer,
+    manageUsers: manageUsersReducer,
     theme: themeReducer,
   },
 });

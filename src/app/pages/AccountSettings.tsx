@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { User, Mail, Lock, Bell, Shield, Trash2, Camera, Save, Eye, EyeOff, Globe, Smartphone, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/app/components/ui/ConfirmDialog';
 import { useAccountSettings } from '@/hooks/useAccountSettings';
+import { useProfileImageUpload } from '@/hooks/useProfileImageUpload';
 import { updateUserPassword, updateUserProfile } from '@/store/accountSettingsThunk';
 import type { ProfileFormState, UserDetails } from '@/types/account.types';
 import {
@@ -66,9 +68,18 @@ export function AccountSettings() {
 
   const [profile, setProfile] = useState<ProfileFormState>(defaultProfile);
   const [profileValidationErrors, setProfileValidationErrors] = useState<string[]>([]);
-  const [selectedProfileImage, setSelectedProfileImage] = useState<File | null>(null);
-  const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
-  const profileImageInputRef = useRef<HTMLInputElement>(null);
+  const {
+    inputRef: profileImageInputRef,
+    selectedFile: selectedProfileImage,
+    displayedImageUrl: displayedProfileImage,
+    openPicker: openProfileImagePicker,
+    clearSelection: clearSelectedProfileImage,
+    handleFileChange: handleProfileImageChange,
+    handleChangeAvatarClick,
+  } = useProfileImageUpload({
+    initialImageUrl: userDetails?.profile_image ?? null,
+    disabled: profileUpdating,
+  });
   const [passwordValidationErrors, setPasswordValidationErrors] = useState<string[]>([]);
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
@@ -104,73 +115,6 @@ export function AccountSettings() {
       setProfile(mapUserDetailsToProfile(userDetails));
     }
   }, [userDetails]);
-
-  useEffect(() => {
-    return () => {
-      if (profileImagePreview) {
-        URL.revokeObjectURL(profileImagePreview);
-      }
-    };
-  }, [profileImagePreview]);
-
-  const displayedProfileImage = profileImagePreview ?? userDetails?.profile_image ?? null;
-
-  const openProfileImagePicker = () => {
-    profileImageInputRef.current?.click();
-  };
-
-  const clearSelectedProfileImage = () => {
-    if (profileImagePreview) {
-      URL.revokeObjectURL(profileImagePreview);
-    }
-
-    setSelectedProfileImage(null);
-    setProfileImagePreview(null);
-
-    if (profileImageInputRef.current) {
-      profileImageInputRef.current.value = '';
-    }
-  };
-
-  const handleProfileImageChange = async (file: File | null) => {
-    if (!file) {
-      return;
-    }
-
-    const validation = validateProfileImage(file);
-    if (!validation.isValid) {
-      toast.error(validation.errors[0]);
-      if (profileImageInputRef.current) {
-        profileImageInputRef.current.value = '';
-      }
-      return;
-    }
-
-    const integrityValidation = await validateProfileImageIntegrity(file);
-    if (!integrityValidation.isValid) {
-      toast.error(integrityValidation.errors[0]);
-      if (profileImageInputRef.current) {
-        profileImageInputRef.current.value = '';
-      }
-      return;
-    }
-
-    if (profileImagePreview) {
-      URL.revokeObjectURL(profileImagePreview);
-    }
-
-    setSelectedProfileImage(file);
-    setProfileImagePreview(URL.createObjectURL(file));
-  };
-
-  const handleChangeAvatarClick = () => {
-    if (selectedProfileImage) {
-      clearSelectedProfileImage();
-      return;
-    }
-
-    openProfileImagePicker();
-  };
 
   useEffect(() => {
     return () => {
@@ -280,54 +224,37 @@ export function AccountSettings() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      {confirmAction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 max-w-md w-full space-y-4">
-            <h3 className="text-lg font-semibold dark:text-white">
-              {confirmAction === 'activate' && 'Activate Account'}
-              {confirmAction === 'deactivate' && 'Deactivate Account'}
-              {confirmAction === 'delete' && 'Delete Account'}
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              {confirmAction === 'activate' &&
-                'Are you sure you want to activate your account? You will regain full access to your account.'}
-              {confirmAction === 'deactivate' &&
-                'Are you sure you want to deactivate your account? You will be logged out and will need to reactivate your account to regain access.'}
-              {confirmAction === 'delete' &&
-                'Are you sure you want to permanently delete your account? This action cannot be undone and all associated data will be removed.'}
-            </p>
-            {error && (
-              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-            )}
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => {
-                  setConfirmAction(null);
-                  clearError();
-                }}
-                disabled={isConfirmLoading}
-                className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-40"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => void handleConfirmAction()}
-                disabled={isConfirmLoading}
-                className={`px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors disabled:opacity-40 flex items-center gap-2 ${
-                  confirmAction === 'delete'
-                    ? 'bg-red-600 hover:bg-red-700'
-                    : confirmAction === 'deactivate'
-                      ? 'bg-orange-600 hover:bg-orange-700'
-                      : 'bg-blue-600 hover:bg-blue-700'
-                }`}
-              >
-                {isConfirmLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                Confirm
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        open={confirmAction !== null}
+        title={
+          confirmAction === 'activate'
+            ? 'Activate Account'
+            : confirmAction === 'deactivate'
+              ? 'Deactivate Account'
+              : 'Delete Account'
+        }
+        message={
+          confirmAction === 'activate'
+            ? 'Are you sure you want to activate your account? You will regain full access to your account.'
+            : confirmAction === 'deactivate'
+              ? 'Are you sure you want to deactivate your account? You will be logged out and will need to reactivate your account to regain access.'
+              : 'Are you sure you want to permanently delete your account? This action cannot be undone and all associated data will be removed.'
+        }
+        loading={isConfirmLoading}
+        error={error}
+        confirmVariant={
+          confirmAction === 'delete'
+            ? 'danger'
+            : confirmAction === 'deactivate'
+              ? 'warning'
+              : 'primary'
+        }
+        onCancel={() => {
+          setConfirmAction(null);
+          clearError();
+        }}
+        onConfirm={() => void handleConfirmAction()}
+      />
 
       {/* Header */}
       <div className="mb-8">

@@ -14,6 +14,8 @@ import { ChatHistory } from "./pages/ChatHistory";
 import { Analytics } from "./pages/Analytics";
 import { Billing } from "./pages/Billing";
 import { AccountSettings } from "./pages/AccountSettings";
+import { ManageUsers } from "./pages/ManageUsers";
+import { AdminRoute } from "@/components/AdminRoute";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 export const router = createBrowserRouter([
@@ -49,6 +51,10 @@ export const router = createBrowserRouter([
           { path: "history", Component: ChatHistory },
           { path: "analytics", Component: Analytics },
           { path: "settings", Component: AccountSettings },
+          {
+            Component: AdminRoute,
+            children: [{ path: "manage-users", Component: ManageUsers }],
+          },
           { path: "billing", Component: Billing },
         ],
       },

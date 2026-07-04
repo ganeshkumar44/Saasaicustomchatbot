@@ -12,6 +12,9 @@ export const selectProfileUpdating = (state: RootState): boolean =>
 export const selectPasswordUpdating = (state: RootState): boolean =>
   state.accountSettings.passwordUpdating;
 
+export const selectRemoveProfilePictureLoading = (state: RootState): boolean =>
+  state.accountSettings.removeProfilePictureLoading;
+
 export const selectActivateLoading = (state: RootState): boolean =>
   state.accountSettings.activateLoading;
 

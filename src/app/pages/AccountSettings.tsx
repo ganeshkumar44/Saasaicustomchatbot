@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { ConfirmDialog } from '@/app/components/ui/ConfirmDialog';
 import { useAccountSettings } from '@/hooks/useAccountSettings';
 import { useProfileImageUpload } from '@/hooks/useProfileImageUpload';
-import { updateUserPassword, updateUserProfile } from '@/store/accountSettingsThunk';
+import { updateUserPassword, updateUserProfile, removeProfilePicture as removeProfilePictureThunk } from '@/store/accountSettingsThunk';
 import type { ProfileFormState, UserDetails } from '@/types/account.types';
 import {
   validateProfileImage,
@@ -46,12 +46,14 @@ export function AccountSettings() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
+  const [showRemoveAvatarConfirm, setShowRemoveAvatarConfirm] = useState(false);
 
   const {
     userDetails,
     profileLoading,
     profileUpdating,
     passwordUpdating,
+    loadingRemoveAvatar,
     activateLoading,
     deactivateLoading,
     deleteLoading,
@@ -62,6 +64,7 @@ export function AccountSettings() {
     activateAccount,
     deactivateAccount,
     deleteAccount,
+    removeProfilePicture,
     clearError,
     resetState,
   } = useAccountSettings();
@@ -206,6 +209,14 @@ export function AccountSettings() {
     setConfirmAction(null);
   };
 
+  const handleRemoveAvatarConfirm = async () => {
+    const result = await removeProfilePicture();
+    if (removeProfilePictureThunk.fulfilled.match(result)) {
+      clearSelectedProfileImage();
+      setShowRemoveAvatarConfirm(false);
+    }
+  };
+
   const toggleNotification = (key: keyof typeof notifications) => {
     setNotifications(prev => ({ ...prev, [key]: !prev[key] }));
   };
@@ -254,6 +265,17 @@ export function AccountSettings() {
           clearError();
         }}
         onConfirm={() => void handleConfirmAction()}
+      />
+
+      <ConfirmDialog
+        open={showRemoveAvatarConfirm}
+        title="Remove Profile Picture"
+        message="Are you sure you want to remove your profile picture?"
+        confirmLabel="Remove"
+        loading={loadingRemoveAvatar}
+        confirmVariant="danger"
+        onCancel={() => setShowRemoveAvatarConfirm(false)}
+        onConfirm={() => void handleRemoveAvatarConfirm()}
       />
 
       {/* Header */}
@@ -345,14 +367,26 @@ export function AccountSettings() {
                           {roleLabel}
                         </span>
                       )}
-                      <button
-                        type="button"
-                        onClick={handleChangeAvatarClick}
-                        disabled={profileUpdating}
-                        className="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-40 disabled:cursor-not-allowed"
-                      >
-                        Change avatar
-                      </button>
+                      <div className="mt-2 flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={handleChangeAvatarClick}
+                          disabled={profileUpdating || loadingRemoveAvatar}
+                          className="text-sm text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          Change avatar
+                        </button>
+                        {userDetails?.profile_image && (
+                          <button
+                            type="button"
+                            onClick={() => setShowRemoveAvatarConfirm(true)}
+                            disabled={profileUpdating || loadingRemoveAvatar}
+                            className="text-sm text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            Remove Avatar
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
 

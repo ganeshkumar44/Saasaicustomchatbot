@@ -6,6 +6,7 @@ import {
   fetchUserDetails,
   updateUserPassword,
   updateUserProfile,
+  removeProfilePicture,
 } from '@/store/accountSettingsThunk';
 import type { AccountSettingsState } from '@/types/account.types';
 
@@ -14,6 +15,7 @@ const initialState: AccountSettingsState = {
   profileLoading: false,
   profileUpdating: false,
   passwordUpdating: false,
+  removeProfilePictureLoading: false,
   activateLoading: false,
   deactivateLoading: false,
   deleteLoading: false,
@@ -140,6 +142,27 @@ const accountSettingsSlice = createSlice({
         state.success = false;
         state.error =
           action.payload ?? 'Failed to delete account. Please try again.';
+      })
+      .addCase(removeProfilePicture.pending, (state) => {
+        state.removeProfilePictureLoading = true;
+        state.error = null;
+        state.success = false;
+        state.successMessage = null;
+      })
+      .addCase(removeProfilePicture.fulfilled, (state, action) => {
+        state.removeProfilePictureLoading = false;
+        state.success = true;
+        state.successMessage = action.payload.message;
+        state.error = null;
+        if (state.userDetails) {
+          state.userDetails.profile_image = null;
+        }
+      })
+      .addCase(removeProfilePicture.rejected, (state, action) => {
+        state.removeProfilePictureLoading = false;
+        state.success = false;
+        state.error =
+          action.payload ?? 'Failed to remove profile picture. Please try again.';
       });
   },
 });

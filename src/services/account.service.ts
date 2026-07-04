@@ -10,6 +10,7 @@ import type {
   UpdateUserRequest,
   UpdateUserResponse,
   UserDetailsResponse,
+  RemoveProfilePictureResponse,
 } from '@/types/account.types';
 
 function buildUpdateUserFormData(data: UpdateUserRequest): FormData {
@@ -84,6 +85,13 @@ export async function deleteAccount(
   const response = await apiClient.delete<DeleteAccountResponse>(
     '/v1/delete-account',
     { data },
+  );
+  return response.data;
+}
+
+export async function removeProfilePicture(): Promise<RemoveProfilePictureResponse> {
+  const response = await apiClient.delete<RemoveProfilePictureResponse>(
+    '/v1/remove-profile-picture',
   );
   return response.data;
 }

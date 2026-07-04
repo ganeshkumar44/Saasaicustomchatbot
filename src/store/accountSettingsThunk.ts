@@ -4,6 +4,7 @@ import {
   deactivateAccount as deactivateAccountService,
   deleteAccount as deleteAccountService,
   getUserDetails as getUserDetailsService,
+  removeProfilePicture as removeProfilePictureService,
   updatePassword as updatePasswordService,
   updateUserDetails as updateUserDetailsService,
 } from '@/services/account.service';
@@ -111,6 +112,20 @@ export const deleteUserAccount = createAsyncThunk<
 >('accountSettings/deleteAccount', async (payload, { rejectWithValue }) => {
   try {
     const response = await deleteAccountService(payload);
+    return { message: response.message };
+  } catch (error) {
+    return rejectWithValue(getApiErrorMessage(error));
+  }
+});
+
+export const removeProfilePicture = createAsyncThunk<
+  MessagePayload,
+  void,
+  { rejectValue: string }
+>('accountSettings/removeProfilePicture', async (_, { rejectWithValue, dispatch }) => {
+  try {
+    const response = await removeProfilePictureService();
+    dispatch(updateAuthUser({ profile_image: null }));
     return { message: response.message };
   } catch (error) {
     return rejectWithValue(getApiErrorMessage(error));

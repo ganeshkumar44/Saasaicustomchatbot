@@ -18,6 +18,7 @@ import {
   selectPasswordUpdating,
   selectProfileLoading,
   selectProfileUpdating,
+  selectRemoveProfilePictureLoading,
   selectUserDetails,
 } from '@/store/accountSettingsSelectors';
 import {
@@ -25,6 +26,7 @@ import {
   deactivateUserAccount,
   deleteUserAccount,
   fetchUserDetails,
+  removeProfilePicture,
   updateUserPassword,
   updateUserProfile,
 } from '@/store/accountSettingsThunk';
@@ -43,6 +45,7 @@ export function useAccountSettings() {
   const profileLoading = useAppSelector(selectProfileLoading);
   const profileUpdating = useAppSelector(selectProfileUpdating);
   const passwordUpdating = useAppSelector(selectPasswordUpdating);
+  const loadingRemoveAvatar = useAppSelector(selectRemoveProfilePictureLoading);
   const activateLoading = useAppSelector(selectActivateLoading);
   const deactivateLoading = useAppSelector(selectDeactivateLoading);
   const deleteLoading = useAppSelector(selectDeleteLoading);
@@ -147,6 +150,21 @@ export function useAccountSettings() {
     [dispatch, navigate],
   );
 
+  const removeProfilePictureAction = useCallback(async () => {
+    dispatch(clearAccountSettingsError());
+    const result = await dispatch(removeProfilePicture());
+
+    if (removeProfilePicture.fulfilled.match(result)) {
+      toast.success(result.payload.message);
+      return result;
+    }
+
+    const errorMessage =
+      result.payload ?? 'Failed to remove profile picture. Please try again.';
+    toast.error(errorMessage);
+    return result;
+  }, [dispatch]);
+
   const clearError = useCallback(
     () => dispatch(clearAccountSettingsError()),
     [dispatch],
@@ -162,6 +180,7 @@ export function useAccountSettings() {
     profileLoading,
     profileUpdating,
     passwordUpdating,
+    loadingRemoveAvatar,
     activateLoading,
     deactivateLoading,
     deleteLoading,
@@ -174,6 +193,7 @@ export function useAccountSettings() {
     activateAccount,
     deactivateAccount,
     deleteAccount,
+    removeProfilePicture: removeProfilePictureAction,
     clearError,
     resetState,
   };

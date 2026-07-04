@@ -80,11 +80,17 @@ export interface ActivateAccountResponse {
   message: string;
 }
 
+export interface RemoveProfilePictureResponse {
+  success: true;
+  message: string;
+}
+
 export interface AccountSettingsState {
   userDetails: UserDetails | null;
   profileLoading: boolean;
   profileUpdating: boolean;
   passwordUpdating: boolean;
+  removeProfilePictureLoading: boolean;
   activateLoading: boolean;
   deactivateLoading: boolean;
   deleteLoading: boolean;

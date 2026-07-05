@@ -6,9 +6,8 @@ import { selectUserDetails } from '@/store/accountSettingsSelectors';
 import { fetchUserDetails } from '@/store/accountSettingsThunk';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppTheme } from '@/hooks/useTheme';
-import { formatRoleLabel, getRoleBadgeClassName } from '@/utils/userRole';
+import { formatRoleLabel, getRoleBadgeClassName, hasAdminAccess, isSuperAdminRole } from '@/utils/userRole';
 import { useChatbot } from '@/hooks/useChatbot';
-import { hasAdminAccess } from '@/utils/userRole';
 import {
   LayoutDashboard,
   Bot,
@@ -60,6 +59,7 @@ export function DashboardLayout() {
   };
 
   const showManageUsersMenu = hasAdminAccess(user?.role);
+  const showBillingMenu = isSuperAdminRole(user?.role);
 
   const menuItems = [
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -70,7 +70,9 @@ export function DashboardLayout() {
     ...(showManageUsersMenu
       ? [{ path: '/dashboard/manage-users', icon: UserCog, label: 'Manage Users' }]
       : []),
-    { path: '/dashboard/billing', icon: CreditCard, label: 'Billing' },
+    ...(showBillingMenu
+      ? [{ path: '/dashboard/billing', icon: CreditCard, label: 'Billing' }]
+      : []),
   ];
 
   const isActive = (path: string) => {

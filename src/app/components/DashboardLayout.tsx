@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useAppTheme } from '@/hooks/useTheme';
 import { formatRoleLabel, getRoleBadgeClassName } from '@/utils/userRole';
 import { useChatbot } from '@/hooks/useChatbot';
-import { isAdminRole } from '@/utils/userRole';
+import { hasAdminAccess } from '@/utils/userRole';
 import {
   LayoutDashboard,
   Bot,
@@ -59,7 +59,7 @@ export function DashboardLayout() {
     navigate(path);
   };
 
-  const isAdmin = isAdminRole(user?.role);
+  const showManageUsersMenu = hasAdminAccess(user?.role);
 
   const menuItems = [
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -67,7 +67,7 @@ export function DashboardLayout() {
     { path: '/dashboard/history', icon: MessageSquare, label: 'Chat History' },
     { path: '/dashboard/analytics', icon: BarChart3, label: 'Analytics' },
     { path: '/dashboard/settings', icon: Settings, label: 'Settings' },
-    ...(isAdmin
+    ...(showManageUsersMenu
       ? [{ path: '/dashboard/manage-users', icon: UserCog, label: 'Manage Users' }]
       : []),
     { path: '/dashboard/billing', icon: CreditCard, label: 'Billing' },

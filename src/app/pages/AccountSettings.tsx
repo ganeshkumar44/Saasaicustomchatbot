@@ -12,7 +12,7 @@ import {
   validateUpdatePasswordForm,
   validateUpdateProfileForm,
 } from '@/utils/accountValidation';
-import { formatRoleLabel, getRoleBadgeClassName, isAdminRole } from '@/utils/userRole';
+import { formatRoleLabel, getRoleBadgeClassName, hasAdminAccess, isSuperAdminRole } from '@/utils/userRole';
 
 type ConfirmAction = 'activate' | 'deactivate' | 'delete';
 
@@ -201,8 +201,16 @@ export function AccountSettings() {
     if (confirmAction === 'activate') {
       await activateAccount({ user_id: userDetails.id });
     } else if (confirmAction === 'deactivate') {
+      if (hasAdminAccess(userDetails.role)) {
+        setConfirmAction(null);
+        return;
+      }
       await deactivateAccount();
     } else if (confirmAction === 'delete') {
+      if (hasAdminAccess(userDetails.role)) {
+        setConfirmAction(null);
+        return;
+      }
       await deleteAccount({ user_id: userDetails.id });
     }
 
@@ -229,7 +237,8 @@ export function AccountSettings() {
   const isConfirmLoading =
     activateLoading || deactivateLoading || deleteLoading;
 
-  const isAdmin = isAdminRole(userDetails?.role);
+  const isSuperAdmin = isSuperAdminRole(userDetails?.role);
+  const isAccountDeactivateOrDeleteDisabled = hasAdminAccess(userDetails?.role);
   const roleLabel = formatRoleLabel(userDetails?.role);
   const roleBadgeClassName = getRoleBadgeClassName(userDetails?.role);
 
@@ -716,6 +725,11 @@ export function AccountSettings() {
               <div className="bg-white dark:bg-gray-900 rounded-xl border border-red-200 dark:border-red-900/40 p-6">
                 <h2 className="font-semibold text-red-600 dark:text-red-400 mb-1">Danger Zone</h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">These actions are irreversible. Please proceed with caution.</p>
+                {isSuperAdmin && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                    Super Admin accounts cannot be deactivated or deleted.
+                  </p>
+                )}
 
                 <div className="space-y-4">
                   <div className="flex items-start justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-800">
@@ -755,7 +769,7 @@ export function AccountSettings() {
                       </div>
                       <button
                         onClick={() => setConfirmAction('deactivate')}
-                        disabled={deactivateLoading || isAdmin}
+                        disabled={deactivateLoading || isAccountDeactivateOrDeleteDisabled}
                         className="flex-shrink-0 ml-4 px-4 py-2 border border-orange-200 dark:border-orange-900/50 text-orange-600 dark:text-orange-400 rounded-lg text-sm font-medium hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         Deactivate
@@ -770,7 +784,7 @@ export function AccountSettings() {
                     </div>
                     <button
                       onClick={() => setConfirmAction('delete')}
-                      disabled={deleteLoading || isAdmin}
+                      disabled={deleteLoading || isAccountDeactivateOrDeleteDisabled}
                       className="flex-shrink-0 ml-4 flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       <Trash2 className="w-4 h-4" />

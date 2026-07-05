@@ -9,7 +9,13 @@ import {
   mapManageUserDetailToForm,
   validateManageUserUpdateForm,
 } from '@/utils/manageUsers';
-import { formatRoleLabel, getRoleBadgeClassName } from '@/utils/userRole';
+import {
+  formatRoleLabel,
+  getRoleBadgeClassName,
+  USER_ROLE_ADMIN,
+  USER_ROLE_SUPERADMIN,
+  USER_ROLE_USER,
+} from '@/utils/userRole';
 
 interface ManageUserEditModalProps {
   open: boolean;
@@ -234,8 +240,9 @@ export function ManageUserEditModal({
                     disabled={updating}
                     className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
+                    <option value={USER_ROLE_USER}>User</option>
+                    <option value={USER_ROLE_ADMIN}>Admin</option>
+                    <option value={USER_ROLE_SUPERADMIN}>Super Admin</option>
                   </select>
                 </div>
               </div>

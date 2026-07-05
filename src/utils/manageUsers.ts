@@ -6,8 +6,9 @@ import type {
   ManageUserStatusFilter,
   UpdateManageUserRequest,
 } from '@/types/manageUsers.types';
-import type { ValidationResult } from '@/utils/validation';
+import { USER_ROLE_ADMIN, USER_ROLE_SUPERADMIN, USER_ROLE_USER } from '@/utils/userRole';
 import { validateUpdateProfileForm } from '@/utils/accountValidation';
+import type { ValidationResult } from '@/utils/validation';
 
 export const MANAGE_USERS_PAGE_SIZE = 10;
 
@@ -135,7 +136,8 @@ export function validateManageUserUpdateForm(
   }
 
   const normalizedRole = data.role.trim().toLowerCase();
-  if (normalizedRole !== 'admin' && normalizedRole !== 'user') {
+  const validRoles = new Set([USER_ROLE_USER, USER_ROLE_ADMIN, USER_ROLE_SUPERADMIN]);
+  if (!validRoles.has(normalizedRole)) {
     return {
       isValid: false,
       errors: [...baseValidation.errors, 'Please select a valid role.'],

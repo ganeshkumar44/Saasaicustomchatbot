@@ -13,6 +13,7 @@ import type { ChatbotListItem } from '@/types/chatbot.types';
 import { formatRelativeTime } from '@/utils/formatRelativeTime';
 import { getChatbotStatusDisplay } from '@/utils/chatbotList';
 import { canDeleteChatbot } from '@/utils/chatbotPermissions';
+import { hasAdminAccess } from '@/utils/userRole';
 
 interface ChatbotCardProps {
   chatbot: ChatbotListItem;
@@ -27,7 +28,7 @@ export function ChatbotCard({
 }: ChatbotCardProps) {
   const navigate = useNavigate();
   const user = useAppSelector(selectUser);
-  const isAdmin = user?.role?.toLowerCase() === 'admin';
+  const showOwnerInfo = hasAdminAccess(user?.role);
   const statusDisplay = getChatbotStatusDisplay(chatbot.status);
   const showDeleteButton = canDeleteChatbot(user) && Boolean(onDelete);
 
@@ -73,7 +74,7 @@ export function ChatbotCard({
         </span>
       </div>
 
-      {isAdmin && (
+      {showOwnerInfo && (
         <div className="flex items-center gap-2 mb-4">
           <span className="text-sm text-gray-600 dark:text-gray-400">Owner:</span>
           <span className="text-sm font-medium text-gray-900 dark:text-gray-200">

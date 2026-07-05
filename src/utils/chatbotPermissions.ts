@@ -1,5 +1,5 @@
 import type { AuthUser } from '@/types/auth.types';
-import { isAdminRole } from '@/utils/userRole';
+import { hasAdminAccess } from '@/utils/userRole';
 
 export function canDeleteChatbot(
   user: Pick<AuthUser, 'id' | 'role'> | null,
@@ -9,7 +9,7 @@ export function canDeleteChatbot(
     return false;
   }
 
-  if (isAdminRole(user.role)) {
+  if (hasAdminAccess(user.role)) {
     return true;
   }
 
@@ -23,5 +23,5 @@ export function canDeleteChatbot(
 export function canActivateChatbot(
   user: Pick<AuthUser, 'role'> | null,
 ): boolean {
-  return isAdminRole(user?.role);
+  return hasAdminAccess(user?.role);
 }

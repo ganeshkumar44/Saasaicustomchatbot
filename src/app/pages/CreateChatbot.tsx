@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { Bot, Sparkles, Settings, ArrowRight, Upload, CheckCircle, X, Loader2 } from 'lucide-react';
+import { Bot, Sparkles, Settings, ArrowRight, Upload, CheckCircle, X, Loader2, Globe } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   CHATBOT_AI_MODELS,
@@ -15,6 +15,7 @@ import {
   validateChatbotBehaviour,
   validateKnowledgeBaseFiles,
   validateKnowledgeBaseUpload,
+  validateKnowledgeBaseUrl,
 } from '@/utils/chatbotValidation';
 
 export function CreateChatbot() {
@@ -54,14 +55,23 @@ export function CreateChatbot() {
     name: '',
     description: '',
     personality: 'professional',
-    aiModel: CHATBOT_AI_MODELS[0].id,
+    aiModel: CHATBOT_AI_MODELS[0].id as (typeof CHATBOT_AI_MODELS)[number]['id'],
     language: CHATBOT_LANGUAGE.id as string,
   });
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
+  const [urlInput, setUrlInput] = useState('');
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   const step = currentStep;
   const hasFiles = uploadedFiles.length > 0;
+  const hasUrls = uploadedUrls.length > 0;
+  const hasKnowledgeSources = hasFiles || hasUrls;
+  const isUploadingKnowledgeBase = step === 3 && knowledgeBaseLoading;
+  const showUploadProgress =
+    isUploadingKnowledgeBase
+    && knowledgeBaseUploadProgress > 0
+    && knowledgeBaseUploadProgress < 100;
   const isStepLoading =
     createDraftLoading
     || basicInfoLoading
@@ -89,6 +99,8 @@ export function CreateChatbot() {
       language: CHATBOT_LANGUAGE.id as string,
     });
     setUploadedFiles([]);
+    setUploadedUrls([]);
+    setUrlInput('');
     setValidationErrors([]);
   }, [chatbotId]);
 
@@ -176,6 +188,30 @@ export function CreateChatbot() {
     setUploadedFiles(uploadedFiles.filter((_, fileIndex) => fileIndex !== index));
   };
 
+  const handleAddUrl = () => {
+    const validation = validateKnowledgeBaseUrl(urlInput);
+    if (!validation.isValid) {
+      setValidationErrors(validation.errors);
+      return;
+    }
+
+    const trimmedUrl = urlInput.trim();
+    const normalizedUrl = trimmedUrl.toLowerCase();
+
+    if (uploadedUrls.some((url) => url.toLowerCase() === normalizedUrl)) {
+      setValidationErrors(['This URL has already been added.']);
+      return;
+    }
+
+    setValidationErrors([]);
+    setUploadedUrls((previousUrls) => [...previousUrls, trimmedUrl]);
+    setUrlInput('');
+  };
+
+  const removeUrl = (index: number) => {
+    setUploadedUrls((previousUrls) => previousUrls.filter((_, urlIndex) => urlIndex !== index));
+  };
+
   const handleBasicInfoNext = async () => {
     clearErrors();
     const validation = validateChatbotBasicInfo(formData.name, formData.description);
@@ -219,7 +255,7 @@ export function CreateChatbot() {
 
   const handleKnowledgeNext = async () => {
     clearErrors();
-    const validation = validateKnowledgeBaseUpload(uploadedFiles, []);
+    const validation = validateKnowledgeBaseUpload(uploadedFiles, uploadedUrls);
 
     if (!validation.isValid) {
       setValidationErrors(validation.errors);
@@ -229,7 +265,7 @@ export function CreateChatbot() {
     setValidationErrors([]);
     await uploadKnowledgeBase({
       files: uploadedFiles,
-      urls: [],
+      urls: uploadedUrls,
     });
   };
 
@@ -262,15 +298,15 @@ export function CreateChatbot() {
   const reviewLanguage = chatbotReview?.language ?? CHATBOT_LANGUAGE.label;
   const reviewKnowledgeSummary = chatbotReview?.knowledgebase
     ? `${chatbotReview.knowledgebase.total_knowledge_sources} source(s)`
-    : hasFiles
-      ? `${uploadedFiles.length} file(s)`
+    : hasKnowledgeSources
+      ? `${uploadedFiles.length} file(s), ${uploadedUrls.length} URL(s)`
       : '—';
 
   const stepError =
     createDraftError
     ?? basicInfoError
     ?? behaviourError
-    ?? knowledgeBaseError
+    ?? (isUploadingKnowledgeBase ? null : knowledgeBaseError)
     ?? reviewError
     ?? publishError;
 
@@ -469,17 +505,23 @@ export function CreateChatbot() {
               </div>
               <div>
                 <h2 className="text-xl font-semibold dark:text-white">Knowledge Base</h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Upload training data for your chatbot</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Upload training data or add website URLs for your chatbot</p>
               </div>
             </div>
 
             <div
-              className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 text-center hover:border-blue-500 dark:hover:border-blue-500 transition-colors cursor-pointer"
-              onClick={handleFileUpload}
+              className={`border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 text-center transition-colors ${
+                knowledgeBaseLoading
+                  ? 'opacity-60 cursor-not-allowed'
+                  : 'hover:border-blue-500 dark:hover:border-blue-500 cursor-pointer'
+              }`}
+              onClick={knowledgeBaseLoading ? undefined : handleFileUpload}
               onDragOver={(event) => event.preventDefault()}
               onDrop={(event) => {
                 event.preventDefault();
-                addFiles(event.dataTransfer.files);
+                if (!knowledgeBaseLoading) {
+                  addFiles(event.dataTransfer.files);
+                }
               }}
             >
               <div className="flex flex-col items-center">
@@ -500,32 +542,74 @@ export function CreateChatbot() {
               </div>
             </div>
 
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Add Website URL
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="url"
+                  value={urlInput}
+                  onChange={(event) => setUrlInput(event.target.value)}
+                  placeholder="https://example.com"
+                  disabled={knowledgeBaseLoading}
+                  className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white disabled:opacity-60"
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault();
+                      handleAddUrl();
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={handleAddUrl}
+                  disabled={knowledgeBaseLoading || !urlInput.trim()}
+                  className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60"
+                >
+                  Add URL
+                </button>
+              </div>
+            </div>
+
             {knowledgeBaseLoading && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-                  <span>Uploading...</span>
-                  <span>{knowledgeBaseUploadProgress}%</span>
+              <div className="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/40 p-4 space-y-3">
+                <div className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-200">
+                  <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
+                  <span>
+                    {showUploadProgress
+                      ? `Uploading files... ${knowledgeBaseUploadProgress}%`
+                      : 'Processing knowledge base... This may take a few minutes for URLs and large files.'}
+                  </span>
                 </div>
-                <div className="w-full h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-blue-600 transition-all duration-300"
-                    style={{ width: `${knowledgeBaseUploadProgress}%` }}
-                  />
-                </div>
+                {showUploadProgress ? (
+                  <div className="w-full h-2 bg-blue-100 dark:bg-blue-900 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-blue-600 transition-all duration-300"
+                      style={{ width: `${knowledgeBaseUploadProgress}%` }}
+                    />
+                  </div>
+                ) : (
+                  <div className="w-full h-2 bg-blue-100 dark:bg-blue-900 rounded-full overflow-hidden">
+                    <div className="h-full w-1/3 bg-blue-600 rounded-full animate-pulse" />
+                  </div>
+                )}
               </div>
             )}
 
-            {hasFiles && (
+            {(hasFiles || hasUrls) && (
               <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Uploaded Files ({uploadedFiles.length})</p>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Knowledge Sources ({uploadedFiles.length + uploadedUrls.length})
+                </p>
                 {uploadedFiles.map((file, index) => (
                   <div
                     key={`${file.name}-${file.size}-${index}`}
                     className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg"
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">{file.name}</span>
+                      <span className="text-sm text-gray-700 dark:text-gray-300 truncate">{file.name}</span>
                     </div>
                     <button
                       type="button"
@@ -537,13 +621,32 @@ export function CreateChatbot() {
                     </button>
                   </div>
                 ))}
+                {uploadedUrls.map((url, index) => (
+                  <div
+                    key={`${url}-${index}`}
+                    className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Globe className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                      <span className="text-sm text-gray-700 dark:text-gray-300 truncate">{url}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeUrl(index)}
+                      className="p-1 hover:bg-green-100 dark:hover:bg-green-900 rounded transition-colors"
+                      disabled={knowledgeBaseLoading}
+                    >
+                      <X className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
 
-            {!hasFiles && (
+            {!hasKnowledgeSources && !knowledgeBaseLoading && (
               <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
                 <p className="text-sm text-amber-800 dark:text-amber-200">
-                  <strong>Required:</strong> Upload at least one knowledge base file to continue.
+                  <strong>Required:</strong> Upload at least one file or add a website URL to continue.
                 </p>
               </div>
             )}
@@ -574,7 +677,7 @@ export function CreateChatbot() {
                   { label: 'Personality', value: reviewPersonality },
                   { label: 'AI Model', value: reviewAiModel },
                   { label: 'Language', value: reviewLanguage },
-                  { label: 'Knowledge Files', value: reviewKnowledgeSummary },
+                  { label: 'Knowledge Sources', value: reviewKnowledgeSummary },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-800 last:border-0">
                     <span className="text-sm text-gray-500 dark:text-gray-400">{label}</span>
@@ -586,7 +689,7 @@ export function CreateChatbot() {
           </div>
         )}
 
-        {validationErrors.length > 0 && (
+        {validationErrors.length > 0 && !isUploadingKnowledgeBase && (
           <div className="rounded-lg border border-red-200 dark:border-red-800 p-3 space-y-1">
             {validationErrors.map((validationError) => (
               <p key={validationError} className="text-sm text-red-600 dark:text-red-400">
@@ -625,7 +728,7 @@ export function CreateChatbot() {
               {(step === 1 && basicInfoLoading) || (step === 2 && behaviourLoading) || (step === 3 && knowledgeBaseLoading) ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  {step === 3 ? 'Uploading...' : 'Saving...'}
+                  {step === 3 ? 'Processing...' : 'Saving...'}
                 </>
               ) : (
                 <>

@@ -23,9 +23,10 @@ import {
 } from '@/utils/chatbotSettingsForm';
 import {
   getKnowledgebaseDocumentsKey,
+  getKnowledgebaseUrlDocuments,
   getUploadedKnowledgebaseDocuments,
 } from '@/utils/knowledgebaseDocuments';
-import { isAllowedKnowledgeFile } from '@/utils/chatbotValidation';
+import { isAllowedKnowledgeFile, validateKnowledgeBaseUrl } from '@/utils/chatbotValidation';
 import { canDeleteChatbot, canActivateChatbot } from '@/utils/chatbotPermissions';
 import { isChatbotDeleted } from '@/utils/chatbotList';
 
@@ -54,6 +55,8 @@ export function ChatbotSettings() {
     allowed_domains: '',
   });
   const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [newUrls, setNewUrls] = useState<string[]>([]);
+  const [urlInput, setUrlInput] = useState('');
   const [deleteDocumentIds, setDeleteDocumentIds] = useState<number[]>([]);
 
   const {
@@ -217,11 +220,13 @@ export function ChatbotSettings() {
           chatbot_id: chatbotId,
           delete_document_ids: deleteDocumentIds,
           files: newFiles,
-          urls: [],
+          urls: newUrls,
         });
 
         if (saved) {
           setNewFiles([]);
+          setNewUrls([]);
+          setUrlInput('');
           setDeleteDocumentIds([]);
         }
         break;
@@ -262,6 +267,37 @@ export function ChatbotSettings() {
 
   const handleRemoveNewFile = (fileIndex: number) => {
     setNewFiles((previousFiles) => previousFiles.filter((_, index) => index !== fileIndex));
+  };
+
+  const handleAddUrl = () => {
+    const validation = validateKnowledgeBaseUrl(urlInput);
+    if (!validation.isValid) {
+      toast.error(validation.errors[0]);
+      return;
+    }
+
+    const trimmedUrl = urlInput.trim();
+    const normalizedUrl = trimmedUrl.toLowerCase();
+    const alreadyAdded = newUrls.some((url) => url.toLowerCase() === normalizedUrl);
+    const alreadyExists = getKnowledgebaseUrlDocuments(
+      chatbotDetails?.knowledgebase_documents,
+    ).some(
+      (document) =>
+        !deleteDocumentIds.includes(document.id)
+        && (document.url ?? '').toLowerCase() === normalizedUrl,
+    );
+
+    if (alreadyAdded || alreadyExists) {
+      toast.error('This URL is already in the knowledge base.');
+      return;
+    }
+
+    setNewUrls((previousUrls) => [...previousUrls, trimmedUrl]);
+    setUrlInput('');
+  };
+
+  const handleRemoveNewUrl = (urlIndex: number) => {
+    setNewUrls((previousUrls) => previousUrls.filter((_, index) => index !== urlIndex));
   };
 
   const Toggle = ({
@@ -359,7 +395,13 @@ export function ChatbotSettings() {
   const uploadedFileDocuments = getUploadedKnowledgebaseDocuments(
     chatbotDetails.knowledgebase_documents,
   );
-  const visibleUploadedDocuments = uploadedFileDocuments.filter(
+  const uploadedUrlDocuments = getKnowledgebaseUrlDocuments(
+    chatbotDetails.knowledgebase_documents,
+  );
+  const visibleUploadedFileDocuments = uploadedFileDocuments.filter(
+    (document) => !deleteDocumentIds.includes(document.id),
+  );
+  const visibleUploadedUrlDocuments = uploadedUrlDocuments.filter(
     (document) => !deleteDocumentIds.includes(document.id),
   );
 
@@ -628,20 +670,79 @@ export function ChatbotSettings() {
                 </div>
 
                 <div className="space-y-3">
-                  {visibleUploadedDocuments.length > 0 || newFiles.length > 0 ? (
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Add Website URL
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <input
+                      type="url"
+                      value={urlInput}
+                      onChange={(event) => setUrlInput(event.target.value)}
+                      placeholder="https://example.com"
+                      disabled={knowledgebaseLoading}
+                      className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter') {
+                          event.preventDefault();
+                          handleAddUrl();
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddUrl}
+                      disabled={knowledgebaseLoading || !urlInput.trim()}
+                      className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60"
+                    >
+                      Add URL
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {visibleUploadedFileDocuments.length > 0
+                  || visibleUploadedUrlDocuments.length > 0
+                  || newFiles.length > 0
+                  || newUrls.length > 0 ? (
                     <>
                       <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Uploaded Files ({visibleUploadedDocuments.length + newFiles.length})
+                        Knowledge Sources (
+                        {visibleUploadedFileDocuments.length
+                          + visibleUploadedUrlDocuments.length
+                          + newFiles.length
+                          + newUrls.length}
+                        )
                       </p>
-                      {visibleUploadedDocuments.map((document) => (
+                      {visibleUploadedFileDocuments.map((document) => (
                         <div
                           key={document.id}
                           className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
                         >
-                          <div className="flex items-center gap-3">
-                            <Database className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                            <span className="text-sm font-medium dark:text-white">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <Database className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                            <span className="text-sm font-medium dark:text-white truncate">
                               {document.original_file_name}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveExistingDocument(document.id)}
+                            disabled={knowledgebaseLoading}
+                            className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </div>
+                      ))}
+                      {visibleUploadedUrlDocuments.map((document) => (
+                        <div
+                          key={document.id}
+                          className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <Database className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                            <span className="text-sm font-medium dark:text-white truncate">
+                              {document.url}
                             </span>
                           </div>
                           <button
@@ -675,10 +776,31 @@ export function ChatbotSettings() {
                           </button>
                         </div>
                       ))}
+                      {newUrls.map((url, index) => (
+                        <div
+                          key={`${url}-${index}`}
+                          className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <Database className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                            <span className="text-sm font-medium dark:text-white truncate">
+                              {url}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveNewUrl(index)}
+                            disabled={knowledgebaseLoading}
+                            className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </div>
+                      ))}
                     </>
                   ) : (
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      No documents uploaded yet.
+                      No documents or URLs uploaded yet.
                     </p>
                   )}
                 </div>

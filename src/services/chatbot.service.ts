@@ -1,3 +1,4 @@
+import { KNOWLEDGE_BASE_UPLOAD_TIMEOUT_MS } from '@/constants/chatbot';
 import { apiClient } from '@/api/axios';
 import type {
   BasicInfoRequest,
@@ -69,9 +70,7 @@ export async function uploadKnowledgeBase(
     `/v1/chatbots/${chatbotId}/knowledgebase/upload`,
     formData,
     {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+      timeout: KNOWLEDGE_BASE_UPLOAD_TIMEOUT_MS,
       onUploadProgress: (event) => {
         if (!event.total) {
           return;

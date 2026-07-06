@@ -4,13 +4,39 @@ export const CHATBOT_PERSONALITY_OPTIONS = [
   { id: 'casual', label: 'Casual', apiValue: 'Casual' },
 ] as const;
 
-export const CHATBOT_AI_MODEL = {
-  id: 'gemini-2.5-flash',
-  label: 'Gemini 2.5 Flash',
-  provider: 'Google',
-  desc: 'Fast & cost-effective',
-  apiValue: 'Gemini 2.5 Flash',
-} as const;
+export const CHATBOT_AI_MODELS = [
+  {
+    id: 'gemini-2.5-flash',
+    label: 'Gemini 2.5 Flash',
+    provider: 'Google',
+    desc: 'Fast & cost-effective',
+    apiValue: 'Gemini 2.5 Flash',
+  },
+  {
+    id: 'llama-3.1',
+    label: 'Llama 3.1 (Ollama)',
+    provider: 'Ollama',
+    desc: 'Self-hosted local inference',
+    apiValue: 'Llama 3.1',
+  },
+] as const;
+
+export const CHATBOT_AI_MODEL = CHATBOT_AI_MODELS[0];
+
+export const CHATBOT_AI_MODEL_API_VALUES = CHATBOT_AI_MODELS.map(
+  (model) => model.apiValue,
+);
+
+export function getChatbotAiModelById(id: string) {
+  return CHATBOT_AI_MODELS.find((model) => model.id === id) ?? CHATBOT_AI_MODELS[0];
+}
+
+export function getChatbotAiModelByApiValue(apiValue: string) {
+  return (
+    CHATBOT_AI_MODELS.find((model) => model.apiValue === apiValue)
+    ?? CHATBOT_AI_MODELS[0]
+  );
+}
 
 export const CHATBOT_LANGUAGE = {
   id: 'en',

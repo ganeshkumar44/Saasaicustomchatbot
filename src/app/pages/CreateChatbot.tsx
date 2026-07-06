@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router';
 import { Bot, Sparkles, Settings, ArrowRight, Upload, CheckCircle, X, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
-  CHATBOT_AI_MODEL,
+  CHATBOT_AI_MODELS,
   CHATBOT_LANGUAGE,
   CHATBOT_PERSONALITY_OPTIONS,
+  getChatbotAiModelByApiValue,
+  getChatbotAiModelById,
 } from '@/constants/chatbot';
 import { useChatbot } from '@/hooks/useChatbot';
 import {
@@ -52,7 +54,7 @@ export function CreateChatbot() {
     name: '',
     description: '',
     personality: 'professional',
-    aiModel: CHATBOT_AI_MODEL.id,
+    aiModel: CHATBOT_AI_MODELS[0].id,
     language: CHATBOT_LANGUAGE.id as string,
   });
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
@@ -83,12 +85,36 @@ export function CreateChatbot() {
       name: '',
       description: '',
       personality: 'professional',
-      aiModel: CHATBOT_AI_MODEL.id,
+      aiModel: CHATBOT_AI_MODELS[0].id,
       language: CHATBOT_LANGUAGE.id as string,
     });
     setUploadedFiles([]);
     setValidationErrors([]);
   }, [chatbotId]);
+
+  useEffect(() => {
+    if (!chatbotReview) {
+      return;
+    }
+
+    const personalityId =
+      CHATBOT_PERSONALITY_OPTIONS.find(
+        (option) => option.apiValue === chatbotReview.personality,
+      )?.id ?? 'professional';
+
+    const aiModelId = chatbotReview.ai_model
+      ? getChatbotAiModelByApiValue(chatbotReview.ai_model).id
+      : CHATBOT_AI_MODELS[0].id;
+
+    setFormData((prev) => ({
+      ...prev,
+      name: chatbotReview.chatbot_name ?? prev.name,
+      description: chatbotReview.description ?? prev.description,
+      personality: personalityId,
+      aiModel: aiModelId,
+      language: CHATBOT_LANGUAGE.id,
+    }));
+  }, [chatbotReview]);
 
   useEffect(() => {
     if (currentStep === 4 && chatbotId) {
@@ -186,7 +212,7 @@ export function CreateChatbot() {
 
     await updateBehaviour({
       personality: personalityOption?.apiValue ?? 'Professional',
-      ai_model: CHATBOT_AI_MODEL.apiValue,
+      ai_model: getChatbotAiModelById(formData.aiModel).apiValue,
       language: CHATBOT_LANGUAGE.apiValue,
     });
   };
@@ -232,7 +258,7 @@ export function CreateChatbot() {
 
   const reviewName = (chatbotReview?.chatbot_name ?? formData.name) || '—';
   const reviewPersonality = chatbotReview?.personality ?? formData.personality;
-  const reviewAiModel = chatbotReview?.ai_model ?? CHATBOT_AI_MODEL.label;
+  const reviewAiModel = chatbotReview?.ai_model ?? getChatbotAiModelById(formData.aiModel).label;
   const reviewLanguage = chatbotReview?.language ?? CHATBOT_LANGUAGE.label;
   const reviewKnowledgeSummary = chatbotReview?.knowledgebase
     ? `${chatbotReview.knowledgebase.total_knowledge_sources} source(s)`
@@ -388,29 +414,34 @@ export function CreateChatbot() {
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">AI Model</label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, aiModel: CHATBOT_AI_MODEL.id })}
-                  className={`p-4 border-2 rounded-lg text-left transition-all ${
-                    formData.aiModel === CHATBOT_AI_MODEL.id
-                      ? 'border-blue-600 bg-blue-50 dark:bg-blue-950'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                  }`}
-                  disabled={behaviourLoading}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium dark:text-white">{CHATBOT_AI_MODEL.label}</span>
-                    <div className="flex items-center gap-1.5">
-                      <span className="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded text-xs font-medium">
-                        Fast
-                      </span>
-                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400">
-                        {CHATBOT_AI_MODEL.provider}
-                      </span>
+                {CHATBOT_AI_MODELS.map((model) => (
+                  <button
+                    key={model.id}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, aiModel: model.id })}
+                    className={`p-4 border-2 rounded-lg text-left transition-all ${
+                      formData.aiModel === model.id
+                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-950'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                    }`}
+                    disabled={behaviourLoading}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-medium dark:text-white">{model.label}</span>
+                      <div className="flex items-center gap-1.5">
+                        {model.id === 'gemini-2.5-flash' && (
+                          <span className="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded text-xs font-medium">
+                            Fast
+                          </span>
+                        )}
+                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400">
+                          {model.provider}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{CHATBOT_AI_MODEL.desc}</p>
-                </button>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{model.desc}</p>
+                  </button>
+                ))}
               </div>
             </div>
 

@@ -1,4 +1,4 @@
-import { CHATBOT_AI_MODEL } from '@/constants/chatbot';
+import { CHATBOT_AI_MODEL_API_VALUES } from '@/constants/chatbot';
 import {
   validateKnowledgeBaseFiles,
   validateKnowledgeBaseUrl,
@@ -165,7 +165,7 @@ export function validateSecuritySettings(form: SecuritySettingsForm): Validation
 
   if (!aiModel) {
     errors.push('AI model is required.');
-  } else if (aiModel !== CHATBOT_AI_MODEL.apiValue) {
+  } else if (!CHATBOT_AI_MODEL_API_VALUES.includes(aiModel as (typeof CHATBOT_AI_MODEL_API_VALUES)[number])) {
     errors.push('Please select a valid AI model.');
   }
 

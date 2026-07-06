@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 import { Bot, Save, Trash2, Copy, Eye, Code, Palette, MessageSquare, Shield, Database, ArrowLeft, Cpu, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { CHATBOT_AI_MODEL } from '@/constants/chatbot';
+import { CHATBOT_AI_MODELS } from '@/constants/chatbot';
 import { DeleteChatbotConfirmDialog } from '@/app/components/chatbot/DeleteChatbotConfirmDialog';
 import { useChatbotSettings } from '@/hooks/useChatbotSettings';
 import { useDeleteChatbot } from '@/hooks/useDeleteChatbot';
@@ -50,7 +50,7 @@ export function ChatbotSettings() {
     input_placeholder: '',
   });
   const [securityForm, setSecurityForm] = useState<SecuritySettingsForm>({
-    ai_model: CHATBOT_AI_MODEL.apiValue,
+    ai_model: CHATBOT_AI_MODELS[0].apiValue,
     allowed_domains: '',
   });
   const [newFiles, setNewFiles] = useState<File[]>([]);
@@ -698,25 +698,28 @@ export function ChatbotSettings() {
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Choose which AI model powers this chatbot. Changes take effect immediately.</p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setSecurityForm({ ...securityForm, ai_model: CHATBOT_AI_MODEL.apiValue })}
-                      disabled={securityLoading}
-                      className={`p-4 border-2 rounded-lg text-left transition-all ${
-                        securityForm.ai_model === CHATBOT_AI_MODEL.apiValue
-                          ? 'border-blue-600 bg-blue-50 dark:bg-blue-950'
-                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-medium dark:text-white text-sm">{CHATBOT_AI_MODEL.label}</span>
-                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400">
-                          {CHATBOT_AI_MODEL.provider}
-                        </span>
-                      </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{CHATBOT_AI_MODEL.desc}</p>
-                    </button>
+                    {CHATBOT_AI_MODELS.map((model) => (
+                      <button
+                        key={model.id}
+                        type="button"
+                        onClick={() =>
+                          setSecurityForm({ ...securityForm, ai_model: model.apiValue })}
+                        disabled={securityLoading}
+                        className={`p-4 border-2 rounded-lg text-left transition-all ${
+                          securityForm.ai_model === model.apiValue
+                            ? 'border-blue-600 bg-blue-50 dark:bg-blue-950'
+                            : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-medium dark:text-white text-sm">{model.label}</span>
+                          <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400">
+                            {model.provider}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{model.desc}</p>
+                      </button>
+                    ))}
                   </div>
                   {securityForm.ai_model && (
                     <p className="mt-2 text-xs text-blue-600 dark:text-blue-400">

@@ -662,7 +662,7 @@ export function ChatbotSettings() {
                     <Database className="w-12 h-12 text-gray-400 mb-4" />
                     <p className="text-gray-600 dark:text-gray-400 mb-2">Drag and drop files here, or click to browse</p>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                      Supported: PDF, DOC, DOCX, TXT, CSV, MD (Max 10MB)
+                      Supported: PDF, DOC, DOCX, TXT, CSV, MD (Max 4MB per file)
                     </p>
                     <button
                       type="button"

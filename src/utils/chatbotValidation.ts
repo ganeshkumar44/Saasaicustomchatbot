@@ -96,7 +96,7 @@ export function validateKnowledgeBaseFiles(files: File[]): ValidationResult {
     }
 
     if (file.size > KNOWLEDGE_BASE_MAX_FILE_SIZE_BYTES) {
-      errors.push(`File exceeds maximum size (10MB): ${file.name}`);
+      errors.push(`Each knowledge base file must not exceed 4 MB: ${file.name}`);
     }
   });
 

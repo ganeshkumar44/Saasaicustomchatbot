@@ -60,7 +60,7 @@ export const KNOWLEDGE_BASE_ALLOWED_EXTENSIONS = [
   '.md',
 ] as const;
 
-export const KNOWLEDGE_BASE_MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
+export const KNOWLEDGE_BASE_MAX_FILE_SIZE_BYTES = 4 * 1024 * 1024;
 
 /** Extended timeout for knowledge base upload (file processing and URL crawling). */
 export const KNOWLEDGE_BASE_UPLOAD_TIMEOUT_MS = 5 * 60 * 1000;

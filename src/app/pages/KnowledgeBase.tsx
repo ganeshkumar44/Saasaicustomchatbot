@@ -69,7 +69,7 @@ export function KnowledgeBase() {
             Choose Files
           </button>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
-            Supported formats: PDF, DOC, DOCX, TXT, CSV, MD (Max 10MB)
+            Supported formats: PDF, DOC, DOCX, TXT, CSV, MD (Max 4MB per file)
           </p>
         </div>
       </div>

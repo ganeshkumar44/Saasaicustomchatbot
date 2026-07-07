@@ -21,6 +21,7 @@ const ALLOWED_PROFILE_IMAGE_TYPES = new Set([
 ]);
 
 const ALLOWED_PROFILE_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp'];
+const MAX_PROFILE_IMAGE_SIZE_BYTES = 1 * 1024 * 1024;
 
 export function validateProfileImage(file: File): ValidationResult {
   const errors: string[] = [];
@@ -38,6 +39,10 @@ export function validateProfileImage(file: File): ValidationResult {
 
   if (!hasAllowedType && !hasAllowedExtension) {
     errors.push('Only JPG, JPEG, PNG, and WEBP images are allowed.');
+  }
+
+  if (file.size > MAX_PROFILE_IMAGE_SIZE_BYTES) {
+    errors.push('Profile image size must not exceed 1 MB.');
   }
 
   return {

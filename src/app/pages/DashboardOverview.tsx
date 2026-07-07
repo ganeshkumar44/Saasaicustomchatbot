@@ -9,7 +9,11 @@ import { ChatbotCardsSkeleton } from '@/app/components/chatbot/ChatbotCardsSkele
 import { ChatbotListEmptyState } from '@/app/components/chatbot/ChatbotListEmptyState';
 import { ChatbotListErrorState } from '@/app/components/chatbot/ChatbotListErrorState';
 import { DeleteChatbotConfirmDialog } from '@/app/components/chatbot/DeleteChatbotConfirmDialog';
-import { Skeleton } from '@/app/components/ui/skeleton';
+import {
+  SkeletonChart,
+  SkeletonConversation,
+  SkeletonStatistic,
+} from '@/components/Skeleton';
 import { useChatbot } from '@/hooks/useChatbot';
 import { useDeleteChatbot } from '@/hooks/useDeleteChatbot';
 import { useDashboardAnalytics } from '@/hooks/useDashboardAnalytics';
@@ -173,16 +177,7 @@ export function DashboardOverview() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {analyticsLoading ? (
-          [1, 2, 3, 4].map((item) => (
-            <div
-              key={item}
-              className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800"
-            >
-              <Skeleton className="w-12 h-12 rounded-lg mb-4" />
-              <Skeleton className="h-4 w-32 mb-2" />
-              <Skeleton className="h-9 w-24" />
-            </div>
-          ))
+          <SkeletonStatistic />
         ) : analyticsError ? (
           <div className="col-span-full bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800 text-center">
             <p className="text-red-600 dark:text-red-400 mb-4">{analyticsError}</p>
@@ -284,7 +279,7 @@ export function DashboardOverview() {
             </div>
           </div>
           {conversationsLoading ? (
-            <Skeleton className="w-full h-[300px] rounded-lg" />
+            <SkeletonChart />
           ) : conversationsError ? (
             <div className="h-[300px] flex flex-col items-center justify-center text-center">
               <p className="text-red-600 dark:text-red-400 mb-4">{conversationsError}</p>
@@ -365,28 +360,7 @@ export function DashboardOverview() {
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
               {recentConversationsLoading ? (
-                Array.from({ length: 4 }).map((_, index) => (
-                  <tr key={`recent-conversation-skeleton-${index}`}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-3">
-                        <Skeleton className="w-10 h-10 rounded-full" />
-                        <Skeleton className="h-4 w-28" />
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <Skeleton className="h-4 w-full max-w-md" />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <Skeleton className="h-4 w-24" />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <Skeleton className="h-6 w-20 rounded-full" />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <Skeleton className="h-5 w-5 ml-auto" />
-                    </td>
-                  </tr>
-                ))
+                <SkeletonConversation />
               ) : recentConversationsError ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center">

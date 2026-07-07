@@ -6,6 +6,7 @@ import { ManageUsersTable } from '@/app/components/admin/ManageUsersTable';
 import { ManageUsersToolbar } from '@/app/components/admin/ManageUsersToolbar';
 import { ChatbotListPagination } from '@/app/components/chatbot/ChatbotListPagination';
 import { ConfirmDialog } from '@/app/components/ui/ConfirmDialog';
+import { SkeletonPagination, SkeletonToolbar } from '@/components/Skeleton';
 import { useManageUsers } from '@/hooks/useManageUsers';
 import {
   updateUser as updateUserThunk,
@@ -46,6 +47,7 @@ export function ManageUsers() {
   const [pendingStatusUser, setPendingStatusUser] = useState<ManageUserListItem | null>(null);
 
   const isEditModalOpen = editUserId !== null;
+  const isInitialLoading = loading && users.length === 0;
   const hasActiveFilters =
     search.trim().length > 0 || roleFilter !== 'all' || statusFilter !== 'all';
   const showEmptyResults = !loading && !error && users.length === 0;
@@ -157,25 +159,29 @@ export function ManageUsers() {
 
       <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
         <div className="p-6 border-b border-gray-200 dark:border-gray-800 space-y-4">
-          <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search by name or email..."
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
+          {isInitialLoading ? (
+            <SkeletonToolbar />
+          ) : (
+            <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search by name or email..."
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
+                />
+              </div>
+
+              <ManageUsersToolbar
+                roleFilter={roleFilter}
+                statusFilter={statusFilter}
+                onRoleFilterChange={setRoleFilter}
+                onStatusFilterChange={setStatusFilter}
               />
             </div>
-
-            <ManageUsersToolbar
-              roleFilter={roleFilter}
-              statusFilter={statusFilter}
-              onRoleFilterChange={setRoleFilter}
-              onStatusFilterChange={setStatusFilter}
-            />
-          </div>
+          )}
         </div>
 
         {error && !isEditModalOpen && statusAction === null && (
@@ -203,11 +209,15 @@ export function ManageUsers() {
         />
 
         <div className="px-6 pb-6">
-          <ChatbotListPagination
-            currentPage={pagination.page}
-            totalPages={pagination.totalPages}
-            onPageChange={changePage}
-          />
+          {isInitialLoading ? (
+            <SkeletonPagination />
+          ) : (
+            <ChatbotListPagination
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
+              onPageChange={changePage}
+            />
+          )}
         </div>
       </div>
     </div>

@@ -1,0 +1,206 @@
+/* Shared Markdown styles for all AI bot responses (dashboard, preview, widget-class parity) */
+
+.markdown-message {
+  display: block;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.markdown-message > :first-child {
+  margin-top: 0;
+}
+
+.markdown-message > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown-message h1,
+.markdown-message h2,
+.markdown-message h3,
+.markdown-message h4 {
+  font-weight: 700;
+  line-height: 1.35;
+  margin: 0.75em 0 0.35em;
+  color: #111827;
+}
+
+.dark .markdown-message h1,
+.dark .markdown-message h2,
+.dark .markdown-message h3,
+.dark .markdown-message h4 {
+  color: #f9fafb;
+}
+
+.markdown-message h1 {
+  font-size: 1.125rem;
+}
+
+.markdown-message h2 {
+  font-size: 1rem;
+}
+
+.markdown-message h3,
+.markdown-message h4 {
+  font-size: 0.875rem;
+}
+
+.markdown-message h3 {
+  font-weight: 600;
+}
+
+.markdown-message h4 {
+  font-weight: 500;
+}
+
+.markdown-message p {
+  margin: 0 0 0.65em;
+  line-height: 1.55;
+}
+
+.markdown-message p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-message ul,
+.markdown-message ol {
+  margin: 0.35em 0 0.75em;
+  padding-left: 1.25em;
+}
+
+.markdown-message li {
+  margin: 0.25em 0;
+  line-height: 1.5;
+}
+
+.markdown-message ul {
+  list-style: disc;
+}
+
+.markdown-message ol {
+  list-style: decimal;
+}
+
+.markdown-message li > ul,
+.markdown-message li > ol {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+.markdown-message blockquote {
+  margin: 0.5em 0;
+  padding: 0.35em 0 0.35em 0.75em;
+  border-left: 3px solid #d1d5db;
+  color: #4b5563;
+}
+
+.dark .markdown-message blockquote {
+  border-left-color: #4b5563;
+  color: #d1d5db;
+}
+
+.markdown-message hr {
+  border: none;
+  border-top: 1px solid #d1d5db;
+  margin: 0.75em 0;
+}
+
+.dark .markdown-message hr {
+  border-top-color: #374151;
+}
+
+.markdown-message a {
+  color: #2563eb;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  word-break: break-word;
+}
+
+.dark .markdown-message a {
+  color: #60a5fa;
+}
+
+.markdown-message a:hover {
+  opacity: 0.85;
+}
+
+.markdown-message code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85em;
+  background: rgba(17, 24, 39, 0.08);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+
+.dark .markdown-message code {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.markdown-message pre {
+  margin: 0.5em 0;
+  padding: 0.75em;
+  border-radius: 8px;
+  background: #111827;
+  color: #f9fafb;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.markdown-message pre code {
+  display: block;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font-size: 0.8em;
+  white-space: pre;
+  border-radius: 0;
+}
+
+.markdown-message .markdown-table-wrap {
+  margin: 0.5em 0;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.markdown-message table {
+  width: 100%;
+  min-width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85em;
+}
+
+.markdown-message th,
+.markdown-message td {
+  border: 1px solid #d1d5db;
+  padding: 0.4em 0.55em;
+  text-align: left;
+  vertical-align: top;
+}
+
+.dark .markdown-message th,
+.dark .markdown-message td {
+  border-color: #4b5563;
+}
+
+.markdown-message th {
+  background: rgba(17, 24, 39, 0.06);
+  font-weight: 600;
+}
+
+.dark .markdown-message th {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.markdown-message img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 0.5em 0;
+}
+
+.markdown-message input[type='checkbox'] {
+  margin-right: 0.35em;
+  vertical-align: middle;
+}

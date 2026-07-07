@@ -167,12 +167,18 @@ export function ChatbotSettings() {
     { id: 'embed', label: 'Embed Code', icon: Code },
   ];
 
-  const isSaveLoading =
-    generalLoading
-    || appearanceLoading
-    || messageLoading
-    || securityLoading
-    || knowledgebaseLoading;
+  const activeTabSaveLoading =
+    activeTab === 'general'
+      ? generalLoading
+      : activeTab === 'appearance'
+        ? appearanceLoading
+        : activeTab === 'messages'
+          ? messageLoading
+          : activeTab === 'security'
+            ? securityLoading
+            : activeTab === 'knowledge'
+              ? knowledgebaseLoading
+              : false;
 
   const isEditableTab = ['general', 'appearance', 'messages', 'knowledge', 'security'].includes(
     activeTab,
@@ -950,15 +956,15 @@ export function ChatbotSettings() {
                 <button
                   type="button"
                   onClick={() => void handleSaveChanges()}
-                  disabled={isDeletedChatbot || !isEditableTab || isSaveLoading}
+                  disabled={isDeletedChatbot || !isEditableTab || activeTabSaveLoading}
                   className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  {isSaveLoading ? (
+                  {activeTabSaveLoading ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
                   ) : (
                     <Save className="w-5 h-5" />
                   )}
-                  Save Changes
+                  {activeTabSaveLoading ? 'Saving...' : 'Save Changes'}
                 </button>
               )}
             </div>

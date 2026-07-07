@@ -3,7 +3,7 @@ import { LineChart, Line, BarChart, Bar, AreaChart, Area, XAxis, YAxis, Cartesia
 import { AnalyticsTrendBadge } from '@/app/components/AnalyticsTrendBadge';
 import { AnalyticsRangeSelector } from '@/app/components/AnalyticsRangeSelector';
 import { UsersChartPanel } from '@/app/components/UsersChartPanel';
-import { Skeleton } from '@/app/components/ui/skeleton';
+import { SkeletonChart, SkeletonStatistic } from '@/components/Skeleton';
 import { useDashboardAnalytics } from '@/hooks/useDashboardAnalytics';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import {
@@ -72,16 +72,7 @@ export function Analytics() {
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {analyticsLoading ? (
-          [1, 2, 3, 4].map((item) => (
-            <div
-              key={item}
-              className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800"
-            >
-              <Skeleton className="w-12 h-12 rounded-lg mb-4" />
-              <Skeleton className="h-4 w-32 mb-2" />
-              <Skeleton className="h-9 w-24" />
-            </div>
-          ))
+          <SkeletonStatistic />
         ) : analyticsError ? (
           <div className="col-span-full bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800 text-center">
             <p className="text-red-600 dark:text-red-400 mb-4">{analyticsError}</p>
@@ -177,7 +168,7 @@ export function Analytics() {
             <p className="text-sm text-gray-600 dark:text-gray-400">{rangeLabel} performance</p>
           </div>
           {conversationsLoading ? (
-            <Skeleton className="w-full h-[300px] rounded-lg" />
+            <SkeletonChart />
           ) : conversationsError ? (
             <div className="h-[300px] flex flex-col items-center justify-center text-center">
               <p className="text-red-600 dark:text-red-400 mb-4">{conversationsError}</p>
@@ -217,7 +208,7 @@ export function Analytics() {
             <p className="text-sm text-gray-600 dark:text-gray-400">Resolved vs Escalated</p>
           </div>
           {resolutionLoading ? (
-            <Skeleton className="w-full h-[300px] rounded-lg" />
+            <SkeletonChart />
           ) : resolutionError ? (
             <div className="h-[300px] flex flex-col items-center justify-center text-center">
               <p className="text-red-600 dark:text-red-400 mb-4">{resolutionError}</p>
@@ -256,7 +247,7 @@ export function Analytics() {
             <p className="text-sm text-gray-600 dark:text-gray-400">Average response time (seconds)</p>
           </div>
           {responseTimeLoading ? (
-            <Skeleton className="w-full h-[300px] rounded-lg" />
+            <SkeletonChart />
           ) : responseTimeError ? (
             <div className="h-[300px] flex flex-col items-center justify-center text-center">
               <p className="text-red-600 dark:text-red-400 mb-4">{responseTimeError}</p>

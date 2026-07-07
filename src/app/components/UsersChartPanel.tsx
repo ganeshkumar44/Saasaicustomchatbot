@@ -1,5 +1,5 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Skeleton } from '@/app/components/ui/skeleton';
+import { SkeletonChart } from '@/components/Skeleton';
 import type { UsersChartRow } from '@/types/dashboardAnalytics.types';
 
 const TOOLTIP_STYLE = {
@@ -37,7 +37,7 @@ export function UsersChartPanel({
         </div>
       </div>
       {loading ? (
-        <Skeleton className="w-full h-[300px] rounded-lg" />
+        <SkeletonChart />
       ) : error ? (
         <div className="h-[300px] flex flex-col items-center justify-center text-center">
           <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>

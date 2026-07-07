@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { Search, Filter, Download, MessageSquare, Clock, ChevronRight } from 'lucide-react';
-import { MarkdownMessage } from '@/app/components/chat/MarkdownMessage';
-import { Skeleton } from '@/app/components/ui/skeleton';
+import { MarkdownMessage } from '@/components/common/MarkdownMessage';
+import {
+  SkeletonConversationMessages,
+  SkeletonConversationPanel,
+  SkeletonSessionList,
+} from '@/components/Skeleton';
 import {
   Pagination,
   PaginationContent,
@@ -19,51 +23,6 @@ import {
   getVisitorDisplayName,
 } from '@/utils/chatHistoryFormat';
 import { formatRelativeLastActivity } from '@/utils/timeFormatter';
-
-function SessionListSkeleton() {
-  return (
-    <>
-      {Array.from({ length: 5 }).map((_, index) => (
-        <div
-          key={`session-skeleton-${index}`}
-          className="w-full p-4 border-b border-gray-200 dark:border-gray-800"
-        >
-          <div className="flex items-start justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <Skeleton className="w-8 h-8 rounded-full" />
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-3 w-32" />
-              </div>
-            </div>
-            <Skeleton className="w-5 h-5" />
-          </div>
-          <Skeleton className="h-4 w-full mb-2" />
-          <div className="flex items-center gap-4">
-            <Skeleton className="h-3 w-10" />
-            <Skeleton className="h-3 w-12" />
-            <Skeleton className="h-5 w-16 rounded-full" />
-          </div>
-        </div>
-      ))}
-    </>
-  );
-}
-
-function ConversationSkeleton() {
-  return (
-    <div className="flex-1 overflow-y-auto p-6 space-y-4">
-      {Array.from({ length: 4 }).map((_, index) => (
-        <div
-          key={`message-skeleton-${index}`}
-          className={`flex ${index % 2 === 0 ? 'justify-end' : 'justify-start'}`}
-        >
-          <Skeleton className={`h-16 rounded-2xl ${index % 2 === 0 ? 'w-1/2' : 'w-2/3'}`} />
-        </div>
-      ))}
-    </div>
-  );
-}
 
 function matchesSearchQuery(session: ChatSession, searchTerm: string): boolean {
   const query = searchTerm.trim().toLowerCase();
@@ -153,7 +112,7 @@ export function ChatHistory() {
 
             <div className="flex-1 overflow-y-auto min-h-0">
               {loadingSessions ? (
-                <SessionListSkeleton />
+                <SkeletonSessionList count={10} />
               ) : error && sessions.length === 0 ? (
                 <div className="p-8 text-center">
                   <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
@@ -301,7 +260,7 @@ export function ChatHistory() {
               </div>
 
               {loadingMessages ? (
-                <ConversationSkeleton />
+                <SkeletonConversationMessages />
               ) : error && !sessionDetails ? (
                 <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
                   <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
@@ -342,24 +301,7 @@ export function ChatHistory() {
               ) : null}
             </div>
           ) : loadingSessions ? (
-            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden h-[calc(100vh-180px)] flex flex-col">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-800">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <Skeleton className="w-12 h-12 rounded-full" />
-                    <div className="space-y-2">
-                      <Skeleton className="h-6 w-40" />
-                      <Skeleton className="h-4 w-48" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-32 ml-auto" />
-                    <Skeleton className="h-4 w-16 ml-auto" />
-                  </div>
-                </div>
-              </div>
-              <ConversationSkeleton />
-            </div>
+            <SkeletonConversationPanel />
           ) : (
             <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 h-[calc(100vh-180px)] flex items-center justify-center">
               <div className="text-center">

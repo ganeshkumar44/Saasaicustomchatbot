@@ -1,9 +1,9 @@
-import { Skeleton } from '@/app/components/ui/skeleton';
+import { SkeletonTable } from '@/components/Skeleton';
+import type { ManageUserListItem } from '@/types/manageUsers.types';
 import {
   ManageUserActionsMenu,
   ManageUserAvatar,
 } from '@/app/components/admin/ManageUserActionsMenu';
-import type { ManageUserListItem } from '@/types/manageUsers.types';
 import {
   formatManageUserDate,
   getAccountStatusBadgeClassName,
@@ -17,50 +17,6 @@ interface ManageUsersTableProps {
   onEdit: (user: ManageUserListItem) => void;
   onDeactivate: (user: ManageUserListItem) => void;
   onActivate: (user: ManageUserListItem) => void;
-}
-
-function ManageUsersTableSkeleton() {
-  return (
-    <>
-      {Array.from({ length: 5 }).map((_, index) => (
-        <tr key={`manage-user-skeleton-${index}`}>
-          <td className="px-6 py-4 whitespace-nowrap">
-            <Skeleton className="w-10 h-10 rounded-full" />
-          </td>
-          <td className="px-6 py-4 whitespace-nowrap">
-            <Skeleton className="h-4 w-32" />
-          </td>
-          <td className="px-6 py-4 whitespace-nowrap">
-            <Skeleton className="h-4 w-40" />
-          </td>
-          <td className="px-6 py-4 whitespace-nowrap">
-            <Skeleton className="h-4 w-28" />
-          </td>
-          <td className="px-6 py-4 whitespace-nowrap">
-            <Skeleton className="h-5 w-16 rounded-full" />
-          </td>
-          <td className="px-6 py-4 whitespace-nowrap">
-            <Skeleton className="h-4 w-24" />
-          </td>
-          <td className="px-6 py-4 whitespace-nowrap">
-            <Skeleton className="h-4 w-10" />
-          </td>
-          <td className="px-6 py-4 whitespace-nowrap">
-            <Skeleton className="h-5 w-20 rounded-full" />
-          </td>
-          <td className="px-6 py-4 whitespace-nowrap">
-            <Skeleton className="h-5 w-16 rounded-full" />
-          </td>
-          <td className="px-6 py-4 whitespace-nowrap">
-            <Skeleton className="h-4 w-24" />
-          </td>
-          <td className="px-6 py-4 whitespace-nowrap text-right">
-            <Skeleton className="h-5 w-5 ml-auto" />
-          </td>
-        </tr>
-      ))}
-    </>
-  );
 }
 
 export function ManageUsersTable({
@@ -112,7 +68,7 @@ export function ManageUsersTable({
         </thead>
         <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
           {loading ? (
-            <ManageUsersTableSkeleton />
+            <SkeletonTable rowCount={9} variant="manage-users" />
           ) : users.length === 0 ? (
             <tr>
               <td

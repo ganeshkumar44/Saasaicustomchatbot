@@ -19,6 +19,13 @@ export const CHATBOT_AI_MODELS = [
     desc: 'Self-hosted local inference',
     apiValue: 'Llama 3.1',
   },
+  {
+    id: 'gpt-4.1-mini',
+    label: 'GPT-4.1 Mini',
+    provider: 'OpenAI',
+    desc: 'Fast & capable cloud model',
+    apiValue: 'GPT-4.1 Mini',
+  },
 ] as const;
 
 export const CHATBOT_AI_MODEL = CHATBOT_AI_MODELS[0];

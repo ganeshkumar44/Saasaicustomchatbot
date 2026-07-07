@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Filter, Download, MessageSquare, Clock, ChevronRight } from 'lucide-react';
+import { Search, Filter, Download, MessageSquare, Clock, ChevronRight, ArrowLeft } from 'lucide-react';
 import { MarkdownMessage } from '@/components/common/MarkdownMessage';
 import {
   SkeletonConversationMessages,
@@ -46,6 +46,7 @@ function matchesSearchQuery(session: ChatSession, searchTerm: string): boolean {
 
 export function ChatHistory() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [mobileView, setMobileView] = useState<'list' | 'detail'>('list');
   const {
     sessions,
     selectedSession,
@@ -76,6 +77,18 @@ export function ChatHistory() {
   const activeSessionDetails =
     selectedSession && sessionDetails && !loadingMessages ? sessionDetails : null;
 
+  const handleSelectSession = (session: ChatSession) => {
+    selectSession(session);
+    setMobileView('detail');
+  };
+
+  const handleBackToList = () => {
+    setMobileView('list');
+  };
+
+  const showListPanel = mobileView === 'list';
+  const showDetailPanel = mobileView === 'detail';
+
   return (
     <div className="p-6">
       <div className="mb-8">
@@ -85,7 +98,7 @@ export function ChatHistory() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-stretch">
         {/* Conversations List */}
-        <div className="lg:col-span-1">
+        <div className={`lg:col-span-1 ${showListPanel ? 'block' : 'hidden lg:block'}`}>
           <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden h-[calc(100vh-180px)] flex flex-col">
             <div className="p-4 border-b border-gray-200 dark:border-gray-800">
               <div className="relative mb-4">
@@ -143,7 +156,7 @@ export function ChatHistory() {
                   return (
                     <button
                       key={session.chat_session_id}
-                      onClick={() => selectSession(session)}
+                      onClick={() => handleSelectSession(session)}
                       className={`w-full p-4 border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left ${
                         isSelected ? 'bg-blue-50 dark:bg-blue-950' : ''
                       }`}
@@ -236,10 +249,18 @@ export function ChatHistory() {
         </div>
 
         {/* Conversation Details */}
-        <div className="lg:col-span-2">
+        <div className={`lg:col-span-2 ${showDetailPanel ? 'block' : 'hidden lg:block'}`}>
           {showConversationPanel ? (
             <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden h-[calc(100vh-180px)] flex flex-col">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+              <div className="p-4 lg:p-6 border-b border-gray-200 dark:border-gray-800">
+                <button
+                  type="button"
+                  onClick={handleBackToList}
+                  className="lg:hidden flex items-center gap-2 mb-4 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to conversations
+                </button>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium">

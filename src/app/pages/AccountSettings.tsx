@@ -3,6 +3,13 @@ import { User, Mail, Lock, Bell, Shield, Trash2, Save, Eye, EyeOff, Globe, Smart
 import { toast } from 'sonner';
 import { ProfileAvatarPopover } from '@/app/components/account/ProfileAvatarPopover';
 import { ConfirmDialog } from '@/app/components/ui/ConfirmDialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/app/components/ui/select';
 import { useAccountSettings } from '@/hooks/useAccountSettings';
 import { useProfileImageUpload } from '@/hooks/useProfileImageUpload';
 import { updateUserPassword, updateUserProfile, removeProfilePicture as removeProfilePictureThunk } from '@/store/accountSettingsThunk';
@@ -241,6 +248,7 @@ export function AccountSettings() {
   const isAccountDeactivateOrDeleteDisabled = hasAdminAccess(userDetails?.role);
   const roleLabel = formatRoleLabel(userDetails?.role);
   const roleBadgeClassName = getRoleBadgeClassName(userDetails?.role);
+  const activeTabConfig = tabs.find((tab) => tab.id === activeTab) ?? tabs[0];
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -293,9 +301,38 @@ export function AccountSettings() {
         <p className="text-gray-500 dark:text-gray-400 mt-1">Manage your account details and preferences</p>
       </div>
 
-      <div className="flex gap-6">
-        {/* Tabs sidebar */}
-        <div className="w-48 flex-shrink-0">
+      <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+        {/* Mobile tab dropdown */}
+        <div className="md:hidden">
+          <Select value={activeTab} onValueChange={setActiveTab}>
+            <SelectTrigger
+              aria-label="Select settings section"
+              className="h-12 w-full rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 text-sm font-medium text-gray-900 dark:text-white shadow-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500"
+            >
+              <div className="flex items-center gap-2">
+                <activeTabConfig.icon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <SelectValue placeholder="Select section" />
+              </div>
+            </SelectTrigger>
+            <SelectContent className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+              {tabs.map((tab) => (
+                <SelectItem
+                  key={tab.id}
+                  value={tab.id}
+                  className="rounded-md py-2.5 pl-3 pr-8 text-sm font-medium text-gray-900 dark:text-white cursor-pointer focus:bg-blue-50 focus:text-blue-700 dark:focus:bg-blue-950/60 dark:focus:text-blue-300"
+                >
+                  <span className="flex items-center gap-2">
+                    <tab.icon className="w-4 h-4" />
+                    {tab.label}
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Desktop tabs sidebar */}
+        <div className="hidden md:block w-48 flex-shrink-0">
           <nav className="space-y-1">
             {tabs.map(tab => (
               <button
@@ -315,7 +352,7 @@ export function AccountSettings() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 w-full">
           {/* Profile Tab */}
           {activeTab === 'profile' && (
             <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 space-y-6">

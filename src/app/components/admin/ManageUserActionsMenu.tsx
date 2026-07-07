@@ -47,9 +47,8 @@ export function ManageUserActionsMenu({
         </DropdownMenuItem>
         {canDeactivateManageUser(user) && (
           <DropdownMenuItem
-            variant="destructive"
             onClick={() => onDeactivate(user)}
-            className="rounded-md px-3 py-2 text-sm font-medium cursor-pointer"
+            className="rounded-md px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 cursor-pointer focus:bg-red-50 dark:focus:bg-red-950/30 focus:text-red-600 dark:focus:text-red-400"
           >
             Delete Account
           </DropdownMenuItem>

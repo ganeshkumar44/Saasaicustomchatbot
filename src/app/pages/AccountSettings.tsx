@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { User, Mail, Lock, Bell, Shield, Trash2, Camera, Save, Eye, EyeOff, Globe, Smartphone, Loader2 } from 'lucide-react';
+import { User, Mail, Lock, Bell, Shield, Trash2, Save, Eye, EyeOff, Globe, Smartphone, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { ProfileAvatarPopover } from '@/app/components/account/ProfileAvatarPopover';
 import { ConfirmDialog } from '@/app/components/ui/ConfirmDialog';
 import { useAccountSettings } from '@/hooks/useAccountSettings';
 import { useProfileImageUpload } from '@/hooks/useProfileImageUpload';
@@ -75,7 +76,6 @@ export function AccountSettings() {
     inputRef: profileImageInputRef,
     selectedFile: selectedProfileImage,
     displayedImageUrl: displayedProfileImage,
-    openPicker: openProfileImagePicker,
     clearSelection: clearSelectedProfileImage,
     handleFileChange: handleProfileImageChange,
     handleChangeAvatarClick,
@@ -336,38 +336,17 @@ export function AccountSettings() {
               ) : (
                 <>
                   {/* Avatar section */}
-                  <input
-                    ref={profileImageInputRef}
-                    type="file"
-                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-                    className="hidden"
-                    onChange={(event) => {
-                      const file = event.target.files?.[0] ?? null;
-                      void handleProfileImageChange(file);
-                    }}
-                  />
                   <div className="flex items-center gap-5 pb-6 border-b border-gray-200 dark:border-gray-800">
-                    <div className="relative">
-                      {displayedProfileImage ? (
-                        <img
-                          src={displayedProfileImage}
-                          alt="Profile"
-                          className="w-20 h-20 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                          <User className="w-8 h-8 text-white" />
-                        </div>
-                      )}
-                      <button
-                        type="button"
-                        onClick={openProfileImagePicker}
-                        disabled={profileUpdating}
-                        className="absolute bottom-0 right-0 w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white dark:border-gray-900 hover:bg-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                      >
-                        <Camera className="w-3.5 h-3.5 text-white" />
-                      </button>
-                    </div>
+                    <ProfileAvatarPopover
+                      inputRef={profileImageInputRef}
+                      imageUrl={displayedProfileImage}
+                      disabled={profileUpdating}
+                      removeDisabled={loadingRemoveAvatar}
+                      showRemove={Boolean(userDetails?.profile_image)}
+                      onFileChange={handleProfileImageChange}
+                      onChangeAvatar={handleChangeAvatarClick}
+                      onRemoveAvatar={() => setShowRemoveAvatarConfirm(true)}
+                    />
                     <div>
                       <p className="font-semibold dark:text-white">{profile.firstName} {profile.lastName}</p>
                       <p className="text-sm text-gray-500 dark:text-gray-400">{profile.email}</p>
@@ -376,26 +355,6 @@ export function AccountSettings() {
                           {roleLabel}
                         </span>
                       )}
-                      <div className="mt-2 flex items-center gap-3">
-                        <button
-                          type="button"
-                          onClick={handleChangeAvatarClick}
-                          disabled={profileUpdating || loadingRemoveAvatar}
-                          className="text-sm text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-40 disabled:cursor-not-allowed"
-                        >
-                          Change avatar
-                        </button>
-                        {userDetails?.profile_image && (
-                          <button
-                            type="button"
-                            onClick={() => setShowRemoveAvatarConfirm(true)}
-                            disabled={profileUpdating || loadingRemoveAvatar}
-                            className="text-sm text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-40 disabled:cursor-not-allowed"
-                          >
-                            Remove Avatar
-                          </button>
-                        )}
-                      </div>
                     </div>
                   </div>
 

@@ -10,7 +10,6 @@ import { formatRoleLabel, getRoleBadgeClassName, hasAdminAccess, isSuperAdminRol
 import { useChatbot } from '@/hooks/useChatbot';
 import {
   LayoutDashboard,
-  Bot,
   MessageSquare,
   BarChart3,
   CreditCard,
@@ -89,11 +88,15 @@ export function DashboardLayout() {
         {/* Logo */}
         <div className="h-16 flex items-center justify-center border-b border-gray-200 dark:border-gray-800 overflow-hidden">
           {collapsed ? (
-            <Bot className="w-7 h-7 text-blue-600" />
+            <span className="w-7 h-7 flex items-center justify-center rounded-lg bg-blue-600 text-white text-xs font-bold">
+              NG
+            </span>
           ) : (
             <div className="flex items-center gap-2 px-4 w-full">
-              <Bot className="w-7 h-7 text-blue-600 flex-shrink-0" />
-              <span className="font-bold text-lg dark:text-white whitespace-nowrap">ChatAI</span>
+              <span className="w-7 h-7 flex items-center justify-center rounded-lg bg-blue-600 text-white text-xs font-bold flex-shrink-0">
+                NG
+              </span>
+              <span className="font-bold text-lg dark:text-white whitespace-nowrap">NexGenAI</span>
             </div>
           )}
         </div>

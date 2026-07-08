@@ -13,13 +13,6 @@ export const CHATBOT_AI_MODELS = [
     apiValue: 'Gemini 2.5 Flash',
   },
   {
-    id: 'llama-3.1',
-    label: 'Llama 3.1 (Ollama)',
-    provider: 'Ollama',
-    desc: 'Self-hosted local inference',
-    apiValue: 'Llama 3.1',
-  },
-  {
     id: 'gpt-4.1-mini',
     label: 'GPT-4.1 Mini',
     provider: 'OpenAI',

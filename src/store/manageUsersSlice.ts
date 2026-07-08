@@ -1,11 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit';
 import {
+  getManageUsersLoginHistory,
   getUserDetails,
   getUsers,
   updateUser,
   updateUserStatus,
 } from '@/store/manageUsersThunk';
 import type { ManageUsersState } from '@/types/manageUsers.types';
+import { MANAGE_LOGIN_HISTORY_PAGE_SIZE } from '@/utils/loginHistory';
 import { MANAGE_USERS_PAGE_SIZE } from '@/utils/manageUsers';
 
 const initialState: ManageUsersState = {
@@ -21,6 +23,17 @@ const initialState: ManageUsersState = {
     totalRecords: 0,
     totalPages: 0,
   },
+  loginHistory: {
+    items: [],
+    loading: false,
+    error: null,
+    pagination: {
+      page: 1,
+      perPage: MANAGE_LOGIN_HISTORY_PAGE_SIZE,
+      totalRecords: 0,
+      totalPages: 0,
+    },
+  },
   error: null,
 };
 
@@ -30,6 +43,9 @@ const manageUsersSlice = createSlice({
   reducers: {
     clearManageUsersError: (state) => {
       state.error = null;
+    },
+    clearManageLoginHistoryError: (state) => {
+      state.loginHistory.error = null;
     },
     clearSelectedManageUser: (state) => {
       state.selectedUser = null;
@@ -132,12 +148,34 @@ const manageUsersSlice = createSlice({
       .addCase(updateUserStatus.rejected, (state, action) => {
         state.statusUpdating = false;
         state.error = action.payload ?? 'Failed to update user status.';
+      })
+      .addCase(getManageUsersLoginHistory.pending, (state) => {
+        state.loginHistory.loading = true;
+        state.loginHistory.error = null;
+      })
+      .addCase(getManageUsersLoginHistory.fulfilled, (state, action) => {
+        state.loginHistory.loading = false;
+        state.loginHistory.error = null;
+        state.loginHistory.items = action.payload.data;
+        state.loginHistory.pagination = {
+          page: action.payload.page,
+          perPage: action.payload.perPage,
+          totalRecords: action.payload.totalRecords,
+          totalPages: action.payload.totalPages,
+        };
+      })
+      .addCase(getManageUsersLoginHistory.rejected, (state, action) => {
+        state.loginHistory.loading = false;
+        state.loginHistory.items = [];
+        state.loginHistory.error =
+          action.payload ?? 'Failed to load login history.';
       });
   },
 });
 
 export const {
   clearManageUsersError,
+  clearManageLoginHistoryError,
   clearSelectedManageUser,
   resetManageUsersState,
 } = manageUsersSlice.actions;

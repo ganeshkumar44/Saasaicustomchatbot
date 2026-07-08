@@ -1,3 +1,5 @@
+import type { UserLoginHistoryItem } from '@/types/loginHistory.types';
+
 export interface UserDetails {
   id: number;
   first_name: string;
@@ -94,6 +96,9 @@ export interface AccountSettingsState {
   activateLoading: boolean;
   deactivateLoading: boolean;
   deleteLoading: boolean;
+  loginHistory: UserLoginHistoryItem[];
+  loginHistoryLoading: boolean;
+  loginHistoryError: string | null;
   success: boolean;
   error: string | null;
   successMessage: string | null;
@@ -109,3 +114,5 @@ export interface ProfileFormState {
   language: string;
   bio: string;
 }
+
+export type { UserLoginHistoryItem } from '@/types/loginHistory.types';

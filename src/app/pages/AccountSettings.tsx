@@ -3,6 +3,7 @@ import { User, Mail, Lock, Bell, Shield, Trash2, Save, Eye, EyeOff, Globe, Smart
 import { toast } from 'sonner';
 import { ProfileAvatarPopover } from '@/app/components/account/ProfileAvatarPopover';
 import { ConfirmDialog } from '@/app/components/ui/ConfirmDialog';
+import { UserLoginHistorySection } from '@/components/loginHistory/UserLoginHistoryList';
 import {
   Select,
   SelectContent,
@@ -12,6 +13,7 @@ import {
 } from '@/app/components/ui/select';
 import { useAccountSettings } from '@/hooks/useAccountSettings';
 import { useProfileImageUpload } from '@/hooks/useProfileImageUpload';
+import { useUserLoginHistory } from '@/hooks/useUserLoginHistory';
 import { updateUserPassword, updateUserProfile, removeProfilePicture as removeProfilePictureThunk } from '@/store/accountSettingsThunk';
 import type { ProfileFormState, UserDetails } from '@/types/account.types';
 import {
@@ -249,6 +251,12 @@ export function AccountSettings() {
   const roleLabel = formatRoleLabel(userDetails?.role);
   const roleBadgeClassName = getRoleBadgeClassName(userDetails?.role);
   const activeTabConfig = tabs.find((tab) => tab.id === activeTab) ?? tabs[0];
+  const {
+    data: loginHistory,
+    loading: loginHistoryLoading,
+    error: loginHistoryError,
+    refresh: refreshLoginHistory,
+  } = useUserLoginHistory(activeTab === 'security');
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -626,31 +634,12 @@ export function AccountSettings() {
                 </button>
               </div>
 
-              {/* Active Sessions */}
-              <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
-                <h2 className="font-semibold dark:text-white mb-4">Active Sessions</h2>
-                {[
-                  { device: 'Chrome on macOS', location: 'New York, US', current: true, time: 'Now' },
-                  { device: 'Safari on iPhone', location: 'New York, US', current: false, time: '2 hours ago' },
-                ].map((session, i) => (
-                  <div key={i} className={`flex items-center justify-between py-3 ${i > 0 ? 'border-t border-gray-100 dark:border-gray-800' : ''}`}>
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                        <Smartphone className="w-4 h-4 text-gray-500" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium dark:text-white">{session.device}</p>
-                        <p className="text-xs text-gray-500">{session.location} · {session.time}</p>
-                      </div>
-                    </div>
-                    {session.current ? (
-                      <span className="text-xs text-green-600 dark:text-green-400 font-medium">Current</span>
-                    ) : (
-                      <button className="text-xs text-red-500 hover:text-red-700 font-medium">Revoke</button>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <UserLoginHistorySection
+                items={loginHistory}
+                loading={loginHistoryLoading}
+                error={loginHistoryError}
+                onRetry={refreshLoginHistory}
+              />
             </div>
           )}
 

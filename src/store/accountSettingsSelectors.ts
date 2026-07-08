@@ -33,3 +33,12 @@ export const selectAccountSettingsError = (state: RootState): string | null =>
 export const selectAccountSettingsSuccessMessage = (
   state: RootState,
 ): string | null => state.accountSettings.successMessage;
+
+export const selectUserLoginHistory = (state: RootState) =>
+  state.accountSettings.loginHistory;
+
+export const selectUserLoginHistoryLoading = (state: RootState): boolean =>
+  state.accountSettings.loginHistoryLoading;
+
+export const selectUserLoginHistoryError = (state: RootState): string | null =>
+  state.accountSettings.loginHistoryError;

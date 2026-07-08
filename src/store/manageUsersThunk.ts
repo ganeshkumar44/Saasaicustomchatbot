@@ -1,10 +1,15 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
+  getManageUsersLoginHistory as getManageUsersLoginHistoryService,
   getUserDetails as getUserDetailsService,
   getUsers as getUsersService,
   updateUser as updateUserService,
   updateUserStatus as updateUserStatusService,
 } from '@/services/manageUsers.service';
+import type {
+  FetchManageLoginHistoryParams,
+  ManageLoginHistoryItem,
+} from '@/types/loginHistory.types';
 import type {
   FetchManageUsersParams,
   ManageUserDetail,
@@ -37,6 +42,15 @@ interface UpdateManageUserStatusPayload {
   message: string;
   userId: number;
   accountStatus: ManageUserListItem['account_status'];
+}
+
+interface FetchManageLoginHistoryPayload {
+  message: string;
+  page: number;
+  perPage: number;
+  totalRecords: number;
+  totalPages: number;
+  data: ManageLoginHistoryItem[];
 }
 
 export const getUsers = createAsyncThunk<
@@ -102,6 +116,26 @@ export const updateUserStatus = createAsyncThunk<
       message: response.message,
       userId: response.user_id,
       accountStatus: response.account_status,
+    };
+  } catch (error) {
+    return rejectWithValue(getApiErrorMessage(error));
+  }
+});
+
+export const getManageUsersLoginHistory = createAsyncThunk<
+  FetchManageLoginHistoryPayload,
+  FetchManageLoginHistoryParams,
+  { rejectValue: string }
+>('manageUsers/getManageUsersLoginHistory', async (params, { rejectWithValue }) => {
+  try {
+    const response = await getManageUsersLoginHistoryService(params);
+    return {
+      message: response.message,
+      page: response.page,
+      perPage: response.per_page,
+      totalRecords: response.total_records,
+      totalPages: response.total_pages,
+      data: response.data,
     };
   } catch (error) {
     return rejectWithValue(getApiErrorMessage(error));

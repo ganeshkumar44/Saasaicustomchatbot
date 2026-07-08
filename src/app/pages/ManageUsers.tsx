@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Search } from 'lucide-react';
 import { toast } from 'sonner';
+import { ManageUsersLoginHistorySection } from '@/app/components/admin/ManageUsersLoginHistorySection';
 import { ManageUserEditModal } from '@/app/components/admin/ManageUserEditModal';
 import { ManageUsersTable } from '@/app/components/admin/ManageUsersTable';
 import { ManageUsersToolbar } from '@/app/components/admin/ManageUsersToolbar';
@@ -220,6 +221,8 @@ export function ManageUsers() {
           )}
         </div>
       </div>
+
+      <ManageUsersLoginHistorySection />
     </div>
   );
 }

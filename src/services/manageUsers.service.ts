@@ -1,4 +1,5 @@
 import { apiClient } from '@/api/axios';
+import type { FetchManageLoginHistoryParams, ManageLoginHistoryResponse } from '@/types/loginHistory.types';
 import type {
   FetchManageUsersParams,
   ManageUserDetailResponse,
@@ -67,6 +68,26 @@ export async function updateUserStatus(
   const response = await apiClient.put<UpdateManageUserStatusResponse>(
     `/v1/manage-users/${userId}/status`,
     data,
+  );
+  return response.data;
+}
+
+export async function getManageUsersLoginHistory(
+  params: FetchManageLoginHistoryParams,
+): Promise<ManageLoginHistoryResponse> {
+  const response = await apiClient.get<ManageLoginHistoryResponse>(
+    '/v1/manage-users/login-history',
+    {
+      params: {
+        page: params.page,
+        per_page: params.perPage,
+        ...(params.search?.trim() ? { search: params.search.trim() } : {}),
+        ...(params.role?.trim() ? { role: params.role.trim() } : {}),
+        ...(params.loginStatus ? { login_status: params.loginStatus } : {}),
+        ...(params.dateFrom ? { date_from: params.dateFrom } : {}),
+        ...(params.dateTo ? { date_to: params.dateTo } : {}),
+      },
+    },
   );
   return response.data;
 }

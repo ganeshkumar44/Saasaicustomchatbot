@@ -4,6 +4,7 @@ import {
   deactivateUserAccount,
   deleteUserAccount,
   fetchUserDetails,
+  fetchUserLoginHistory,
   updateUserPassword,
   updateUserProfile,
   removeProfilePicture,
@@ -19,6 +20,9 @@ const initialState: AccountSettingsState = {
   activateLoading: false,
   deactivateLoading: false,
   deleteLoading: false,
+  loginHistory: [],
+  loginHistoryLoading: false,
+  loginHistoryError: null,
   success: false,
   error: null,
   successMessage: null,
@@ -163,6 +167,21 @@ const accountSettingsSlice = createSlice({
         state.success = false;
         state.error =
           action.payload ?? 'Failed to remove profile picture. Please try again.';
+      })
+      .addCase(fetchUserLoginHistory.pending, (state) => {
+        state.loginHistoryLoading = true;
+        state.loginHistoryError = null;
+      })
+      .addCase(fetchUserLoginHistory.fulfilled, (state, action) => {
+        state.loginHistoryLoading = false;
+        state.loginHistoryError = null;
+        state.loginHistory = action.payload.data;
+      })
+      .addCase(fetchUserLoginHistory.rejected, (state, action) => {
+        state.loginHistoryLoading = false;
+        state.loginHistory = [];
+        state.loginHistoryError =
+          action.payload ?? 'Failed to load login history. Please try again.';
       });
   },
 });

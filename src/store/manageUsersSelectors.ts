@@ -22,3 +22,15 @@ export const selectManageUsersPagination = (state: RootState) =>
 
 export const selectManageUsersError = (state: RootState): string | null =>
   state.manageUsers.error;
+
+export const selectManageLoginHistoryItems = (state: RootState) =>
+  state.manageUsers.loginHistory.items;
+
+export const selectManageLoginHistoryLoading = (state: RootState): boolean =>
+  state.manageUsers.loginHistory.loading;
+
+export const selectManageLoginHistoryError = (state: RootState): string | null =>
+  state.manageUsers.loginHistory.error;
+
+export const selectManageLoginHistoryPagination = (state: RootState) =>
+  state.manageUsers.loginHistory.pagination;

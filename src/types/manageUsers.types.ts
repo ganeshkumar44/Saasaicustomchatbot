@@ -1,3 +1,5 @@
+import type { ManageLoginHistoryState } from '@/types/loginHistory.types';
+
 export type ManageUserAccountStatus = 'active' | 'deactivated' | 'deleted';
 
 export type ManageUserRoleFilter = 'all' | 'admin' | 'user';
@@ -118,6 +120,7 @@ export interface ManageUsersState {
   updating: boolean;
   statusUpdating: boolean;
   pagination: ManageUsersPagination;
+  loginHistory: ManageLoginHistoryState;
   error: string | null;
 }
 

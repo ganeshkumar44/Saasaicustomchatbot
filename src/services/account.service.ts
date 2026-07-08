@@ -1,4 +1,5 @@
 import { apiClient } from '@/api/axios';
+import type { UserLoginHistoryResponse } from '@/types/loginHistory.types';
 import type {
   ActivateAccountRequest,
   ActivateAccountResponse,
@@ -92,6 +93,13 @@ export async function deleteAccount(
 export async function removeProfilePicture(): Promise<RemoveProfilePictureResponse> {
   const response = await apiClient.delete<RemoveProfilePictureResponse>(
     '/v1/remove-profile-picture',
+  );
+  return response.data;
+}
+
+export async function getUserLoginHistory(): Promise<UserLoginHistoryResponse> {
+  const response = await apiClient.get<UserLoginHistoryResponse>(
+    '/v1/user-details/login-history',
   );
   return response.data;
 }

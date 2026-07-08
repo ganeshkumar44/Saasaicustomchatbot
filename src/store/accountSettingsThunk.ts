@@ -4,6 +4,7 @@ import {
   deactivateAccount as deactivateAccountService,
   deleteAccount as deleteAccountService,
   getUserDetails as getUserDetailsService,
+  getUserLoginHistory as getUserLoginHistoryService,
   removeProfilePicture as removeProfilePictureService,
   updatePassword as updatePasswordService,
   updateUserDetails as updateUserDetailsService,
@@ -15,6 +16,7 @@ import type {
   UpdatePasswordRequest,
   UpdateUserRequest,
   UserDetails,
+  UserLoginHistoryItem,
 } from '@/types/account.types';
 import { getApiErrorMessage } from '@/utils/apiError';
 
@@ -113,6 +115,19 @@ export const deleteUserAccount = createAsyncThunk<
   try {
     const response = await deleteAccountService(payload);
     return { message: response.message };
+  } catch (error) {
+    return rejectWithValue(getApiErrorMessage(error));
+  }
+});
+
+export const fetchUserLoginHistory = createAsyncThunk<
+  { message: string; data: UserLoginHistoryItem[] },
+  void,
+  { rejectValue: string }
+>('accountSettings/fetchUserLoginHistory', async (_, { rejectWithValue }) => {
+  try {
+    const response = await getUserLoginHistoryService();
+    return { message: response.message, data: response.data };
   } catch (error) {
     return rejectWithValue(getApiErrorMessage(error));
   }

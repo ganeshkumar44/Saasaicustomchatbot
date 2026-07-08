@@ -42,3 +42,15 @@ export const selectUserLoginHistoryLoading = (state: RootState): boolean =>
 
 export const selectUserLoginHistoryError = (state: RootState): string | null =>
   state.accountSettings.loginHistoryError;
+
+export const selectNotificationSettings = (state: RootState) =>
+  state.accountSettings.notificationSettings;
+
+export const selectNotificationSettingsLoading = (state: RootState): boolean =>
+  state.accountSettings.notificationSettingsLoading;
+
+export const selectNotificationSettingsSaving = (state: RootState): boolean =>
+  state.accountSettings.notificationSettingsSaving;
+
+export const selectNotificationSettingsError = (state: RootState): string | null =>
+  state.accountSettings.notificationSettingsError;

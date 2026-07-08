@@ -5,8 +5,10 @@ import {
   deleteUserAccount,
   fetchUserDetails,
   fetchUserLoginHistory,
+  fetchNotificationSettings,
   updateUserPassword,
   updateUserProfile,
+  updateNotificationSettings,
   removeProfilePicture,
 } from '@/store/accountSettingsThunk';
 import type { AccountSettingsState } from '@/types/account.types';
@@ -23,6 +25,11 @@ const initialState: AccountSettingsState = {
   loginHistory: [],
   loginHistoryLoading: false,
   loginHistoryError: null,
+  notificationSettings: null,
+  notificationSettingsSnapshot: null,
+  notificationSettingsLoading: false,
+  notificationSettingsSaving: false,
+  notificationSettingsError: null,
   success: false,
   error: null,
   successMessage: null,
@@ -38,6 +45,9 @@ const accountSettingsSlice = createSlice({
     clearAccountSettingsSuccess: (state) => {
       state.success = false;
       state.successMessage = null;
+    },
+    clearNotificationSettingsError: (state) => {
+      state.notificationSettingsError = null;
     },
     resetAccountSettingsState: () => initialState,
   },
@@ -182,6 +192,42 @@ const accountSettingsSlice = createSlice({
         state.loginHistory = [];
         state.loginHistoryError =
           action.payload ?? 'Failed to load login history. Please try again.';
+      })
+      .addCase(fetchNotificationSettings.pending, (state) => {
+        state.notificationSettingsLoading = true;
+        state.notificationSettingsError = null;
+      })
+      .addCase(fetchNotificationSettings.fulfilled, (state, action) => {
+        state.notificationSettingsLoading = false;
+        state.notificationSettingsError = null;
+        state.notificationSettings = action.payload.data;
+      })
+      .addCase(fetchNotificationSettings.rejected, (state, action) => {
+        state.notificationSettingsLoading = false;
+        state.notificationSettings = null;
+        state.notificationSettingsError =
+          action.payload ?? 'Failed to load notification settings. Please try again.';
+      })
+      .addCase(updateNotificationSettings.pending, (state, action) => {
+        state.notificationSettingsSaving = true;
+        state.notificationSettingsError = null;
+        state.notificationSettingsSnapshot = state.notificationSettings;
+        state.notificationSettings = action.meta.arg;
+      })
+      .addCase(updateNotificationSettings.fulfilled, (state, action) => {
+        state.notificationSettingsSaving = false;
+        state.notificationSettingsError = null;
+        state.notificationSettings = action.payload.data;
+        state.notificationSettingsSnapshot = null;
+      })
+      .addCase(updateNotificationSettings.rejected, (state, action) => {
+        state.notificationSettingsSaving = false;
+        state.notificationSettingsError =
+          action.payload ?? 'Failed to update notification settings. Please try again.';
+        if (state.notificationSettingsSnapshot) {
+          state.notificationSettings = state.notificationSettingsSnapshot;
+        }
+        state.notificationSettingsSnapshot = null;
       });
   },
 });
@@ -189,6 +235,7 @@ const accountSettingsSlice = createSlice({
 export const {
   clearAccountSettingsError,
   clearAccountSettingsSuccess,
+  clearNotificationSettingsError,
   resetAccountSettingsState,
 } = accountSettingsSlice.actions;
 

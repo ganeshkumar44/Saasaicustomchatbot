@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { User, Mail, Lock, Bell, Shield, Trash2, Save, Eye, EyeOff, Globe, Smartphone, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ProfileAvatarPopover } from '@/app/components/account/ProfileAvatarPopover';
+import { NotificationSettingsPanel } from '@/app/components/account/NotificationSettingsPanel';
 import { ConfirmDialog } from '@/app/components/ui/ConfirmDialog';
 import { UserLoginHistorySection } from '@/components/loginHistory/UserLoginHistoryList';
 import {
@@ -97,16 +98,6 @@ export function AccountSettings() {
     currentPassword: '',
     newPassword: '',
     confirmNewPassword: '',
-  });
-
-  const [notifications, setNotifications] = useState({
-    emailNewConversation: true,
-    emailWeeklyReport: true,
-    emailBilling: true,
-    emailProduct: false,
-    pushNewConversation: false,
-    pushAlerts: true,
-    smsAlerts: false,
   });
 
   const tabs = [
@@ -232,10 +223,6 @@ export function AccountSettings() {
       clearSelectedProfileImage();
       setShowRemoveAvatarConfirm(false);
     }
-  };
-
-  const toggleNotification = (key: keyof typeof notifications) => {
-    setNotifications(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
   const handlePhoneChange = (value: string) => {
@@ -645,63 +632,7 @@ export function AccountSettings() {
 
           {/* Notifications Tab */}
           {activeTab === 'notifications' && (
-            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 space-y-6">
-              {[
-                {
-                  section: 'Email Notifications',
-                  items: [
-                    { key: 'emailNewConversation' as const, label: 'New conversation started', desc: 'Get notified when a user starts a new chat' },
-                    { key: 'emailWeeklyReport' as const, label: 'Weekly report', desc: 'Summary of your chatbot performance each week' },
-                    { key: 'emailBilling' as const, label: 'Billing updates', desc: 'Invoices, payment confirmations, and plan changes' },
-                    { key: 'emailProduct' as const, label: 'Product updates', desc: 'News about new features and improvements' },
-                  ],
-                },
-                {
-                  section: 'Push Notifications',
-                  items: [
-                    { key: 'pushNewConversation' as const, label: 'New conversation', desc: 'Real-time alerts for new chats' },
-                    { key: 'pushAlerts' as const, label: 'System alerts', desc: 'Important account and usage alerts' },
-                  ],
-                },
-                {
-                  section: 'SMS Notifications',
-                  items: [
-                    { key: 'smsAlerts' as const, label: 'Critical alerts only', desc: 'SMS for high-priority issues only' },
-                  ],
-                },
-              ].map(group => (
-                <div key={group.section}>
-                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{group.section}</h3>
-                  <div className="space-y-4">
-                    {group.items.map(item => (
-                      <div key={item.key} className="flex items-start justify-between">
-                        <div>
-                          <p className="text-sm font-medium dark:text-white">{item.label}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{item.desc}</p>
-                        </div>
-                        <button
-                          onClick={() => toggleNotification(item.key)}
-                          className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                            notifications[item.key] ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'
-                          }`}
-                        >
-                          <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${notifications[item.key] ? 'translate-x-5' : 'translate-x-0'}`} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-              <div className="flex justify-end pt-2 border-t border-gray-100 dark:border-gray-800">
-                <button
-                  onClick={() => toast.success('Notification preferences saved')}
-                  className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
-                >
-                  <Save className="w-4 h-4" />
-                  Save Preferences
-                </button>
-              </div>
-            </div>
+            <NotificationSettingsPanel enabled={activeTab === 'notifications'} />
           )}
 
           {/* Danger Zone Tab */}

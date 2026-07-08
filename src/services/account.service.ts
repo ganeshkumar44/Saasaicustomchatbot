@@ -1,4 +1,5 @@
 import { apiClient } from '@/api/axios';
+import type { NotificationSettingsResponse, UpdateNotificationSettingsRequest, UpdateNotificationSettingsResponse } from '@/types/notification.types';
 import type { UserLoginHistoryResponse } from '@/types/loginHistory.types';
 import type {
   ActivateAccountRequest,
@@ -100,6 +101,23 @@ export async function removeProfilePicture(): Promise<RemoveProfilePictureRespon
 export async function getUserLoginHistory(): Promise<UserLoginHistoryResponse> {
   const response = await apiClient.get<UserLoginHistoryResponse>(
     '/v1/user-details/login-history',
+  );
+  return response.data;
+}
+
+export async function getNotificationSettings(): Promise<NotificationSettingsResponse> {
+  const response = await apiClient.get<NotificationSettingsResponse>(
+    '/v1/notification/settings',
+  );
+  return response.data;
+}
+
+export async function updateNotificationSettings(
+  data: UpdateNotificationSettingsRequest,
+): Promise<UpdateNotificationSettingsResponse> {
+  const response = await apiClient.put<UpdateNotificationSettingsResponse>(
+    '/v1/notification/settings',
+    data,
   );
   return response.data;
 }

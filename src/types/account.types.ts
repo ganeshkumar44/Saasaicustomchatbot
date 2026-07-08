@@ -1,3 +1,4 @@
+import type { NotificationSettings } from '@/types/notification.types';
 import type { UserLoginHistoryItem } from '@/types/loginHistory.types';
 
 export interface UserDetails {
@@ -99,6 +100,11 @@ export interface AccountSettingsState {
   loginHistory: UserLoginHistoryItem[];
   loginHistoryLoading: boolean;
   loginHistoryError: string | null;
+  notificationSettings: NotificationSettings | null;
+  notificationSettingsSnapshot: NotificationSettings | null;
+  notificationSettingsLoading: boolean;
+  notificationSettingsSaving: boolean;
+  notificationSettingsError: string | null;
   success: boolean;
   error: string | null;
   successMessage: string | null;
@@ -116,3 +122,4 @@ export interface ProfileFormState {
 }
 
 export type { UserLoginHistoryItem } from '@/types/loginHistory.types';
+export type { NotificationSettings } from '@/types/notification.types';

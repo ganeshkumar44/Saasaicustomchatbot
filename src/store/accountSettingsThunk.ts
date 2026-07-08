@@ -4,8 +4,10 @@ import {
   deactivateAccount as deactivateAccountService,
   deleteAccount as deleteAccountService,
   getUserDetails as getUserDetailsService,
+  getNotificationSettings as getNotificationSettingsService,
   getUserLoginHistory as getUserLoginHistoryService,
   removeProfilePicture as removeProfilePictureService,
+  updateNotificationSettings as updateNotificationSettingsService,
   updatePassword as updatePasswordService,
   updateUserDetails as updateUserDetailsService,
 } from '@/services/account.service';
@@ -17,7 +19,9 @@ import type {
   UpdateUserRequest,
   UserDetails,
   UserLoginHistoryItem,
+  NotificationSettings,
 } from '@/types/account.types';
+import type { UpdateNotificationSettingsRequest } from '@/types/notification.types';
 import { getApiErrorMessage } from '@/utils/apiError';
 
 function syncAuthUserFromDetails(details: UserDetails) {
@@ -127,6 +131,32 @@ export const fetchUserLoginHistory = createAsyncThunk<
 >('accountSettings/fetchUserLoginHistory', async (_, { rejectWithValue }) => {
   try {
     const response = await getUserLoginHistoryService();
+    return { message: response.message, data: response.data };
+  } catch (error) {
+    return rejectWithValue(getApiErrorMessage(error));
+  }
+});
+
+export const fetchNotificationSettings = createAsyncThunk<
+  { message: string; data: NotificationSettings },
+  void,
+  { rejectValue: string }
+>('accountSettings/fetchNotificationSettings', async (_, { rejectWithValue }) => {
+  try {
+    const response = await getNotificationSettingsService();
+    return { message: response.message, data: response.data };
+  } catch (error) {
+    return rejectWithValue(getApiErrorMessage(error));
+  }
+});
+
+export const updateNotificationSettings = createAsyncThunk<
+  { message: string; data: NotificationSettings },
+  UpdateNotificationSettingsRequest,
+  { rejectValue: string }
+>('accountSettings/updateNotificationSettings', async (payload, { rejectWithValue }) => {
+  try {
+    const response = await updateNotificationSettingsService(payload);
     return { message: response.message, data: response.data };
   } catch (error) {
     return rejectWithValue(getApiErrorMessage(error));

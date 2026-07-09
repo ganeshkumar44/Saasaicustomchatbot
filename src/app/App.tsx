@@ -5,6 +5,7 @@ import { Toaster } from 'sonner';
 import { router } from './routes';
 import { store } from '@/store/index';
 import { logout } from '@/store/authSlice';
+import { IdleLogoutSync } from '@/app/components/IdleLogoutSync';
 import { ThemeProviderBridge } from '@/app/components/ThemeProviderBridge';
 import { ThemeInitializer } from '@/app/components/ThemeInitializer';
 
@@ -25,6 +26,7 @@ export default function App() {
   return (
     <Provider store={store}>
       <AuthSessionSync />
+      <IdleLogoutSync />
       <ThemeProviderBridge>
         <ThemeInitializer>
           <RouterProvider router={router} />

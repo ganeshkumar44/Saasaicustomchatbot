@@ -96,7 +96,7 @@ export function DashboardLayout() {
               <span className="w-7 h-7 flex items-center justify-center rounded-lg bg-blue-600 text-white text-xs font-bold flex-shrink-0">
                 NG
               </span>
-              <span className="font-bold text-lg dark:text-white whitespace-nowrap">NexGenAI</span>
+              <span className="font-bold text-lg dark:text-white whitespace-nowrap">NexGenChat</span>
             </div>
           )}
         </div>

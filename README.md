@@ -1,7 +1,7 @@
 
-  # NexGenAI Chatbot
+  # NexGenChat Chatbot
 
-  This is a code bundle for NexGenAI Chatbot. The original project is available at https://www.figma.com/design/EhCoMubKK7F5UWRCEPklwc/SaaS-AI-Custom-Chatbot.
+  This is a code bundle for NexGenChat Chatbot. The original project is available at https://www.figma.com/design/EhCoMubKK7F5UWRCEPklwc/SaaS-AI-Custom-Chatbot.
 
   ## Running the code
 

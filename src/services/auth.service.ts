@@ -18,6 +18,7 @@ import type {
   VerifyForgotPasswordCodeRequest,
   VerifyForgotPasswordCodeResponse,
 } from '@/types/forgotPassword.types';
+import type { MeResponse } from '@/types/userPlan.types';
 
 export async function signup(data: SignupRequest): Promise<SignupResponse> {
   const response = await apiClient.post<SignupResponse>('/v1/signup', data);
@@ -51,6 +52,11 @@ export async function resendSignupVerification(
 
 export async function signout(): Promise<SignoutResponse> {
   const response = await apiClient.post<SignoutResponse>('/v1/signout');
+  return response.data;
+}
+
+export async function getCurrentUserProfile(): Promise<MeResponse> {
+  const response = await apiClient.get<MeResponse>('/v1/me');
   return response.data;
 }
 

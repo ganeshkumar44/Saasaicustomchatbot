@@ -1,14 +1,17 @@
-import { Loader2, Plus, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { ChatbotCard } from '@/app/components/chatbot/ChatbotCard';
 import { ChatbotCardsSkeleton } from '@/app/components/chatbot/ChatbotCardsSkeleton';
 import { ChatbotListEmptyState } from '@/app/components/chatbot/ChatbotListEmptyState';
 import { ChatbotListErrorState } from '@/app/components/chatbot/ChatbotListErrorState';
 import { ChatbotListPagination } from '@/app/components/chatbot/ChatbotListPagination';
 import { ChatbotListToolbar } from '@/app/components/chatbot/ChatbotListToolbar';
+import { ChatbotPlanLimitAlert } from '@/app/components/chatbot/ChatbotPlanLimitAlert';
+import { CreateChatbotButton } from '@/app/components/chatbot/CreateChatbotButton';
 import { DeleteChatbotConfirmDialog } from '@/app/components/chatbot/DeleteChatbotConfirmDialog';
 import { useChatbot } from '@/hooks/useChatbot';
 import { useDeleteChatbot } from '@/hooks/useDeleteChatbot';
 import { useChatbotListPage } from '@/hooks/useChatbotListPage';
+import { useUserPlan } from '@/hooks/useUserPlan';
 
 export function Chatbots() {
   const { createDraft, createDraftLoading } = useChatbot();
@@ -40,6 +43,7 @@ export function Chatbots() {
     confirmDelete,
     pendingChatbotId,
   } = useDeleteChatbot();
+  const { hasReachedChatbotLimit, chatbotLimitUpgradeMessage } = useUserPlan();
 
   const handleCreateChatbot = () => {
     void createDraft();
@@ -65,19 +69,15 @@ export function Chatbots() {
             Manage all your AI chatbots in one place
           </p>
         </div>
-        <button
+        <CreateChatbotButton
           onClick={handleCreateChatbot}
-          disabled={createDraftLoading}
-          className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          {createDraftLoading ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <Plus className="w-5 h-5" />
-          )}
-          Create Chatbot
-        </button>
+          loading={createDraftLoading}
+        />
       </div>
+
+      {hasReachedChatbotLimit && chatbotLimitUpgradeMessage && (
+        <ChatbotPlanLimitAlert message={chatbotLimitUpgradeMessage} />
+      )}
 
       <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
         <div className="p-6 border-b border-gray-200 dark:border-gray-800 space-y-4">
@@ -117,6 +117,7 @@ export function Chatbots() {
           <ChatbotListEmptyState
             onCreateChatbot={handleCreateChatbot}
             createLoading={createDraftLoading}
+            createDisabled={hasReachedChatbotLimit}
           />
         ) : showEmptyResults ? (
           <div className="p-12 flex flex-col items-center justify-center text-center">
@@ -127,18 +128,13 @@ export function Chatbots() {
                 : 'Create your first chatbot to get started.'}
             </p>
             {!hasSearchOrFilter && (
-              <button
+              <CreateChatbotButton
                 onClick={handleCreateChatbot}
-                disabled={createDraftLoading}
+                loading={createDraftLoading}
                 className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {createDraftLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <Plus className="w-5 h-5" />
-                )}
                 Create Chatbot
-              </button>
+              </CreateChatbotButton>
             )}
           </div>
         ) : (

@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router';
-import { ArrowRight, MessageSquare, Users, TrendingUp, Zap, MoreVertical, Plus, Loader2 } from 'lucide-react';
+import { ArrowRight, MessageSquare, Users, TrendingUp, Zap, MoreVertical } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { AnalyticsTrendBadge } from '@/app/components/AnalyticsTrendBadge';
 import { UsersChartPanel } from '@/app/components/UsersChartPanel';
@@ -14,7 +14,10 @@ import {
   SkeletonConversation,
   SkeletonStatistic,
 } from '@/components/Skeleton';
+import { ChatbotPlanLimitAlert } from '@/app/components/chatbot/ChatbotPlanLimitAlert';
+import { CreateChatbotButton } from '@/app/components/chatbot/CreateChatbotButton';
 import { useChatbot } from '@/hooks/useChatbot';
+import { useUserPlan } from '@/hooks/useUserPlan';
 import { useDeleteChatbot } from '@/hooks/useDeleteChatbot';
 import { useDashboardAnalytics } from '@/hooks/useDashboardAnalytics';
 import { useAnalytics } from '@/hooks/useAnalytics';
@@ -75,6 +78,7 @@ export function DashboardOverview() {
     confirmDelete,
     pendingChatbotId,
   } = useDeleteChatbot();
+  const { hasReachedChatbotLimit, chatbotLimitUpgradeMessage } = useUserPlan();
 
   const recentChatbots = useMemo(
     () => getRecentChatbots(chatbotList, DASHBOARD_RECENT_CHATBOT_LIMIT),
@@ -123,19 +127,18 @@ export function DashboardOverview() {
                   : `${chatbotList.length} ${chatbotList.length === 1 ? 'chatbot' : 'chatbots'} found`}
             </p>
           </div>
-          <button
+          <CreateChatbotButton
             onClick={handleCreateChatbot}
-            disabled={createDraftLoading}
-            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {createDraftLoading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <Plus className="w-5 h-5" />
-            )}
-            Create Chatbot
-          </button>
+            loading={createDraftLoading}
+          />
         </div>
+
+        {hasReachedChatbotLimit && chatbotLimitUpgradeMessage && (
+          <ChatbotPlanLimitAlert
+            message={chatbotLimitUpgradeMessage}
+            className="mx-6 mt-4"
+          />
+        )}
 
         {loading ? (
           <ChatbotCardsSkeleton count={3} />
@@ -145,6 +148,7 @@ export function DashboardOverview() {
           <ChatbotListEmptyState
             onCreateChatbot={handleCreateChatbot}
             createLoading={createDraftLoading}
+            createDisabled={hasReachedChatbotLimit}
           />
         ) : (
           <>

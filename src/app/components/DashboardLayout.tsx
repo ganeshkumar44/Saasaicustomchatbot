@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { SidebarUserMenu } from '@/app/components/SidebarUserMenu';
 import { NgMarkIcon } from '@/assets/logos';
+import { fetchCurrentUserProfile } from '@/store/authThunk';
 
 export function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(true);
@@ -35,10 +36,11 @@ export function DashboardLayout() {
   const roleLabel = formatRoleLabel(user?.role);
   const roleBadgeClassName = getRoleBadgeClassName(user?.role);
   const { signout, signoutLoading } = useAuth();
-  const { createDraft, createDraftLoading } = useChatbot();
+  const { createDraft, createDraftLoading, canCreateChatbot } = useChatbot();
 
   useEffect(() => {
     void dispatch(fetchUserDetails());
+    void dispatch(fetchCurrentUserProfile());
   }, [dispatch]);
 
   const profileImage = user?.profile_image ?? userDetails?.profile_image ?? null;
@@ -49,6 +51,10 @@ export function DashboardLayout() {
 
   const handleMenuClick = (path: string, label: string) => {
     if (label === 'Create Chatbot') {
+      if (!canCreateChatbot) {
+        return;
+      }
+
       void createDraft();
       return;
     }
@@ -105,7 +111,10 @@ export function DashboardLayout() {
               key={item.path}
               onClick={() => handleMenuClick(item.path, item.label)}
               title={collapsed ? item.label : undefined}
-              disabled={item.label === 'Create Chatbot' && createDraftLoading}
+              disabled={
+                item.label === 'Create Chatbot' &&
+                (createDraftLoading || !canCreateChatbot)
+              }
               className={`w-full flex items-center gap-3 py-3 transition-colors ${
                 collapsed ? 'justify-center px-0' : 'px-4'
               } ${

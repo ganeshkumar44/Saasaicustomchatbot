@@ -1,3 +1,5 @@
+import type { UserPlanSummary } from '@/types/userPlan.types';
+
 export interface SignupRequest {
   first_name: string;
   last_name: string;
@@ -33,6 +35,7 @@ export interface AuthUser {
   role: string;
   is_email_verified: boolean;
   profile_image?: string | null;
+  plan?: UserPlanSummary | null;
 }
 
 export interface LoginResponse {

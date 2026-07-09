@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/app/components/ui/dropdown-menu';
 import type { AuthUser } from '@/types/auth.types';
+import { useUserPlan } from '@/hooks/useUserPlan';
 
 interface SidebarUserMenuProps {
   user: AuthUser | null;
@@ -31,6 +32,7 @@ export function SidebarUserMenu({
 }: SidebarUserMenuProps) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const { showPlan, planDisplayName } = useUserPlan();
 
   const fullName = user
     ? `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}`
@@ -87,11 +89,18 @@ export function SidebarUserMenu({
                   {user?.email ?? ''}
                 </p>
                 {user?.role && (
-                  <span
-                    className={`inline-flex mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${roleBadgeClassName}`}
-                  >
-                    {roleLabel}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-1 mt-1">
+                    <span
+                      className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${roleBadgeClassName}`}
+                    >
+                      {roleLabel}
+                    </span>
+                    {showPlan && planDisplayName && (
+                      <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300">
+                        Plan {planDisplayName}
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
             </>
@@ -114,11 +123,18 @@ export function SidebarUserMenu({
                 {user?.email ?? ''}
               </p>
               {user?.role && (
-                <span
-                  className={`inline-flex mt-2 px-2.5 py-0.5 rounded-full text-xs font-medium ${roleBadgeClassName}`}
-                >
-                  {roleLabel}
-                </span>
+                <div className="flex flex-wrap items-center justify-center gap-1 mt-2">
+                  <span
+                    className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${roleBadgeClassName}`}
+                  >
+                    {roleLabel}
+                  </span>
+                  {showPlan && planDisplayName && (
+                    <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300">
+                      Plan {planDisplayName}
+                    </span>
+                  )}
+                </div>
               )}
             </div>
           </div>

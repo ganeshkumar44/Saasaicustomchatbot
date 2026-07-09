@@ -1,4 +1,10 @@
 import type { RootState } from '@/store/index';
+import {
+  canCreateChatbot,
+  formatPlanDisplayName,
+  hasReachedChatbotLimit,
+  shouldDisplayUserPlan,
+} from '@/utils/userPlan';
 
 export const selectSignupLoading = (state: RootState): boolean =>
   state.auth.loading;
@@ -19,6 +25,27 @@ export const selectSignupSuccessMessage = (state: RootState): string | null =>
   state.auth.successMessage;
 
 export const selectUser = (state: RootState) => state.auth.user;
+
+export const selectUserPlan = (state: RootState) => state.auth.user?.plan ?? null;
+
+export const selectPlanDisplayName = (state: RootState): string | null => {
+  const plan = selectUserPlan(state);
+
+  if (!plan) {
+    return null;
+  }
+
+  return formatPlanDisplayName(plan.plan_name);
+};
+
+export const selectShouldDisplayUserPlan = (state: RootState): boolean =>
+  shouldDisplayUserPlan(selectUser(state)?.role, selectUserPlan(state));
+
+export const selectHasReachedChatbotLimit = (state: RootState): boolean =>
+  hasReachedChatbotLimit(selectUserPlan(state), selectUser(state)?.role);
+
+export const selectCanCreateChatbot = (state: RootState): boolean =>
+  canCreateChatbot(selectUserPlan(state), selectUser(state)?.role);
 
 export const selectAccessToken = (state: RootState): string | null =>
   state.auth.accessToken;

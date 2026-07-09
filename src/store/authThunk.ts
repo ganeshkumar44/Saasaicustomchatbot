@@ -1,6 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
   login as loginService,
+  getCurrentUserProfile as getCurrentUserProfileService,
   resendSignupVerification,
   signout as signoutService,
   signup as signupService,
@@ -18,6 +19,7 @@ import type {
   VerificationRequest,
   VerificationResponse,
 } from '@/types/auth.types';
+import type { MeResponse } from '@/types/userPlan.types';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { saveAuthSession } from '@/utils/authStorage';
 import { getSignoutErrorMessage } from '@/utils/signoutError';
@@ -53,8 +55,21 @@ export const loginUser = createAsyncThunk<
     await Promise.all([
       dispatch(fetchThemeMode()),
       dispatch(fetchUserDetails()),
+      dispatch(fetchCurrentUserProfile()),
     ]);
     return response;
+  } catch (error) {
+    return rejectWithValue(getApiErrorMessage(error));
+  }
+});
+
+export const fetchCurrentUserProfile = createAsyncThunk<
+  MeResponse,
+  void,
+  { rejectValue: string }
+>('auth/fetchCurrentUserProfile', async (_, { rejectWithValue }) => {
+  try {
+    return await getCurrentUserProfileService();
   } catch (error) {
     return rejectWithValue(getApiErrorMessage(error));
   }

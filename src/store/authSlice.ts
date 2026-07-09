@@ -1,6 +1,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { AuthState, AuthUser } from '@/types/auth.types';
 import {
+  fetchCurrentUserProfile,
   loginUser,
   resendVerificationCode,
   signoutUser,
@@ -254,6 +255,30 @@ const authSlice = createSlice({
         state.signoutSuccess = false;
         state.signoutError = action.payload ?? 'Sign out failed. Please try again.';
         state.signoutSuccessMessage = null;
+      })
+      .addCase(fetchCurrentUserProfile.fulfilled, (state, action) => {
+        if (!state.user) {
+          return;
+        }
+
+        state.user = {
+          ...state.user,
+          id: action.payload.data.id,
+          first_name: action.payload.data.first_name,
+          last_name: action.payload.data.last_name,
+          email: action.payload.data.email,
+          role: action.payload.data.role,
+          plan: action.payload.data.plan,
+        };
+
+        if (state.accessToken && state.tokenType) {
+          saveAuthSession({
+            user: state.user,
+            accessToken: state.accessToken,
+            tokenType: state.tokenType,
+            refreshToken: state.refreshToken,
+          });
+        }
       });
   },
 });

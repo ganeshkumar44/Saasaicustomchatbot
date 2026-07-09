@@ -40,6 +40,13 @@ import {
   selectReviewSuccess,
 } from '@/store/chatbotSelectors';
 import {
+  selectCanCreateChatbot,
+  selectUser,
+  selectUserPlan,
+} from '@/store/authSelectors';
+import { fetchCurrentUserProfile } from '@/store/authThunk';
+import { canCreateChatbot } from '@/utils/userPlan';
+import {
   createChatbotDraft,
   fetchChatbotList,
   fetchChatbotReview,
@@ -97,6 +104,9 @@ export function useChatbot() {
   const chatbotList = useAppSelector(selectListableChatbotList);
   const loading = useAppSelector(selectChatbotListLoading);
   const error = useAppSelector(selectChatbotListError);
+  const user = useAppSelector(selectUser);
+  const userPlan = useAppSelector(selectUserPlan);
+  const canCreate = useAppSelector(selectCanCreateChatbot);
 
   const refetch = useCallback(
     () => dispatch(fetchChatbotList()),
@@ -105,6 +115,10 @@ export function useChatbot() {
 
   const createDraft = useCallback(
     async (options?: { navigateToWizard?: boolean }) => {
+      if (!canCreateChatbot(userPlan, user?.role)) {
+        return;
+      }
+
       dispatch(resetChatbotWizard());
       dispatch(clearChatbotErrors());
       const result = await dispatch(createChatbotDraft());
@@ -116,6 +130,8 @@ export function useChatbot() {
           toast.success(result.payload.message);
         }
 
+        void dispatch(fetchCurrentUserProfile());
+
         if (options?.navigateToWizard !== false) {
           navigate('/dashboard/create');
         }
@@ -123,10 +139,14 @@ export function useChatbot() {
 
       return result;
     },
-    [dispatch, navigate],
+    [dispatch, navigate, user?.role, userPlan],
   );
 
   const ensureChatbotDraft = useCallback(async () => {
+    if (!canCreateChatbot(userPlan, user?.role)) {
+      return null;
+    }
+
     if (chatbotId) {
       return null;
     }
@@ -139,7 +159,7 @@ export function useChatbot() {
 
     dispatch(clearChatbotErrors());
     return dispatch(createChatbotDraft());
-  }, [chatbotId, dispatch]);
+  }, [chatbotId, dispatch, user?.role, userPlan]);
 
   const updateBasicInfo = useCallback(
     (payload: BasicInfoRequest) => dispatch(saveChatbotBasicInfo(payload)),
@@ -162,10 +182,15 @@ export function useChatbot() {
     [dispatch],
   );
 
-  const publishChatbot = useCallback(
-    () => dispatch(publishChatbotDraft()),
-    [dispatch],
-  );
+  const publishChatbot = useCallback(async () => {
+    const result = await dispatch(publishChatbotDraft());
+
+    if (publishChatbotDraft.fulfilled.match(result)) {
+      void dispatch(fetchCurrentUserProfile());
+    }
+
+    return result;
+  }, [dispatch]);
 
   const goToStep = useCallback(
     (step: number) => dispatch(setChatbotStep(step)),
@@ -213,6 +238,7 @@ export function useChatbot() {
     chatbotList,
     loading,
     error,
+    canCreateChatbot: canCreate,
     createDraft,
     ensureChatbotDraft,
     updateBasicInfo,

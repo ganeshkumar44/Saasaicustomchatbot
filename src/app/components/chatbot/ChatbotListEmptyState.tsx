@@ -6,6 +6,7 @@ interface ChatbotListEmptyStateProps {
   actionLabel?: string;
   onCreateChatbot: () => void;
   createLoading?: boolean;
+  createDisabled?: boolean;
 }
 
 export function ChatbotListEmptyState({
@@ -14,6 +15,7 @@ export function ChatbotListEmptyState({
   actionLabel = 'Create Your First Chatbot',
   onCreateChatbot,
   createLoading = false,
+  createDisabled = false,
 }: ChatbotListEmptyStateProps) {
   return (
     <div className="p-12 flex flex-col items-center justify-center text-center">
@@ -24,7 +26,7 @@ export function ChatbotListEmptyState({
       <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">{description}</p>
       <button
         onClick={onCreateChatbot}
-        disabled={createLoading}
+        disabled={createLoading || createDisabled}
         className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
       >
         {createLoading ? (

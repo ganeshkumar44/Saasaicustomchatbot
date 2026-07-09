@@ -22,6 +22,7 @@ import {
   ChevronLeft,
 } from 'lucide-react';
 import { SidebarUserMenu } from '@/app/components/SidebarUserMenu';
+import { NgMarkIcon } from '@/assets/logos';
 
 export function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(true);
@@ -88,14 +89,10 @@ export function DashboardLayout() {
         {/* Logo */}
         <div className="h-16 flex items-center justify-center border-b border-gray-200 dark:border-gray-800 overflow-hidden">
           {collapsed ? (
-            <span className="w-7 h-7 flex items-center justify-center rounded-lg bg-blue-600 text-white text-xs font-bold">
-              NG
-            </span>
+            <NgMarkIcon />
           ) : (
             <div className="flex items-center gap-2 px-4 w-full">
-              <span className="w-7 h-7 flex items-center justify-center rounded-lg bg-blue-600 text-white text-xs font-bold flex-shrink-0">
-                NG
-              </span>
+              <NgMarkIcon />
               <span className="font-bold text-lg dark:text-white whitespace-nowrap">NexGenChat</span>
             </div>
           )}

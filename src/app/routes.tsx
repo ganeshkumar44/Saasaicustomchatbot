@@ -16,7 +16,6 @@ import { Billing } from "./pages/Billing";
 import { AccountSettings } from "./pages/AccountSettings";
 import { ManageUsers } from "./pages/ManageUsers";
 import { AdminRoute } from "@/components/AdminRoute";
-import { SuperAdminRoute } from "@/components/SuperAdminRoute";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 export const router = createBrowserRouter([
@@ -51,14 +50,11 @@ export const router = createBrowserRouter([
           { path: "knowledge-base", Component: KnowledgeBase },
           { path: "history", Component: ChatHistory },
           { path: "analytics", Component: Analytics },
+          { path: "billing", Component: Billing },
           { path: "settings", Component: AccountSettings },
           {
             Component: AdminRoute,
             children: [{ path: "manage-users", Component: ManageUsers }],
-          },
-          {
-            Component: SuperAdminRoute,
-            children: [{ path: "billing", Component: Billing }],
           },
         ],
       },

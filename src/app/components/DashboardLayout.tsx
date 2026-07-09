@@ -6,7 +6,7 @@ import { selectUserDetails } from '@/store/accountSettingsSelectors';
 import { fetchUserDetails } from '@/store/accountSettingsThunk';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppTheme } from '@/hooks/useTheme';
-import { formatRoleLabel, getRoleBadgeClassName, hasAdminAccess, isSuperAdminRole } from '@/utils/userRole';
+import { formatRoleLabel, getRoleBadgeClassName, hasAdminAccess } from '@/utils/userRole';
 import { useChatbot } from '@/hooks/useChatbot';
 import {
   LayoutDashboard,
@@ -63,7 +63,6 @@ export function DashboardLayout() {
   };
 
   const showManageUsersMenu = hasAdminAccess(user?.role);
-  const showBillingMenu = isSuperAdminRole(user?.role);
 
   const menuItems = [
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -71,11 +70,9 @@ export function DashboardLayout() {
     { path: '/dashboard/history', icon: MessageSquare, label: 'Chat History' },
     { path: '/dashboard/analytics', icon: BarChart3, label: 'Analytics' },
     { path: '/dashboard/settings', icon: Settings, label: 'Settings' },
+    { path: '/dashboard/billing', icon: CreditCard, label: 'Billing' },
     ...(showManageUsersMenu
       ? [{ path: '/dashboard/manage-users', icon: UserCog, label: 'Manage Users' }]
-      : []),
-    ...(showBillingMenu
-      ? [{ path: '/dashboard/billing', icon: CreditCard, label: 'Billing' }]
       : []),
   ];
 

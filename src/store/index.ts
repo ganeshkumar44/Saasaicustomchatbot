@@ -8,6 +8,7 @@ import dashboardAnalyticsReducer from '@/store/dashboardAnalyticsSlice';
 import dashboardReducer from '@/store/dashboardSlice';
 import forgotPasswordReducer from '@/store/forgotPasswordSlice';
 import manageUsersReducer from '@/store/manageUsersSlice';
+import billingReducer from '@/store/billingSlice';
 import themeReducer from '@/store/themeSlice';
 
 export const store = configureStore({
@@ -21,6 +22,7 @@ export const store = configureStore({
     dashboard: dashboardReducer,
     forgotPassword: forgotPasswordReducer,
     manageUsers: manageUsersReducer,
+    billing: billingReducer,
     theme: themeReducer,
   },
 });

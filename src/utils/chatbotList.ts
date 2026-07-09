@@ -19,6 +19,17 @@ export function filterPublishedChatbots(
   return chatbots.filter((chatbot) => chatbot.status === 'published');
 }
 
+export function isChatbotDraft(status: string): boolean {
+  return status.toLowerCase() === 'draft';
+}
+
+/** Excludes draft chatbots from listing UIs while keeping published, deleted, etc. */
+export function filterListableChatbots(
+  chatbots: ChatbotListItem[],
+): ChatbotListItem[] {
+  return chatbots.filter((chatbot) => !isChatbotDraft(chatbot.status));
+}
+
 export function isChatbotActive(status: string): boolean {
   return status === 'published';
 }

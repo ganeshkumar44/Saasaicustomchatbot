@@ -1,5 +1,5 @@
 import type { RootState } from '@/store/index';
-import { filterPublishedChatbots } from '@/utils/chatbotList';
+import { filterListableChatbots } from '@/utils/chatbotList';
 
 export const selectChatbotId = (state: RootState): number | null =>
   state.chatbot.chatbotId;
@@ -84,8 +84,8 @@ export const selectPublishError = (state: RootState): string | null =>
 
 export const selectChatbotList = (state: RootState) => state.chatbot.chatbotList;
 
-export const selectPublishedChatbotList = (state: RootState) =>
-  filterPublishedChatbots(state.chatbot.chatbotList);
+export const selectListableChatbotList = (state: RootState) =>
+  filterListableChatbots(state.chatbot.chatbotList);
 
 export const selectChatbotListLoading = (state: RootState): boolean =>
   state.chatbot.chatbotListLoading;

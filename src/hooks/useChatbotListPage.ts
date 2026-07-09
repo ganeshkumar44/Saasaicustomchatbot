@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
   selectChatbotList,
+  selectListableChatbotList,
   selectChatbotListError,
   selectChatbotListLoading,
 } from '@/store/chatbotSelectors';
@@ -21,7 +22,8 @@ import { getTotalPages, paginateItems } from '@/utils/pagination';
 
 export function useChatbotListPage() {
   const dispatch = useAppDispatch();
-  const allChatbotList = useAppSelector(selectChatbotList);
+  const rawChatbotList = useAppSelector(selectChatbotList);
+  const listableChatbotList = useAppSelector(selectListableChatbotList);
   const loading = useAppSelector(selectChatbotListLoading);
   const error = useAppSelector(selectChatbotListError);
 
@@ -36,19 +38,19 @@ export function useChatbotListPage() {
   );
 
   useEffect(() => {
-    if (allChatbotList.length === 0 && !loading) {
+    if (rawChatbotList.length === 0 && !loading) {
       void refetch();
     }
-  }, [allChatbotList.length, loading, refetch]);
+  }, [rawChatbotList.length, loading, refetch]);
 
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, statusFilter]);
 
   const filteredChatbots = useMemo(() => {
-    const searched = filterChatbotsBySearch(allChatbotList, searchTerm);
+    const searched = filterChatbotsBySearch(listableChatbotList, searchTerm);
     return filterChatbotsByStatus(searched, statusFilter);
-  }, [allChatbotList, searchTerm, statusFilter]);
+  }, [listableChatbotList, searchTerm, statusFilter]);
 
   const sortedChatbots = useMemo(
     () => sortChatbotsByUpdatedAtDesc(filteredChatbots),
@@ -75,7 +77,7 @@ export function useChatbotListPage() {
   }, []);
 
   return {
-    chatbotList: allChatbotList,
+    chatbotList: listableChatbotList,
     filteredChatbots,
     paginatedChatbots,
     loading,

@@ -14,7 +14,7 @@ import { useChatbotListPage } from '@/hooks/useChatbotListPage';
 import { useUserPlan } from '@/hooks/useUserPlan';
 
 export function Chatbots() {
-  const { createDraft, createDraftLoading } = useChatbot();
+  const { createDraft, createDraftLoading, hasDraft } = useChatbot();
   const {
     chatbotList,
     filteredChatbots,
@@ -43,7 +43,7 @@ export function Chatbots() {
     confirmDelete,
     pendingChatbotId,
   } = useDeleteChatbot();
-  const { hasReachedChatbotLimit, chatbotLimitUpgradeMessage } = useUserPlan();
+  const { hasReachedChatbotLimit, chatbotLimitUpgradeMessage } = useUserPlan(hasDraft);
 
   const handleCreateChatbot = () => {
     void createDraft();
@@ -72,11 +72,18 @@ export function Chatbots() {
         <CreateChatbotButton
           onClick={handleCreateChatbot}
           loading={createDraftLoading}
+          hasDraft={hasDraft}
         />
       </div>
 
-      {hasReachedChatbotLimit && chatbotLimitUpgradeMessage && (
+      {hasReachedChatbotLimit && !hasDraft && chatbotLimitUpgradeMessage && (
         <ChatbotPlanLimitAlert message={chatbotLimitUpgradeMessage} />
+      )}
+
+      {hasReachedChatbotLimit && hasDraft && (
+        <ChatbotPlanLimitAlert
+          message="You have reached your chatbot limit, but you can continue your unfinished draft chatbot."
+        />
       )}
 
       <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
@@ -117,7 +124,8 @@ export function Chatbots() {
           <ChatbotListEmptyState
             onCreateChatbot={handleCreateChatbot}
             createLoading={createDraftLoading}
-            createDisabled={hasReachedChatbotLimit}
+            createDisabled={false}
+            actionLabel={hasDraft ? 'Continue Draft' : 'Create Your First Chatbot'}
           />
         ) : showEmptyResults ? (
           <div className="p-12 flex flex-col items-center justify-center text-center">
@@ -131,10 +139,9 @@ export function Chatbots() {
               <CreateChatbotButton
                 onClick={handleCreateChatbot}
                 loading={createDraftLoading}
+                hasDraft={hasDraft}
                 className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                Create Chatbot
-              </CreateChatbotButton>
+              />
             )}
           </div>
         ) : (

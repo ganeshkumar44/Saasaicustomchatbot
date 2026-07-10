@@ -22,6 +22,10 @@ import type {
 import type { MeResponse } from '@/types/userPlan.types';
 import { getApiErrorMessage } from '@/utils/apiError';
 import { saveAuthSession } from '@/utils/authStorage';
+import {
+  clearCurrentDraftChatbotId,
+  setCurrentDraftChatbotId,
+} from '@/utils/chatbotDraftStorage';
 import { getSignoutErrorMessage } from '@/utils/signoutError';
 import { validateSignoutSession } from '@/utils/signoutValidation';
 import { fetchThemeMode } from '@/store/themeThunk';
@@ -69,7 +73,16 @@ export const fetchCurrentUserProfile = createAsyncThunk<
   { rejectValue: string }
 >('auth/fetchCurrentUserProfile', async (_, { rejectWithValue }) => {
   try {
-    return await getCurrentUserProfileService();
+    const response = await getCurrentUserProfileService();
+    const draftChatbotId = response.data.plan.draft_chatbot_id ?? null;
+
+    if (response.data.plan.has_draft && draftChatbotId) {
+      setCurrentDraftChatbotId(draftChatbotId);
+    } else {
+      clearCurrentDraftChatbotId();
+    }
+
+    return response;
   } catch (error) {
     return rejectWithValue(getApiErrorMessage(error));
   }

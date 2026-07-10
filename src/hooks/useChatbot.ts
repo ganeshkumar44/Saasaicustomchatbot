@@ -43,11 +43,12 @@ import { useKnowledgeBaseUpload } from '@/hooks/useKnowledgeBaseUpload';
 import { selectKnowledgeBaseUploadProgress } from '@/store/knowledgebaseUploadSelectors';
 import {
   selectCanCreateChatbot,
+  selectHasDraftChatbot,
   selectUser,
   selectUserPlan,
 } from '@/store/authSelectors';
 import { fetchCurrentUserProfile } from '@/store/authThunk';
-import { canCreateChatbot } from '@/utils/userPlan';
+import { canStartOrResumeChatbot } from '@/utils/userPlan';
 import {
   createChatbotDraft,
   fetchChatbotList,
@@ -58,7 +59,10 @@ import {
   saveChatbotBehaviour,
   uploadChatbotKnowledgeBase,
 } from '@/store/chatbotThunk';
-import { getCurrentDraftChatbotId } from '@/utils/chatbotDraftStorage';
+import {
+  clearCurrentDraftChatbotId,
+  getCurrentDraftChatbotId,
+} from '@/utils/chatbotDraftStorage';
 import type {
   BasicInfoRequest,
   BehaviourRequest,
@@ -110,6 +114,8 @@ export function useChatbot() {
   const user = useAppSelector(selectUser);
   const userPlan = useAppSelector(selectUserPlan);
   const canCreate = useAppSelector(selectCanCreateChatbot);
+  const hasDraft = useAppSelector(selectHasDraftChatbot);
+  const canStartOrResume = canStartOrResumeChatbot(userPlan, user?.role, hasDraft);
 
   const refetch = useCallback(
     () => dispatch(fetchChatbotList()),
@@ -118,16 +124,15 @@ export function useChatbot() {
 
   const createDraft = useCallback(
     async (options?: { navigateToWizard?: boolean }) => {
-      if (!canCreateChatbot(userPlan, user?.role)) {
-        return;
-      }
-
       dispatch(resetChatbotWizard());
       dispatch(clearChatbotErrors());
       const result = await dispatch(createChatbotDraft());
 
       if (createChatbotDraft.fulfilled.match(result)) {
-        if (result.payload.isExistingDraft) {
+        if (
+          result.payload.action === 'resume_draft'
+          || result.payload.isExistingDraft
+        ) {
           toast.success('Resuming your existing draft chatbot.');
         } else {
           toast.success(result.payload.message);
@@ -138,31 +143,59 @@ export function useChatbot() {
         if (options?.navigateToWizard !== false) {
           navigate('/dashboard/create');
         }
+      } else if (createChatbotDraft.rejected.match(result)) {
+        clearCurrentDraftChatbotId();
+        void dispatch(fetchCurrentUserProfile());
+        toast.error(
+          result.payload
+          ?? 'You have reached your chatbot creation limit. Please upgrade your subscription.',
+        );
       }
 
       return result;
     },
-    [dispatch, navigate, user?.role, userPlan],
+    [dispatch, navigate],
   );
 
   const ensureChatbotDraft = useCallback(async () => {
-    if (!canCreateChatbot(userPlan, user?.role)) {
-      return null;
-    }
-
     if (chatbotId) {
       return null;
     }
 
+    dispatch(clearChatbotErrors());
+
+    // Prefer backend create/resume. Only use localStorage when it matches a known draft.
     const storedChatbotId = getCurrentDraftChatbotId();
-    if (storedChatbotId) {
-      dispatch(clearChatbotErrors());
-      return dispatch(restoreChatbotDraft(storedChatbotId));
+    if (storedChatbotId && hasDraft) {
+      const restoreResult = await dispatch(restoreChatbotDraft(storedChatbotId));
+      if (restoreChatbotDraft.fulfilled.match(restoreResult)) {
+        return restoreResult;
+      }
+      clearCurrentDraftChatbotId();
+    } else if (storedChatbotId && !hasDraft) {
+      clearCurrentDraftChatbotId();
     }
 
-    dispatch(clearChatbotErrors());
-    return dispatch(createChatbotDraft());
-  }, [chatbotId, dispatch, user?.role, userPlan]);
+    const result = await dispatch(createChatbotDraft());
+
+    if (createChatbotDraft.rejected.match(result)) {
+      clearCurrentDraftChatbotId();
+      void dispatch(fetchCurrentUserProfile());
+      toast.error(
+        result.payload
+        ?? 'You have reached your chatbot creation limit. Please upgrade your subscription.',
+      );
+      navigate('/dashboard/chatbots');
+    } else if (createChatbotDraft.fulfilled.match(result)) {
+      void dispatch(fetchCurrentUserProfile());
+    }
+
+    return result;
+  }, [chatbotId, dispatch, hasDraft, navigate]);
+
+  const resumeDraft = useCallback(async () => {
+    return createDraft({ navigateToWizard: true });
+  }, [createDraft]);
 
   const updateBasicInfo = useCallback(
     (payload: BasicInfoRequest) => dispatch(saveChatbotBasicInfo(payload)),
@@ -242,8 +275,11 @@ export function useChatbot() {
     chatbotList,
     loading,
     error,
+    hasDraft,
     canCreateChatbot: canCreate,
+    canStartOrResumeChatbot: canStartOrResume,
     createDraft,
+    resumeDraft,
     ensureChatbotDraft,
     updateBasicInfo,
     updateBehaviour,

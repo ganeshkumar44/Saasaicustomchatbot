@@ -5,6 +5,8 @@ export interface UserPlanSummary {
   status: string;
   start_date: string;
   end_date: string | null;
+  has_draft?: boolean;
+  draft_chatbot_id?: number | null;
 }
 
 export interface MeUserData {

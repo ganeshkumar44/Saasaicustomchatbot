@@ -44,6 +44,12 @@ export const selectShouldDisplayUserPlan = (state: RootState): boolean =>
 export const selectHasReachedChatbotLimit = (state: RootState): boolean =>
   hasReachedChatbotLimit(selectUserPlan(state), selectUser(state)?.role);
 
+export const selectHasDraftChatbot = (state: RootState): boolean =>
+  Boolean(selectUserPlan(state)?.has_draft);
+
+export const selectDraftChatbotId = (state: RootState): number | null =>
+  selectUserPlan(state)?.draft_chatbot_id ?? null;
+
 export const selectCanCreateChatbot = (state: RootState): boolean =>
   canCreateChatbot(selectUserPlan(state), selectUser(state)?.role);
 

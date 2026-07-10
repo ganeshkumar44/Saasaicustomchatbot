@@ -44,6 +44,22 @@ export function canCreateChatbot(
   return !hasReachedChatbotLimit(plan, role);
 }
 
+/**
+ * Whether the user may open the create/resume chatbot flow.
+ * Plan limit still applies for new drafts, but an existing draft can always be resumed.
+ */
+export function canStartOrResumeChatbot(
+  plan: UserPlanSummary | null | undefined,
+  role: string | null | undefined,
+  hasDraft: boolean,
+): boolean {
+  if (hasDraft) {
+    return true;
+  }
+
+  return canCreateChatbot(plan, role);
+}
+
 export function buildChatbotLimitUpgradeMessage(
   plan: UserPlanSummary | null | undefined,
 ): string {
@@ -54,3 +70,6 @@ export function buildChatbotLimitUpgradeMessage(
 
 export const CHATBOT_LIMIT_TOOLTIP_MESSAGE =
   'You have reached your chatbot limit.';
+
+export const CHATBOT_RESUME_DRAFT_TOOLTIP_MESSAGE =
+  'Continue your unfinished draft chatbot.';

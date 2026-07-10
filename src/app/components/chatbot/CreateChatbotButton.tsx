@@ -13,6 +13,8 @@ interface CreateChatbotButtonProps {
   className?: string;
   children?: ReactNode;
   showIcon?: boolean;
+  /** When true, label/tooltip reflect resuming an existing draft. */
+  hasDraft?: boolean;
 }
 
 const defaultClassName =
@@ -22,17 +24,25 @@ export function CreateChatbotButton({
   onClick,
   loading = false,
   className = defaultClassName,
-  children = 'Create Chatbot',
+  children,
   showIcon = true,
+  hasDraft = false,
 }: CreateChatbotButtonProps) {
-  const { canCreateChatbot, chatbotLimitTooltip } = useUserPlan();
-  const isDisabled = loading || !canCreateChatbot;
+  const {
+    canCreateChatbot,
+    chatbotLimitTooltip,
+    chatbotResumeDraftTooltip,
+  } = useUserPlan(hasDraft);
+
+  const label =
+    children
+    ?? (hasDraft ? 'Continue Draft' : 'Create Chatbot');
 
   const button = (
     <button
       type="button"
       onClick={onClick}
-      disabled={isDisabled}
+      disabled={loading}
       className={className}
     >
       {loading ? (
@@ -40,17 +50,30 @@ export function CreateChatbotButton({
       ) : (
         showIcon && <Plus className="w-5 h-5" />
       )}
-      {children}
+      {label}
     </button>
   );
 
-  if (!canCreateChatbot && chatbotLimitTooltip) {
+  if (hasDraft && chatbotResumeDraftTooltip) {
     return (
       <Tooltip>
         <TooltipTrigger asChild>
           <span className="inline-flex">{button}</span>
         </TooltipTrigger>
-        <TooltipContent>{chatbotLimitTooltip}</TooltipContent>
+        <TooltipContent>{chatbotResumeDraftTooltip}</TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  if (!canCreateChatbot && !hasDraft && chatbotLimitTooltip) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex">{button}</span>
+        </TooltipTrigger>
+        <TooltipContent>
+          {chatbotLimitTooltip} If you have an unfinished draft, click to continue it.
+        </TooltipContent>
       </Tooltip>
     );
   }

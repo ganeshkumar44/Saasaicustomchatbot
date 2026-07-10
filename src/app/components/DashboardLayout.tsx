@@ -36,7 +36,7 @@ export function DashboardLayout() {
   const roleLabel = formatRoleLabel(user?.role);
   const roleBadgeClassName = getRoleBadgeClassName(user?.role);
   const { signout, signoutLoading } = useAuth();
-  const { createDraft, createDraftLoading, canCreateChatbot } = useChatbot();
+  const { createDraft, createDraftLoading, hasDraft } = useChatbot();
 
   useEffect(() => {
     void dispatch(fetchUserDetails());
@@ -50,11 +50,7 @@ export function DashboardLayout() {
   };
 
   const handleMenuClick = (path: string, label: string) => {
-    if (label === 'Create Chatbot') {
-      if (!canCreateChatbot) {
-        return;
-      }
-
+    if (label === 'Create Chatbot' || label === 'Continue Draft') {
       void createDraft();
       return;
     }
@@ -63,10 +59,11 @@ export function DashboardLayout() {
   };
 
   const showManageUsersMenu = hasAdminAccess(user?.role);
+  const createLabel = hasDraft ? 'Continue Draft' : 'Create Chatbot';
 
   const menuItems = [
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { path: '/dashboard/create', icon: Plus, label: 'Create Chatbot' },
+    { path: '/dashboard/create', icon: Plus, label: createLabel },
     { path: '/dashboard/history', icon: MessageSquare, label: 'Chat History' },
     { path: '/dashboard/analytics', icon: BarChart3, label: 'Analytics' },
     { path: '/dashboard/settings', icon: Settings, label: 'Settings' },
@@ -109,8 +106,8 @@ export function DashboardLayout() {
               onClick={() => handleMenuClick(item.path, item.label)}
               title={collapsed ? item.label : undefined}
               disabled={
-                item.label === 'Create Chatbot' &&
-                (createDraftLoading || !canCreateChatbot)
+                (item.label === 'Create Chatbot' || item.label === 'Continue Draft')
+                && createDraftLoading
               }
               className={`w-full flex items-center gap-3 py-3 transition-colors ${
                 collapsed ? 'justify-center px-0' : 'px-4'

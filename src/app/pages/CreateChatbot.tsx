@@ -63,6 +63,7 @@ export function CreateChatbot() {
   const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
   const [urlInput, setUrlInput] = useState('');
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const hasAttemptedDraftEnsure = useRef(false);
 
   const step = currentStep;
   const hasFiles = uploadedFiles.length > 0;
@@ -78,9 +79,12 @@ export function CreateChatbot() {
     || publishLoading;
 
   useEffect(() => {
-    if (!chatbotId && !createDraftLoading) {
-      void ensureChatbotDraft();
+    if (chatbotId || createDraftLoading || hasAttemptedDraftEnsure.current) {
+      return;
     }
+
+    hasAttemptedDraftEnsure.current = true;
+    void ensureChatbotDraft();
   }, [chatbotId, createDraftLoading, ensureChatbotDraft]);
 
   useEffect(() => {

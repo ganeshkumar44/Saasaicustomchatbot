@@ -47,6 +47,11 @@ export function DashboardOverview() {
     createDraftLoading,
   } = useChatbot();
   const {
+    hasDraft,
+    hasReachedChatbotLimit,
+    chatbotLimitUpgradeMessage,
+  } = useUserPlan();
+  const {
     analytics,
     loading: analyticsLoading,
     error: analyticsError,
@@ -78,7 +83,6 @@ export function DashboardOverview() {
     confirmDelete,
     pendingChatbotId,
   } = useDeleteChatbot();
-  const { hasReachedChatbotLimit, chatbotLimitUpgradeMessage } = useUserPlan();
 
   const recentChatbots = useMemo(
     () => getRecentChatbots(chatbotList, DASHBOARD_RECENT_CHATBOT_LIMIT),
@@ -130,12 +134,20 @@ export function DashboardOverview() {
           <CreateChatbotButton
             onClick={handleCreateChatbot}
             loading={createDraftLoading}
+            hasDraft={hasDraft}
           />
         </div>
 
-        {hasReachedChatbotLimit && chatbotLimitUpgradeMessage && (
+        {hasReachedChatbotLimit && !hasDraft && chatbotLimitUpgradeMessage && (
           <ChatbotPlanLimitAlert
             message={chatbotLimitUpgradeMessage}
+            className="mx-6 mt-4"
+          />
+        )}
+
+        {hasReachedChatbotLimit && hasDraft && (
+          <ChatbotPlanLimitAlert
+            message="You have reached your chatbot limit, but you can continue your unfinished draft chatbot."
             className="mx-6 mt-4"
           />
         )}
@@ -148,7 +160,8 @@ export function DashboardOverview() {
           <ChatbotListEmptyState
             onCreateChatbot={handleCreateChatbot}
             createLoading={createDraftLoading}
-            createDisabled={hasReachedChatbotLimit}
+            createDisabled={false}
+            actionLabel={hasDraft ? 'Continue Draft' : 'Create Your First Chatbot'}
           />
         ) : (
           <>

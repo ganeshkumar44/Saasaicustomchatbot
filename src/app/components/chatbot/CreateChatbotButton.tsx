@@ -54,26 +54,19 @@ export function CreateChatbotButton({
     </button>
   );
 
-  if (hasDraft && chatbotResumeDraftTooltip) {
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="inline-flex">{button}</span>
-        </TooltipTrigger>
-        <TooltipContent>{chatbotResumeDraftTooltip}</TooltipContent>
-      </Tooltip>
-    );
-  }
+  const tooltipText = hasDraft
+    ? chatbotResumeDraftTooltip
+    : !canCreateChatbot
+      ? chatbotLimitTooltip
+      : null;
 
-  if (!canCreateChatbot && !hasDraft && chatbotLimitTooltip) {
+  if (tooltipText) {
     return (
       <Tooltip>
         <TooltipTrigger asChild>
           <span className="inline-flex">{button}</span>
         </TooltipTrigger>
-        <TooltipContent>
-          {chatbotLimitTooltip} If you have an unfinished draft, click to continue it.
-        </TooltipContent>
+        <TooltipContent>{tooltipText}</TooltipContent>
       </Tooltip>
     );
   }

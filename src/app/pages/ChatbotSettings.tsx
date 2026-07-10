@@ -3,10 +3,13 @@ import { useNavigate } from 'react-router';
 import { Bot, Save, Trash2, Copy, Eye, Code, Palette, MessageSquare, Shield, Database, ArrowLeft, Cpu, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { CHATBOT_AI_MODELS } from '@/constants/chatbot';
+import { ChatbotDeleteActionsMenu } from '@/app/components/chatbot/ChatbotDeleteActionsMenu';
 import { DeleteChatbotConfirmDialog } from '@/app/components/chatbot/DeleteChatbotConfirmDialog';
+import { PermanentlyDeleteChatbotConfirmDialog } from '@/app/components/chatbot/PermanentlyDeleteChatbotConfirmDialog';
 import { KnowledgeBaseProcessingBanner } from '@/components/knowledgebase/KnowledgeBaseProcessingBanner';
 import { useChatbotSettings } from '@/hooks/useChatbotSettings';
 import { useDeleteChatbot } from '@/hooks/useDeleteChatbot';
+import { usePermanentlyDeleteChatbot } from '@/hooks/usePermanentlyDeleteChatbot';
 import { useActivateChatbot } from '@/hooks/useActivateChatbot';
 import { useAppSelector } from '@/store/hooks';
 import { selectUser } from '@/store/authSelectors';
@@ -28,7 +31,11 @@ import {
   getUploadedKnowledgebaseDocuments,
 } from '@/utils/knowledgebaseDocuments';
 import { isAllowedKnowledgeFile, validateKnowledgeBaseUrl } from '@/utils/chatbotValidation';
-import { canDeleteChatbot, canActivateChatbot } from '@/utils/chatbotPermissions';
+import {
+  canDeleteChatbot,
+  canActivateChatbot,
+  canPermanentlyDeleteChatbot,
+} from '@/utils/chatbotPermissions';
 import { isChatbotDeleted } from '@/utils/chatbotList';
 
 export function ChatbotSettings() {
@@ -96,6 +103,17 @@ export function ChatbotSettings() {
     onSuccess: handleDeleteSuccess,
   });
 
+  const {
+    permanentDeleteLoading,
+    permanentDeleteError,
+    isPermanentDeleteDialogOpen,
+    openPermanentDeleteDialog,
+    closePermanentDeleteDialog,
+    confirmPermanentDelete,
+  } = usePermanentlyDeleteChatbot({
+    onSuccess: handleDeleteSuccess,
+  });
+
   const handleActivateSuccess = useCallback(() => {
     refetch();
   }, [refetch]);
@@ -108,8 +126,14 @@ export function ChatbotSettings() {
   });
 
   const isDeletedChatbot = isChatbotDeleted(chatbotDetails?.status ?? '');
-  const showDeleteButton = canDeleteChatbot(user, chatbotDetails?.user_id);
+  const showSoftDelete = canDeleteChatbot(user, chatbotDetails?.user_id) && !isDeletedChatbot;
+  const showPermanentDelete = canPermanentlyDeleteChatbot(
+    user,
+    chatbotDetails?.owner_role,
+  );
+  const showDeleteMenu = showSoftDelete || showPermanentDelete;
   const showActivateButton = isDeletedChatbot && canActivateChatbot(user);
+  const isDeleteActionLoading = deleteLoading || permanentDeleteLoading;
 
   const knowledgebaseDocumentsKey = getKnowledgebaseDocumentsKey(
     chatbotDetails?.knowledgebase_documents,
@@ -421,6 +445,13 @@ export function ChatbotSettings() {
         error={deleteError}
         onCancel={closeDeleteDialog}
         onConfirm={() => void confirmDelete()}
+      />
+      <PermanentlyDeleteChatbotConfirmDialog
+        open={isPermanentDeleteDialogOpen}
+        loading={permanentDeleteLoading}
+        error={permanentDeleteError}
+        onCancel={closePermanentDeleteDialog}
+        onConfirm={() => void confirmPermanentDelete()}
       />
 
       <input
@@ -898,24 +929,24 @@ export function ChatbotSettings() {
           {/* Action Buttons */}
           <div className="flex items-center justify-between mt-6">
             <div className="flex items-center gap-3">
-              {showDeleteButton && (
-                <button
-                  type="button"
-                  onClick={() => {
+              {showDeleteMenu && (
+                <ChatbotDeleteActionsMenu
+                  variant="button"
+                  disabled={isDeleteActionLoading}
+                  loading={isDeleteActionLoading}
+                  showDelete={showSoftDelete}
+                  showPermanentDelete={showPermanentDelete}
+                  onDelete={() => {
                     if (chatbotId) {
                       openDeleteDialog(chatbotId);
                     }
                   }}
-                  disabled={isDeletedChatbot || deleteLoading}
-                  className="px-6 py-3 border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-950 transition-colors flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  {deleteLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Trash2 className="w-5 h-5" />
-                  )}
-                  Delete Chatbot
-                </button>
+                  onPermanentDelete={() => {
+                    if (chatbotId) {
+                      openPermanentDeleteDialog(chatbotId);
+                    }
+                  }}
+                />
               )}
               {showActivateButton && (
                 <button
@@ -934,7 +965,7 @@ export function ChatbotSettings() {
                   Activate Chatbot
                 </button>
               )}
-              {!showDeleteButton && !showActivateButton && <div />}
+              {!showDeleteMenu && !showActivateButton && <div />}
             </div>
             <div className="flex items-center gap-3">
               <button

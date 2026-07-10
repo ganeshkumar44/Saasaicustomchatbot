@@ -9,6 +9,7 @@ import {
   saveChatbotBehaviour,
   uploadChatbotKnowledgeBase,
   deleteChatbot,
+  permanentlyDeleteChatbot,
   activateChatbot,
 } from '@/store/chatbotThunk';
 import type { ChatbotState } from '@/types/chatbot.types';
@@ -47,6 +48,9 @@ const initialState: ChatbotState = {
   deleteLoading: false,
   deleteSuccess: false,
   deleteError: null,
+  permanentDeleteLoading: false,
+  permanentDeleteSuccess: false,
+  permanentDeleteError: null,
   activateLoading: false,
   activateSuccess: false,
   activateError: null,
@@ -66,6 +70,9 @@ const chatbotSlice = createSlice({
     },
     clearDeleteChatbotError: (state) => {
       state.deleteError = null;
+    },
+    clearPermanentDeleteChatbotError: (state) => {
+      state.permanentDeleteError = null;
     },
     clearActivateChatbotError: (state) => {
       state.activateError = null;
@@ -257,6 +264,32 @@ const chatbotSlice = createSlice({
         state.deleteError =
           action.payload ?? 'Failed to delete chatbot. Please try again.';
       })
+      .addCase(permanentlyDeleteChatbot.pending, (state) => {
+        state.permanentDeleteLoading = true;
+        state.permanentDeleteSuccess = false;
+        state.permanentDeleteError = null;
+      })
+      .addCase(permanentlyDeleteChatbot.fulfilled, (state, action) => {
+        const deletedChatbotId = action.payload.chatbotId;
+
+        state.permanentDeleteLoading = false;
+        state.permanentDeleteSuccess = true;
+        state.permanentDeleteError = null;
+        state.chatbotList = state.chatbotList.filter(
+          (chatbot) => chatbot.chatbot_id !== deletedChatbotId,
+        );
+
+        if (state.chatbotId === deletedChatbotId) {
+          state.chatbotId = null;
+          state.chatbotStatus = null;
+        }
+      })
+      .addCase(permanentlyDeleteChatbot.rejected, (state, action) => {
+        state.permanentDeleteLoading = false;
+        state.permanentDeleteSuccess = false;
+        state.permanentDeleteError =
+          action.payload ?? 'Failed to permanently delete chatbot. Please try again.';
+      })
       .addCase(activateChatbot.pending, (state) => {
         state.activateLoading = true;
         state.activateSuccess = false;
@@ -289,7 +322,7 @@ const chatbotSlice = createSlice({
   },
 });
 
-export const { clearChatbotErrors, clearDeleteChatbotError, clearActivateChatbotError, setChatbotStep, resetChatbotWizard } =
+export const { clearChatbotErrors, clearDeleteChatbotError, clearPermanentDeleteChatbotError, clearActivateChatbotError, setChatbotStep, resetChatbotWizard } =
   chatbotSlice.actions;
 
 export default chatbotSlice.reducer;

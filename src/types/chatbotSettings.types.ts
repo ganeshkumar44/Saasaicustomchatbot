@@ -9,6 +9,7 @@ export interface KnowledgebaseDocument {
 export interface ChatbotDetails {
   id: number;
   user_id: number;
+  owner_role?: string | null;
   chatbot_name: string | null;
   description: string | null;
   personality: string | null;

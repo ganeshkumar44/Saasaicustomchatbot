@@ -8,8 +8,10 @@ import { ChatbotListToolbar } from '@/app/components/chatbot/ChatbotListToolbar'
 import { ChatbotPlanLimitAlert } from '@/app/components/chatbot/ChatbotPlanLimitAlert';
 import { CreateChatbotButton } from '@/app/components/chatbot/CreateChatbotButton';
 import { DeleteChatbotConfirmDialog } from '@/app/components/chatbot/DeleteChatbotConfirmDialog';
+import { PermanentlyDeleteChatbotConfirmDialog } from '@/app/components/chatbot/PermanentlyDeleteChatbotConfirmDialog';
 import { useChatbot } from '@/hooks/useChatbot';
 import { useDeleteChatbot } from '@/hooks/useDeleteChatbot';
+import { usePermanentlyDeleteChatbot } from '@/hooks/usePermanentlyDeleteChatbot';
 import { useChatbotListPage } from '@/hooks/useChatbotListPage';
 import { useUserPlan } from '@/hooks/useUserPlan';
 
@@ -43,6 +45,16 @@ export function Chatbots() {
     confirmDelete,
     pendingChatbotId,
   } = useDeleteChatbot();
+
+  const {
+    permanentDeleteLoading,
+    permanentDeleteError,
+    isPermanentDeleteDialogOpen,
+    openPermanentDeleteDialog,
+    closePermanentDeleteDialog,
+    confirmPermanentDelete,
+    pendingPermanentDeleteChatbotId,
+  } = usePermanentlyDeleteChatbot();
   const { hasReachedChatbotLimit, chatbotLimitUpgradeMessage } = useUserPlan(hasDraft);
 
   const handleCreateChatbot = () => {
@@ -51,6 +63,7 @@ export function Chatbots() {
 
   const hasSearchOrFilter = searchTerm.trim().length > 0 || statusFilter !== 'all';
   const showEmptyResults = !loading && !error && filteredChatbots.length === 0;
+  const isDeleteActionLoading = deleteLoading || permanentDeleteLoading;
 
   return (
     <div className="p-6 space-y-6">
@@ -60,6 +73,13 @@ export function Chatbots() {
         error={deleteError}
         onCancel={closeDeleteDialog}
         onConfirm={() => void confirmDelete()}
+      />
+      <PermanentlyDeleteChatbotConfirmDialog
+        open={isPermanentDeleteDialogOpen}
+        loading={permanentDeleteLoading}
+        error={permanentDeleteError}
+        onCancel={closePermanentDeleteDialog}
+        onConfirm={() => void confirmPermanentDelete()}
       />
 
       <div className="flex items-center justify-between">
@@ -158,7 +178,12 @@ export function Chatbots() {
                   key={chatbot.chatbot_id}
                   chatbot={chatbot}
                   onDelete={openDeleteDialog}
-                  deleteDisabled={deleteLoading && pendingChatbotId === chatbot.chatbot_id}
+                  onPermanentDelete={openPermanentDeleteDialog}
+                  deleteDisabled={
+                    isDeleteActionLoading &&
+                    (pendingChatbotId === chatbot.chatbot_id ||
+                      pendingPermanentDeleteChatbotId === chatbot.chatbot_id)
+                  }
                 />
               ))}
             </div>

@@ -22,10 +22,11 @@ export function DeleteChatbotConfirmDialog({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 max-w-md w-full space-y-4">
-        <h3 className="text-lg font-semibold dark:text-white">Delete Chatbot?</h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          Are you sure you want to delete this chatbot? This action cannot be undone.
-        </p>
+        <h3 className="text-lg font-semibold dark:text-white">Delete Chatbot</h3>
+        <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+          <p>Are you sure you want to delete this chatbot?</p>
+          <p>You can activate it again later.</p>
+        </div>
         {error && (
           <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
         )}

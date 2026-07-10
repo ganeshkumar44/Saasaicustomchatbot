@@ -43,7 +43,7 @@ export function ConfirmDialog({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 max-w-md w-full space-y-4">
         <h3 className="text-lg font-semibold dark:text-white">{title}</h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400">{message}</p>
+        <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-line">{message}</p>
         {error && (
           <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
         )}

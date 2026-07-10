@@ -9,6 +9,7 @@ import {
   updateBasicInfo as updateBasicInfoService,
   updateBehaviour as updateBehaviourService,
 } from '@/services/chatbot.service';
+import { permanentlyDeleteChatbot as permanentlyDeleteChatbotService } from '@/services/manageChatbot.service';
 import { uploadKnowledgeBase as uploadKnowledgeBaseService } from '@/services/knowledgebase.service';
 import {
   knowledgeBaseProcessingFailed,
@@ -322,6 +323,24 @@ export const deleteChatbot = createAsyncThunk<
     }
 
     return { message: response.message, data: response.data };
+  } catch (error) {
+    return rejectWithValue(getApiErrorMessage(error));
+  }
+});
+
+export const permanentlyDeleteChatbot = createAsyncThunk<
+  { message: string; chatbotId: number },
+  number,
+  { rejectValue: string }
+>('chatbot/permanentlyDelete', async (chatbotId, { rejectWithValue }) => {
+  try {
+    const response = await permanentlyDeleteChatbotService(chatbotId);
+
+    if (getCurrentDraftChatbotId() === chatbotId) {
+      clearCurrentDraftChatbotId();
+    }
+
+    return { message: response.message, chatbotId };
   } catch (error) {
     return rejectWithValue(getApiErrorMessage(error));
   }

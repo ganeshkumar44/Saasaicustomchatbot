@@ -9,6 +9,7 @@ import { ChatbotCardsSkeleton } from '@/app/components/chatbot/ChatbotCardsSkele
 import { ChatbotListEmptyState } from '@/app/components/chatbot/ChatbotListEmptyState';
 import { ChatbotListErrorState } from '@/app/components/chatbot/ChatbotListErrorState';
 import { DeleteChatbotConfirmDialog } from '@/app/components/chatbot/DeleteChatbotConfirmDialog';
+import { PermanentlyDeleteChatbotConfirmDialog } from '@/app/components/chatbot/PermanentlyDeleteChatbotConfirmDialog';
 import {
   SkeletonChart,
   SkeletonConversation,
@@ -19,6 +20,7 @@ import { CreateChatbotButton } from '@/app/components/chatbot/CreateChatbotButto
 import { useChatbot } from '@/hooks/useChatbot';
 import { useUserPlan } from '@/hooks/useUserPlan';
 import { useDeleteChatbot } from '@/hooks/useDeleteChatbot';
+import { usePermanentlyDeleteChatbot } from '@/hooks/usePermanentlyDeleteChatbot';
 import { useDashboardAnalytics } from '@/hooks/useDashboardAnalytics';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useDashboard } from '@/hooks/useDashboard';
@@ -84,12 +86,23 @@ export function DashboardOverview() {
     pendingChatbotId,
   } = useDeleteChatbot();
 
+  const {
+    permanentDeleteLoading,
+    permanentDeleteError,
+    isPermanentDeleteDialogOpen,
+    openPermanentDeleteDialog,
+    closePermanentDeleteDialog,
+    confirmPermanentDelete,
+    pendingPermanentDeleteChatbotId,
+  } = usePermanentlyDeleteChatbot();
+
   const recentChatbots = useMemo(
     () => getRecentChatbots(chatbotList, DASHBOARD_RECENT_CHATBOT_LIMIT),
     [chatbotList],
   );
 
   const showViewAllChatbots = chatbotList.length > DASHBOARD_RECENT_CHATBOT_LIMIT;
+  const isDeleteActionLoading = deleteLoading || permanentDeleteLoading;
 
   useEffect(() => {
     void refetch();
@@ -111,6 +124,13 @@ export function DashboardOverview() {
         error={deleteError}
         onCancel={closeDeleteDialog}
         onConfirm={() => void confirmDelete()}
+      />
+      <PermanentlyDeleteChatbotConfirmDialog
+        open={isPermanentDeleteDialogOpen}
+        loading={permanentDeleteLoading}
+        error={permanentDeleteError}
+        onCancel={closePermanentDeleteDialog}
+        onConfirm={() => void confirmPermanentDelete()}
       />
 
       <div>
@@ -171,7 +191,12 @@ export function DashboardOverview() {
                   key={chatbot.chatbot_id}
                   chatbot={chatbot}
                   onDelete={openDeleteDialog}
-                  deleteDisabled={deleteLoading && pendingChatbotId === chatbot.chatbot_id}
+                  onPermanentDelete={openPermanentDeleteDialog}
+                  deleteDisabled={
+                    isDeleteActionLoading &&
+                    (pendingChatbotId === chatbot.chatbot_id ||
+                      pendingPermanentDeleteChatbotId === chatbot.chatbot_id)
+                  }
                 />
               ))}
             </div>

@@ -102,6 +102,15 @@ export const selectDeleteChatbotSuccess = (state: RootState): boolean =>
 export const selectDeleteChatbotError = (state: RootState): string | null =>
   state.chatbot.deleteError;
 
+export const selectPermanentDeleteChatbotLoading = (state: RootState): boolean =>
+  state.chatbot.permanentDeleteLoading;
+
+export const selectPermanentDeleteChatbotSuccess = (state: RootState): boolean =>
+  state.chatbot.permanentDeleteSuccess;
+
+export const selectPermanentDeleteChatbotError = (state: RootState): string | null =>
+  state.chatbot.permanentDeleteError;
+
 export const selectActivateChatbotLoading = (state: RootState): boolean =>
   state.chatbot.activateLoading;
 

@@ -2,35 +2,45 @@ import { useNavigate } from 'react-router';
 import {
   BarChart3,
   Bot,
-  Loader2,
   MessageSquare,
   Settings,
-  Trash2,
 } from 'lucide-react';
 import { useAppSelector } from '@/store/hooks';
 import { selectUser } from '@/store/authSelectors';
+import { ChatbotDeleteActionsMenu } from '@/app/components/chatbot/ChatbotDeleteActionsMenu';
 import type { ChatbotListItem } from '@/types/chatbot.types';
 import { formatRelativeTime } from '@/utils/formatRelativeTime';
 import { getChatbotStatusDisplay } from '@/utils/chatbotList';
-import { canDeleteChatbot } from '@/utils/chatbotPermissions';
+import {
+  canDeleteChatbot,
+  canPermanentlyDeleteChatbot,
+} from '@/utils/chatbotPermissions';
 import { hasAdminAccess } from '@/utils/userRole';
 
 interface ChatbotCardProps {
   chatbot: ChatbotListItem;
   onDelete?: (chatbotId: number) => void;
+  onPermanentDelete?: (chatbotId: number) => void;
   deleteDisabled?: boolean;
 }
 
 export function ChatbotCard({
   chatbot,
   onDelete,
+  onPermanentDelete,
   deleteDisabled = false,
 }: ChatbotCardProps) {
   const navigate = useNavigate();
   const user = useAppSelector(selectUser);
   const showOwnerInfo = hasAdminAccess(user?.role);
   const statusDisplay = getChatbotStatusDisplay(chatbot.status);
-  const showDeleteButton = canDeleteChatbot(user) && Boolean(onDelete);
+  const showDeleteMenu = canDeleteChatbot(user) && Boolean(onDelete);
+  const isDeleted = chatbot.status === 'deleted';
+  const showSoftDelete = showDeleteMenu && !isDeleted;
+  const showPermanentDelete =
+    Boolean(onPermanentDelete) &&
+    canPermanentlyDeleteChatbot(user, chatbot.owner_role);
+  const showActionsMenu = showSoftDelete || showPermanentDelete;
 
   return (
     <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-all group">
@@ -46,19 +56,15 @@ export function ChatbotCard({
           >
             <Settings className="w-5 h-5" />
           </button>
-          {showDeleteButton && (
-            <button
-              type="button"
-              onClick={() => onDelete?.(chatbot.chatbot_id)}
+          {showActionsMenu && (
+            <ChatbotDeleteActionsMenu
               disabled={deleteDisabled}
-              className="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              {deleteDisabled ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <Trash2 className="w-5 h-5" />
-              )}
-            </button>
+              loading={deleteDisabled}
+              showDelete={showSoftDelete}
+              showPermanentDelete={showPermanentDelete}
+              onDelete={() => onDelete?.(chatbot.chatbot_id)}
+              onPermanentDelete={() => onPermanentDelete?.(chatbot.chatbot_id)}
+            />
           )}
         </div>
       </div>

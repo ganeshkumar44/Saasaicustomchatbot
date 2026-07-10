@@ -159,6 +159,9 @@ export interface ChatbotState {
   deleteLoading: boolean;
   deleteSuccess: boolean;
   deleteError: string | null;
+  permanentDeleteLoading: boolean;
+  permanentDeleteSuccess: boolean;
+  permanentDeleteError: string | null;
   activateLoading: boolean;
   activateSuccess: boolean;
   activateError: string | null;
@@ -184,6 +187,7 @@ export interface ChatbotListItem {
   created_at: string;
   updated_at: string;
   owner_name: string | null;
+  owner_role?: string | null;
 }
 
 export interface ChatbotListResponse {

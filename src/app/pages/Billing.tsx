@@ -20,11 +20,9 @@ import {
   formatBillingAmount,
   formatBillingCycleLabel,
   formatNextBillingDate,
-  formatPlanPriceLabel,
   formatPlanStatusLabel,
   isCurrentBillingPlan,
 } from '@/utils/billing';
-import { formatPlanDisplayName } from '@/utils/userPlan';
 
 const SHOW_CONVERSATIONS_USED = false;
 const SHOW_USAGE_OVER_TIME = false;
@@ -188,18 +186,11 @@ export function Billing() {
     toast.success(`Upgraded to ${planName} plan!`);
   };
 
-  const currentPlanLabel = billingData
-    ? formatPlanDisplayName(billingData.plan_name)
-    : null;
   const planStatusLabel = formatPlanStatusLabel(billingData?.status);
   const currentBillingLabel = billingData
     ? formatBillingAmount(billingData.current_billing)
     : null;
   const nextBillingLabel = formatNextBillingDate(billingData?.next_billing_date);
-  const planPriceLabel = formatPlanPriceLabel(
-    billingData?.plan_price,
-    billingData?.billing_cycle,
-  );
   const billingCycleLabel = formatBillingCycleLabel(billingData?.billing_cycle);
 
   return (
@@ -264,19 +255,9 @@ export function Billing() {
                   )}
                 </div>
               </div>
-              {currentPlanLabel && (
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Current Plan: {currentPlanLabel}
-                </p>
-              )}
               {planStatusLabel && (
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   Plan Status: {planStatusLabel}
-                </p>
-              )}
-              {planPriceLabel && (
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Plan Price: {planPriceLabel}
                 </p>
               )}
               {nextBillingLabel && (

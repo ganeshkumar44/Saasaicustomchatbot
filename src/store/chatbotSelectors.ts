@@ -61,9 +61,6 @@ export const selectKnowledgeBaseSuccess = (state: RootState): boolean =>
 export const selectKnowledgeBaseError = (state: RootState): string | null =>
   state.chatbot.knowledgeBaseError;
 
-export const selectKnowledgeBaseUploadProgress = (state: RootState): number =>
-  state.chatbot.knowledgeBaseUploadProgress;
-
 export const selectReviewLoading = (state: RootState): boolean =>
   state.chatbot.reviewLoading;
 

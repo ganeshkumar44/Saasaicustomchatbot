@@ -9,6 +9,7 @@ import dashboardReducer from '@/store/dashboardSlice';
 import forgotPasswordReducer from '@/store/forgotPasswordSlice';
 import manageUsersReducer from '@/store/manageUsersSlice';
 import billingReducer from '@/store/billingSlice';
+import knowledgebaseUploadReducer from '@/store/knowledgebaseUploadSlice';
 import themeReducer from '@/store/themeSlice';
 
 export const store = configureStore({
@@ -23,6 +24,7 @@ export const store = configureStore({
     forgotPassword: forgotPasswordReducer,
     manageUsers: manageUsersReducer,
     billing: billingReducer,
+    knowledgebaseUpload: knowledgebaseUploadReducer,
     theme: themeReducer,
   },
 });

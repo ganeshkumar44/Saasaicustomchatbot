@@ -10,6 +10,7 @@ import {
   getChatbotAiModelById,
 } from '@/constants/chatbot';
 import { useChatbot } from '@/hooks/useChatbot';
+import { KnowledgeBaseProcessingBanner } from '@/components/knowledgebase/KnowledgeBaseProcessingBanner';
 import {
   validateChatbotBasicInfo,
   validateChatbotBehaviour,
@@ -33,7 +34,7 @@ export function CreateChatbot() {
     behaviourError,
     knowledgeBaseLoading,
     knowledgeBaseError,
-    knowledgeBaseUploadProgress,
+    isKnowledgeBaseProcessing,
     reviewLoading,
     reviewError,
     publishLoading,
@@ -68,10 +69,6 @@ export function CreateChatbot() {
   const hasUrls = uploadedUrls.length > 0;
   const hasKnowledgeSources = hasFiles || hasUrls;
   const isUploadingKnowledgeBase = step === 3 && knowledgeBaseLoading;
-  const showUploadProgress =
-    isUploadingKnowledgeBase
-    && knowledgeBaseUploadProgress > 0
-    && knowledgeBaseUploadProgress < 100;
   const isStepLoading =
     createDraftLoading
     || basicInfoLoading
@@ -306,7 +303,7 @@ export function CreateChatbot() {
     createDraftError
     ?? basicInfoError
     ?? behaviourError
-    ?? (isUploadingKnowledgeBase ? null : knowledgeBaseError)
+    ?? (isUploadingKnowledgeBase || isKnowledgeBaseProcessing ? null : knowledgeBaseError)
     ?? reviewError
     ?? publishError;
 
@@ -333,6 +330,12 @@ export function CreateChatbot() {
         <h1 className="text-3xl font-bold dark:text-white">Create New Chatbot</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">Set up your AI-powered chatbot in minutes</p>
       </div>
+
+      {isKnowledgeBaseProcessing && (
+        <div className="mb-6">
+          <KnowledgeBaseProcessingBanner context="create" />
+        </div>
+      )}
 
       {/* Progress Steps */}
       <div className="flex items-center justify-between mb-8">
@@ -572,29 +575,17 @@ export function CreateChatbot() {
               </div>
             </div>
 
-            {knowledgeBaseLoading && (
+            {isUploadingKnowledgeBase && (
               <div className="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/40 p-4 space-y-3">
                 <div className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-200">
                   <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
-                  <span>
-                    {showUploadProgress
-                      ? `Uploading files... ${knowledgeBaseUploadProgress}%`
-                      : 'Processing knowledge base... This may take a few minutes for URLs and large files.'}
-                  </span>
+                  <span>Uploading knowledge base files...</span>
                 </div>
-                {showUploadProgress ? (
-                  <div className="w-full h-2 bg-blue-100 dark:bg-blue-900 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-blue-600 transition-all duration-300"
-                      style={{ width: `${knowledgeBaseUploadProgress}%` }}
-                    />
-                  </div>
-                ) : (
-                  <div className="w-full h-2 bg-blue-100 dark:bg-blue-900 rounded-full overflow-hidden">
-                    <div className="h-full w-1/3 bg-blue-600 rounded-full animate-pulse" />
-                  </div>
-                )}
               </div>
+            )}
+
+            {!isUploadingKnowledgeBase && isKnowledgeBaseProcessing && (
+              <KnowledgeBaseProcessingBanner context="create" />
             )}
 
             {(hasFiles || hasUrls) && (
@@ -725,10 +716,10 @@ export function CreateChatbot() {
               disabled={isStepLoading}
               className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {(step === 1 && basicInfoLoading) || (step === 2 && behaviourLoading) || (step === 3 && knowledgeBaseLoading) ? (
+              {(step === 1 && basicInfoLoading) || (step === 2 && behaviourLoading) || isUploadingKnowledgeBase ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  {step === 3 ? 'Processing...' : 'Saving...'}
+                  {isUploadingKnowledgeBase ? 'Uploading...' : 'Saving...'}
                 </>
               ) : (
                 <>

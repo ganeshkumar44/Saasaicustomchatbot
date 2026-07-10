@@ -3,10 +3,17 @@ import {
   getChatbotDetails as getChatbotDetailsService,
   updateAppearanceSettings as updateAppearanceSettingsService,
   updateGeneralSettings as updateGeneralSettingsService,
-  updateKnowledgeBaseSettings as updateKnowledgeBaseSettingsService,
   updateMessageSettings as updateMessageSettingsService,
   updateSecuritySettings as updateSecuritySettingsService,
 } from '@/services/chatbot.service';
+import { updateKnowledgeBaseSettings as updateKnowledgeBaseSettingsService } from '@/services/knowledgebase.service';
+import {
+  knowledgeBaseProcessingFailed,
+  knowledgeBaseUploadAccepted,
+  resetKnowledgeBaseUpload,
+  setKnowledgeBaseUploadProgress,
+  startKnowledgeBaseUpload,
+} from '@/store/knowledgebaseUploadSlice';
 import type {
   AppearanceSettingsRequest,
   ChatbotDetails,
@@ -25,6 +32,7 @@ interface FetchChatbotDetailsPayload {
 interface SettingsUpdatePayload {
   message: string;
   chatbotId: number;
+  status?: 'processing' | 'completed' | 'failed';
 }
 
 export const fetchChatbotDetails = createAsyncThunk<
@@ -130,15 +138,51 @@ export const updateKnowledgeBase = createAsyncThunk<
 >(
   'chatbotSettings/updateKnowledgeBase',
   async (payload, { dispatch, rejectWithValue }) => {
+    const hasNewSources = payload.files.length > 0 || payload.urls.length > 0;
+
+    if (hasNewSources) {
+      dispatch(
+        startKnowledgeBaseUpload({
+          chatbotId: payload.chatbot_id,
+          context: 'settings',
+        }),
+      );
+    }
+
     try {
-      const response = await updateKnowledgeBaseSettingsService(payload);
+      const response = await updateKnowledgeBaseSettingsService(
+        payload,
+        (progress) => {
+          if (hasNewSources) {
+            dispatch(setKnowledgeBaseUploadProgress(progress));
+          }
+        },
+      );
+
+      if (response.status === 'processing') {
+        dispatch(
+          knowledgeBaseUploadAccepted({
+            chatbotId: payload.chatbot_id,
+            context: 'settings',
+          }),
+        );
+      } else if (hasNewSources) {
+        dispatch(resetKnowledgeBaseUpload());
+      }
+
       await dispatch(fetchChatbotDetails(payload.chatbot_id)).unwrap();
+
       return {
         message: response.message,
         chatbotId: payload.chatbot_id,
+        status: response.status,
       };
     } catch (error) {
-      return rejectWithValue(getApiErrorMessage(error));
+      const message = getApiErrorMessage(error);
+      if (hasNewSources) {
+        dispatch(knowledgeBaseProcessingFailed(message));
+      }
+      return rejectWithValue(message);
     }
   },
 );

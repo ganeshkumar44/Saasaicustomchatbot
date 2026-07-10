@@ -44,6 +44,7 @@ export interface ChatbotDetailsResponse {
 export interface SettingsUpdateResponse {
   success: true;
   message: string;
+  status?: 'processing' | 'completed' | 'failed';
 }
 
 export interface GeneralSettingsRequest {

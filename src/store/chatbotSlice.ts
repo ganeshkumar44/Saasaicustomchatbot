@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { setKnowledgeBaseUploadProgress } from '@/store/chatbotActions';
 import {
   createChatbotDraft,
   fetchChatbotList,
@@ -39,7 +38,6 @@ const initialState: ChatbotState = {
   knowledgeBaseLoading: false,
   knowledgeBaseSuccess: false,
   knowledgeBaseError: null,
-  knowledgeBaseUploadProgress: 0,
   reviewLoading: false,
   reviewSuccess: false,
   reviewError: null,
@@ -85,9 +83,6 @@ const chatbotSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(setKnowledgeBaseUploadProgress, (state, action) => {
-        state.knowledgeBaseUploadProgress = action.payload;
-      })
       .addCase(createChatbotDraft.pending, (state) => {
         state.createDraftLoading = true;
         state.createDraftSuccess = false;
@@ -169,14 +164,12 @@ const chatbotSlice = createSlice({
         state.knowledgeBaseLoading = true;
         state.knowledgeBaseSuccess = false;
         state.knowledgeBaseError = null;
-        state.knowledgeBaseUploadProgress = 0;
       })
       .addCase(uploadChatbotKnowledgeBase.fulfilled, (state, action) => {
         state.knowledgeBaseLoading = false;
         state.knowledgeBaseSuccess = true;
         state.knowledgeBaseError = null;
         state.chatbotKnowledgeBase = action.payload.data;
-        state.knowledgeBaseUploadProgress = 100;
         state.currentStep = 4;
       })
       .addCase(uploadChatbotKnowledgeBase.rejected, (state, action) => {
@@ -184,7 +177,6 @@ const chatbotSlice = createSlice({
         state.knowledgeBaseSuccess = false;
         state.knowledgeBaseError =
           action.payload ?? 'Failed to upload knowledge base. Please try again.';
-        state.knowledgeBaseUploadProgress = 0;
       })
       .addCase(fetchChatbotReview.pending, (state) => {
         state.reviewLoading = true;

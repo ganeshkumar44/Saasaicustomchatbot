@@ -1,4 +1,3 @@
-import { KNOWLEDGE_BASE_UPLOAD_TIMEOUT_MS } from '@/constants/chatbot';
 import { apiClient } from '@/api/axios';
 import type {
   BasicInfoRequest,
@@ -7,8 +6,6 @@ import type {
   BehaviourResponse,
   ChatbotListResponse,
   CreateChatbotResponse,
-  KnowledgeBaseUploadPayload,
-  KnowledgeBaseUploadResponse,
   PublishResponse,
   ReviewResponse,
   DeleteChatbotResponse,
@@ -18,7 +15,6 @@ import type {
   AppearanceSettingsRequest,
   ChatbotDetailsResponse,
   GeneralSettingsRequest,
-  KnowledgeBaseSettingsRequest,
   MessageSettingsRequest,
   SecuritySettingsRequest,
   SettingsUpdateResponse,
@@ -48,40 +44,6 @@ export async function updateBehaviour(
     `/v1/chatbots/${chatbotId}/behaviour`,
     data,
   );
-  return response.data;
-}
-
-export async function uploadKnowledgeBase(
-  chatbotId: number,
-  payload: KnowledgeBaseUploadPayload,
-  onUploadProgress?: (progress: number) => void,
-): Promise<KnowledgeBaseUploadResponse> {
-  const formData = new FormData();
-
-  payload.files.forEach((file) => {
-    formData.append('files', file);
-  });
-
-  payload.urls.forEach((url) => {
-    formData.append('urls', url);
-  });
-
-  const response = await apiClient.post<KnowledgeBaseUploadResponse>(
-    `/v1/chatbots/${chatbotId}/knowledgebase/upload`,
-    formData,
-    {
-      timeout: KNOWLEDGE_BASE_UPLOAD_TIMEOUT_MS,
-      onUploadProgress: (event) => {
-        if (!event.total) {
-          return;
-        }
-
-        const progress = Math.round((event.loaded * 100) / event.total);
-        onUploadProgress?.(progress);
-      },
-    },
-  );
-
   return response.data;
 }
 
@@ -166,46 +128,5 @@ export async function updateSecuritySettings(
     '/v1/chatbots/security',
     data,
   );
-  return response.data;
-}
-
-export async function updateKnowledgeBaseSettings(
-  payload: KnowledgeBaseSettingsRequest,
-  onUploadProgress?: (progress: number) => void,
-): Promise<SettingsUpdateResponse> {
-  const formData = new FormData();
-
-  formData.append('chatbot_id', String(payload.chatbot_id));
-
-  payload.delete_document_ids.forEach((documentId) => {
-    formData.append('delete_document_ids', String(documentId));
-  });
-
-  payload.files.forEach((file) => {
-    formData.append('files', file);
-  });
-
-  payload.urls.forEach((url) => {
-    formData.append('urls', url);
-  });
-
-  const response = await apiClient.put<SettingsUpdateResponse>(
-    '/v1/chatbots/knowledge-base',
-    formData,
-    {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      onUploadProgress: (event) => {
-        if (!event.total) {
-          return;
-        }
-
-        const progress = Math.round((event.loaded * 100) / event.total);
-        onUploadProgress?.(progress);
-      },
-    },
-  );
-
   return response.data;
 }

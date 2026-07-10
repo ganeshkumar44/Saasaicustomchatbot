@@ -4,6 +4,7 @@ import { Bot, Save, Trash2, Copy, Eye, Code, Palette, MessageSquare, Shield, Dat
 import { toast } from 'sonner';
 import { CHATBOT_AI_MODELS } from '@/constants/chatbot';
 import { DeleteChatbotConfirmDialog } from '@/app/components/chatbot/DeleteChatbotConfirmDialog';
+import { KnowledgeBaseProcessingBanner } from '@/components/knowledgebase/KnowledgeBaseProcessingBanner';
 import { useChatbotSettings } from '@/hooks/useChatbotSettings';
 import { useDeleteChatbot } from '@/hooks/useDeleteChatbot';
 import { useActivateChatbot } from '@/hooks/useActivateChatbot';
@@ -70,6 +71,7 @@ export function ChatbotSettings() {
     messageLoading,
     securityLoading,
     knowledgebaseLoading,
+    isKnowledgeBaseProcessing,
     refetch,
     updateGeneralSettings,
     updateAppearanceSettings,
@@ -656,6 +658,10 @@ export function ChatbotSettings() {
             {activeTab === 'knowledge' && (
               <div className="space-y-6">
                 <h2 className="text-xl font-semibold dark:text-white mb-6">Knowledge Base</h2>
+
+                {(knowledgebaseLoading || isKnowledgeBaseProcessing) && (
+                  <KnowledgeBaseProcessingBanner context="settings" />
+                )}
 
                 <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 text-center hover:border-blue-500 dark:hover:border-blue-500 transition-colors">
                   <div className="flex flex-col items-center">

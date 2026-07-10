@@ -8,6 +8,12 @@ import { logout } from '@/store/authSlice';
 import { IdleLogoutSync } from '@/app/components/IdleLogoutSync';
 import { ThemeProviderBridge } from '@/app/components/ThemeProviderBridge';
 import { ThemeInitializer } from '@/app/components/ThemeInitializer';
+import { useKnowledgeBaseStatusPolling } from '@/hooks/useKnowledgeBaseStatusPolling';
+
+function KnowledgeBaseStatusPollingSync() {
+  useKnowledgeBaseStatusPolling();
+  return null;
+}
 
 function AuthSessionSync() {
   useEffect(() => {
@@ -27,6 +33,7 @@ export default function App() {
     <Provider store={store}>
       <AuthSessionSync />
       <IdleLogoutSync />
+      <KnowledgeBaseStatusPollingSync />
       <ThemeProviderBridge>
         <ThemeInitializer>
           <RouterProvider router={router} />

@@ -20,6 +20,7 @@ import {
   selectMessageSettingsLoading,
   selectSecuritySettingsLoading,
 } from '@/store/chatbotSettingsSelectors';
+import { useKnowledgeBaseUpload } from '@/hooks/useKnowledgeBaseUpload';
 import {
   fetchChatbotDetails,
   updateAppearanceSettings,
@@ -61,6 +62,7 @@ export function useChatbotSettings() {
   const messageLoading = useAppSelector(selectMessageSettingsLoading);
   const securityLoading = useAppSelector(selectSecuritySettingsLoading);
   const knowledgebaseLoading = useAppSelector(selectKnowledgeBaseSettingsLoading);
+  const { isProcessing: isKnowledgeBaseProcessing } = useKnowledgeBaseUpload();
   const updateSuccess = useAppSelector(selectChatbotSettingsUpdateSuccess);
   const updateError = useAppSelector(selectChatbotSettingsUpdateError);
 
@@ -267,7 +269,11 @@ export function useChatbotSettings() {
       );
 
       if (updateKnowledgeBase.fulfilled.match(result)) {
-        toast.success(result.payload.message);
+        if (result.payload.status === 'processing') {
+          toast.info('Knowledge base update started. Processing files in the background.');
+        } else {
+          toast.success(result.payload.message);
+        }
         return true;
       }
 
@@ -289,6 +295,7 @@ export function useChatbotSettings() {
     messageLoading,
     securityLoading,
     knowledgebaseLoading,
+    isKnowledgeBaseProcessing,
     updateSuccess,
     updateError,
     invalidChatbotId: chatbotId === null,

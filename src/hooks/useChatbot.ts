@@ -7,6 +7,7 @@ import {
   resetChatbotWizard,
   setChatbotStep,
 } from '@/store/chatbotSlice';
+import { resetKnowledgeBaseUpload } from '@/store/knowledgebaseUploadSlice';
 import {
   selectBasicInfoError,
   selectBasicInfoLoading,
@@ -31,7 +32,6 @@ import {
   selectKnowledgeBaseError,
   selectKnowledgeBaseLoading,
   selectKnowledgeBaseSuccess,
-  selectKnowledgeBaseUploadProgress,
   selectPublishError,
   selectPublishLoading,
   selectPublishSuccess,
@@ -39,6 +39,8 @@ import {
   selectReviewLoading,
   selectReviewSuccess,
 } from '@/store/chatbotSelectors';
+import { useKnowledgeBaseUpload } from '@/hooks/useKnowledgeBaseUpload';
+import { selectKnowledgeBaseUploadProgress } from '@/store/knowledgebaseUploadSelectors';
 import {
   selectCanCreateChatbot,
   selectUser,
@@ -92,6 +94,7 @@ export function useChatbot() {
   const knowledgeBaseSuccess = useAppSelector(selectKnowledgeBaseSuccess);
   const knowledgeBaseError = useAppSelector(selectKnowledgeBaseError);
   const knowledgeBaseUploadProgress = useAppSelector(selectKnowledgeBaseUploadProgress);
+  const { isProcessing: isKnowledgeBaseProcessing } = useKnowledgeBaseUpload();
 
   const reviewLoading = useAppSelector(selectReviewLoading);
   const reviewSuccess = useAppSelector(selectReviewSuccess);
@@ -202,10 +205,10 @@ export function useChatbot() {
     [dispatch],
   );
 
-  const resetWizard = useCallback(
-    () => dispatch(resetChatbotWizard()),
-    [dispatch],
-  );
+  const resetWizard = useCallback(() => {
+    dispatch(resetChatbotWizard());
+    dispatch(resetKnowledgeBaseUpload());
+  }, [dispatch]);
 
   return {
     chatbotId,
@@ -229,6 +232,7 @@ export function useChatbot() {
     knowledgeBaseSuccess,
     knowledgeBaseError,
     knowledgeBaseUploadProgress,
+    isKnowledgeBaseProcessing,
     reviewLoading,
     reviewSuccess,
     reviewError,

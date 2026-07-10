@@ -62,6 +62,7 @@ export interface KnowledgeBaseUploadData {
 export interface KnowledgeBaseUploadResponse {
   success: true;
   message: string;
+  status: 'processing' | 'completed' | 'failed';
   data: KnowledgeBaseUploadData;
 }
 
@@ -148,7 +149,6 @@ export interface ChatbotState {
   knowledgeBaseLoading: boolean;
   knowledgeBaseSuccess: boolean;
   knowledgeBaseError: string | null;
-  knowledgeBaseUploadProgress: number;
   reviewLoading: boolean;
   reviewSuccess: boolean;
   reviewError: string | null;

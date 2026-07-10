@@ -9,6 +9,9 @@ export function getApiErrorMessage(error: unknown): string {
     if (error.code === 'ECONNABORTED') {
       return 'Request timed out. Please try again.';
     }
+    if (error.message === 'Network Error') {
+      return 'Network error. Please check your connection and try again.';
+    }
     if (error.message) {
       return error.message;
     }

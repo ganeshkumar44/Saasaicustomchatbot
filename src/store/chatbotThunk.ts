@@ -8,9 +8,15 @@ import {
   publishChatbot as publishChatbotService,
   updateBasicInfo as updateBasicInfoService,
   updateBehaviour as updateBehaviourService,
-  uploadKnowledgeBase as uploadKnowledgeBaseService,
 } from '@/services/chatbot.service';
-import { setKnowledgeBaseUploadProgress } from '@/store/chatbotActions';
+import { uploadKnowledgeBase as uploadKnowledgeBaseService } from '@/services/knowledgebase.service';
+import {
+  knowledgeBaseProcessingFailed,
+  knowledgeBaseUploadAccepted,
+  resetKnowledgeBaseUpload,
+  setKnowledgeBaseUploadProgress,
+  startKnowledgeBaseUpload,
+} from '@/store/knowledgebaseUploadSlice';
 import type { RootState } from '@/store/index';
 import type {
   BasicInfoData,
@@ -84,6 +90,7 @@ interface BehaviourPayload extends ThunkMessagePayload {
 
 interface KnowledgeBasePayload extends ThunkMessagePayload {
   data: KnowledgeBaseUploadData;
+  status: 'processing' | 'completed' | 'failed';
 }
 
 interface ReviewPayload extends ThunkMessagePayload {
@@ -205,6 +212,8 @@ export const uploadChatbotKnowledgeBase = createAsyncThunk<
       return rejectWithValue('Chatbot draft not found. Please try again.');
     }
 
+    dispatch(startKnowledgeBaseUpload({ chatbotId, context: 'create' }));
+
     try {
       const response = await uploadKnowledgeBaseService(
         chatbotId,
@@ -213,9 +222,22 @@ export const uploadChatbotKnowledgeBase = createAsyncThunk<
           dispatch(setKnowledgeBaseUploadProgress(progress));
         },
       );
-      return { message: response.message, data: response.data };
+
+      if (response.status === 'processing') {
+        dispatch(knowledgeBaseUploadAccepted({ chatbotId, context: 'create' }));
+      } else {
+        dispatch(resetKnowledgeBaseUpload());
+      }
+
+      return {
+        message: response.message,
+        data: response.data,
+        status: response.status,
+      };
     } catch (error) {
-      return rejectWithValue(getApiErrorMessage(error));
+      const message = getApiErrorMessage(error);
+      dispatch(knowledgeBaseProcessingFailed(message));
+      return rejectWithValue(message);
     }
   },
 );

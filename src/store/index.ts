@@ -10,6 +10,7 @@ import forgotPasswordReducer from '@/store/forgotPasswordSlice';
 import manageUsersReducer from '@/store/manageUsersSlice';
 import billingReducer from '@/store/billingSlice';
 import knowledgebaseUploadReducer from '@/store/knowledgebaseUploadSlice';
+import playgroundReducer from '@/store/playgroundSlice';
 import themeReducer from '@/store/themeSlice';
 
 export const store = configureStore({
@@ -25,6 +26,7 @@ export const store = configureStore({
     manageUsers: manageUsersReducer,
     billing: billingReducer,
     knowledgebaseUpload: knowledgebaseUploadReducer,
+    playground: playgroundReducer,
     theme: themeReducer,
   },
 });

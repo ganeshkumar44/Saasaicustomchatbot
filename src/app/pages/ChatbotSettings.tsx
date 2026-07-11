@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router';
-import { Bot, Save, Trash2, Copy, Eye, Code, Palette, MessageSquare, Shield, Database, ArrowLeft, Cpu, Loader2 } from 'lucide-react';
+import { Bot, Save, Trash2, Copy, Eye, Code, Palette, MessageSquare, Shield, Database, ArrowLeft, Cpu, Loader2, FlaskConical } from 'lucide-react';
 import { toast } from 'sonner';
 import { CHATBOT_AI_MODELS } from '@/constants/chatbot';
 import { ChatbotDeleteActionsMenu } from '@/app/components/chatbot/ChatbotDeleteActionsMenu';
 import { DeleteChatbotConfirmDialog } from '@/app/components/chatbot/DeleteChatbotConfirmDialog';
 import { PermanentlyDeleteChatbotConfirmDialog } from '@/app/components/chatbot/PermanentlyDeleteChatbotConfirmDialog';
+import { PlaygroundChatPanel } from '@/app/components/playground/PlaygroundChatPanel';
 import { KnowledgeBaseProcessingBanner } from '@/components/knowledgebase/KnowledgeBaseProcessingBanner';
 import { useChatbotSettings } from '@/hooks/useChatbotSettings';
 import { useDeleteChatbot } from '@/hooks/useDeleteChatbot';
@@ -185,6 +186,7 @@ export function ChatbotSettings() {
   };
 
   const tabs = [
+    { id: 'playground', label: 'Playground', icon: FlaskConical },
     { id: 'general', label: 'General', icon: Bot },
     { id: 'appearance', label: 'Appearance', icon: Palette },
     { id: 'messages', label: 'Messages', icon: MessageSquare },
@@ -498,6 +500,14 @@ export function ChatbotSettings() {
 
         {/* Settings Content */}
         <div className="lg:col-span-3">
+          {activeTab === 'playground' && chatbotId ? (
+            <PlaygroundChatPanel
+              chatbotId={chatbotId}
+              chatbotName={chatbotDetails.chatbot_name ?? 'Chatbot'}
+              enabled={activeTab === 'playground'}
+            />
+          ) : (
+          <>
           <div className="bg-white dark:bg-gray-900 rounded-xl p-8 border border-gray-200 dark:border-gray-800">
 
             {/* General */}
@@ -1006,6 +1016,8 @@ export function ChatbotSettings() {
               )}
             </div>
           </div>
+          </>
+          )}
         </div>
       </div>
     </div>

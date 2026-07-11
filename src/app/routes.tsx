@@ -8,6 +8,7 @@ import { DashboardOverview } from "./pages/DashboardOverview";
 import { Chatbots } from "./pages/Chatbots";
 import { CreateChatbot } from "./pages/CreateChatbot";
 import { ChatbotSettings } from "./pages/ChatbotSettings";
+import { ChatbotPlayground } from "./pages/ChatbotPlayground";
 import { ChatbotPreview } from "./pages/ChatbotPreview";
 import { KnowledgeBase } from "./pages/KnowledgeBase";
 import { ChatHistory } from "./pages/ChatHistory";
@@ -46,6 +47,7 @@ export const router = createBrowserRouter([
           { path: "chatbots", Component: Chatbots },
           { path: "create", Component: CreateChatbot },
           { path: "chatbot/:id/settings", Component: ChatbotSettings },
+          { path: "chatbot/:id/playground", Component: ChatbotPlayground },
           { path: "chatbot/:id/preview", Component: ChatbotPreview },
           { path: "knowledge-base", Component: KnowledgeBase },
           { path: "history", Component: ChatHistory },

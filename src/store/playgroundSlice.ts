@@ -201,7 +201,7 @@ const playgroundSlice = createSlice({
       .addCase(sendPlaygroundMessage.rejected, (state, action) => {
         state.sending = false;
         state.sendError =
-          action.payload ?? 'Failed to get a response. Please try again.';
+          action.payload?.message ?? 'Failed to get a response. Please try again.';
 
         const lastMessage = state.messages[state.messages.length - 1];
         if (lastMessage && lastMessage.sender === 'user' && lastMessage.id < 0) {

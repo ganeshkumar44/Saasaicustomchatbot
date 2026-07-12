@@ -11,7 +11,7 @@ import type {
   PlaygroundSession,
   PlaygroundTestAnswerRequest,
 } from '@/types/playground.types';
-import { getApiErrorMessage } from '@/utils/apiError';
+import { getApiErrorCode, getApiErrorMessage } from '@/utils/apiError';
 
 interface InitializePlaygroundPayload {
   sessions: PlaygroundSession[];
@@ -150,7 +150,7 @@ export const removePlaygroundSession = createAsyncThunk<
 export const sendPlaygroundMessage = createAsyncThunk<
   SendMessagePayload,
   PlaygroundTestAnswerRequest,
-  { rejectValue: string }
+  { rejectValue: { message: string; errorCode: string | null } }
 >('playground/sendMessage', async (payload, { rejectWithValue }) => {
   try {
     const response = await sendPlaygroundTestAnswer(payload);
@@ -160,7 +160,10 @@ export const sendPlaygroundMessage = createAsyncThunk<
       sessionId: payload.session_id,
     };
   } catch (error) {
-    return rejectWithValue(getApiErrorMessage(error));
+    return rejectWithValue({
+      message: getApiErrorMessage(error),
+      errorCode: getApiErrorCode(error),
+    });
   }
 });
 

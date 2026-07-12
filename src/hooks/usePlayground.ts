@@ -27,6 +27,8 @@ import {
   removePlaygroundSession,
   sendPlaygroundMessage,
 } from '@/store/playgroundThunk';
+import { useSubscription } from '@/hooks/useSubscription';
+import { PLAYGROUND_MESSAGE_LIMIT_ERROR_CODE } from '@/types/subscription.types';
 
 interface UsePlaygroundOptions {
   chatbotId: number | null;
@@ -47,6 +49,13 @@ export function usePlayground({ chatbotId, enabled = true }: UsePlaygroundOption
   const initializing = useAppSelector(selectPlaygroundInitializing);
   const error = useAppSelector(selectPlaygroundError);
   const sendError = useAppSelector(selectPlaygroundSendError);
+
+  const {
+    playgroundMessagingDisabled,
+    playgroundLimitMessage,
+    refreshUsage,
+    disablePlaygroundMessaging,
+  } = useSubscription({ chatbotId, enabled });
 
   useEffect(() => {
     if (!enabled || !chatbotId) {
@@ -124,7 +133,12 @@ export function usePlayground({ chatbotId, enabled = true }: UsePlaygroundOption
 
   const sendMessage = useCallback(
     async (question: string) => {
-      if (!chatbotId || !currentSessionId || sending) {
+      if (
+        !chatbotId ||
+        !currentSessionId ||
+        sending ||
+        playgroundMessagingDisabled
+      ) {
         return false;
       }
 
@@ -142,12 +156,32 @@ export function usePlayground({ chatbotId, enabled = true }: UsePlaygroundOption
       );
 
       if (sendPlaygroundMessage.fulfilled.match(result)) {
+        refreshUsage();
         return true;
+      }
+
+      if (sendPlaygroundMessage.rejected.match(result)) {
+        const payload = result.payload;
+        if (
+          payload &&
+          typeof payload === 'object' &&
+          payload.errorCode === PLAYGROUND_MESSAGE_LIMIT_ERROR_CODE
+        ) {
+          disablePlaygroundMessaging(payload.message);
+        }
       }
 
       return false;
     },
-    [chatbotId, currentSessionId, dispatch, sending],
+    [
+      chatbotId,
+      currentSessionId,
+      disablePlaygroundMessaging,
+      dispatch,
+      playgroundMessagingDisabled,
+      refreshUsage,
+      sending,
+    ],
   );
 
   const retryInitialize = useCallback(() => {
@@ -176,6 +210,8 @@ export function usePlayground({ chatbotId, enabled = true }: UsePlaygroundOption
     sending,
     initializing,
     error,
+    messagingDisabled: playgroundMessagingDisabled,
+    limitMessage: playgroundLimitMessage,
     selectSession,
     createSession,
     deleteSession,

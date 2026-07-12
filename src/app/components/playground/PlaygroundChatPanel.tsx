@@ -45,6 +45,8 @@ export function PlaygroundChatPanel({
     sending,
     initializing,
     error,
+    messagingDisabled,
+    limitMessage,
     selectSession,
     createSession,
     deleteSession,
@@ -92,7 +94,7 @@ export function PlaygroundChatPanel({
 
   const handleSend = async () => {
     const trimmed = inputValue.trim();
-    if (!trimmed || sending || !currentSessionId) {
+    if (!trimmed || sending || !currentSessionId || messagingDisabled) {
       return;
     }
 
@@ -143,7 +145,12 @@ export function PlaygroundChatPanel({
 
   const showListPanel = !showMobileSessionToggle || mobileView === 'list';
   const showChatPanel = !showMobileSessionToggle || mobileView === 'chat';
-  const inputDisabled = sending || deletingSession || !currentSessionId || loadingMessages;
+  const inputDisabled =
+    sending ||
+    deletingSession ||
+    !currentSessionId ||
+    loadingMessages ||
+    messagingDisabled;
 
   if (initializing && sessions.length === 0) {
     return (
@@ -277,6 +284,14 @@ export function PlaygroundChatPanel({
             )}
 
             <div className="p-4 border-t border-gray-200 dark:border-gray-800 shrink-0">
+              {messagingDisabled && limitMessage ? (
+                <div
+                  role="alert"
+                  className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
+                >
+                  {limitMessage}
+                </div>
+              ) : null}
               <div className="flex items-end gap-2">
                 <textarea
                   ref={inputRef}
@@ -285,7 +300,11 @@ export function PlaygroundChatPanel({
                   onKeyDown={handleKeyDown}
                   disabled={inputDisabled}
                   rows={1}
-                  placeholder="Message your chatbot..."
+                  placeholder={
+                    messagingDisabled
+                      ? 'Message limit reached — upgrade to continue'
+                      : 'Message your chatbot...'
+                  }
                   className="flex-1 resize-none max-h-32 min-h-[44px] px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white disabled:opacity-50 text-sm"
                 />
                 <button

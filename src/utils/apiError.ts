@@ -23,3 +23,10 @@ export function getApiErrorMessage(error: unknown): string {
 
   return 'An unexpected error occurred. Please try again.';
 }
+
+export function getApiErrorCode(error: unknown): string | null {
+  if (axios.isAxiosError<ApiErrorResponse>(error)) {
+    return error.response?.data?.error_code ?? null;
+  }
+  return null;
+}

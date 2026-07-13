@@ -537,7 +537,7 @@ export function CreateChatbot() {
                   Drag and drop files here, or click to browse
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                  Supported: PDF, DOC, DOCX, TXT, CSV, MD (Max 4MB per file)
+                  Supported: PDF, DOC, DOCX, TXT, CSV, MD (Max 2MB per file)
                 </p>
                 <button
                   type="button"

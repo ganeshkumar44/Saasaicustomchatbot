@@ -7,8 +7,8 @@ export function AuthBackground({ children }: { children: ReactNode }) {
       {/* Left side - Nature Visual */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         <ImageWithFallback
-          src="https://images.unsplash.com/photo-1600340053706-32d1278206ef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920"
-          alt="Peaceful forest with sunlight filtering through trees"
+          src="https://saasaicustomchatbot-buc.s3.ap-south-1.amazonaws.com/images/Gemini_Generated_Image_68qdix68qdix68qd.webp"
+          alt="Intelligent Conversations AI Enabled"
           className="absolute inset-0 w-full h-full object-cover"
         />
       </div>

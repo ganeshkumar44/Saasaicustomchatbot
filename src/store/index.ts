@@ -12,6 +12,7 @@ import billingReducer from '@/store/billingSlice';
 import knowledgebaseUploadReducer from '@/store/knowledgebaseUploadSlice';
 import playgroundReducer from '@/store/playgroundSlice';
 import subscriptionReducer from '@/store/subscriptionSlice';
+import feedbackReducer from '@/store/feedbackSlice';
 import themeReducer from '@/store/themeSlice';
 
 export const store = configureStore({
@@ -29,6 +30,7 @@ export const store = configureStore({
     knowledgebaseUpload: knowledgebaseUploadReducer,
     playground: playgroundReducer,
     subscription: subscriptionReducer,
+    feedback: feedbackReducer,
     theme: themeReducer,
   },
 });

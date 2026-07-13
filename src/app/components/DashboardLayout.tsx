@@ -22,6 +22,7 @@ import {
   ChevronLeft,
 } from 'lucide-react';
 import { SidebarUserMenu } from '@/app/components/SidebarUserMenu';
+import { FeedbackFloatingButton } from '@/app/components/feedback/FeedbackFloatingButton';
 import { NgMarkIcon } from '@/assets/logos';
 import { fetchCurrentUserProfile } from '@/store/authThunk';
 
@@ -175,6 +176,8 @@ export function DashboardLayout() {
           <Outlet />
         </main>
       </div>
+
+      <FeedbackFloatingButton />
     </div>
   );
 }

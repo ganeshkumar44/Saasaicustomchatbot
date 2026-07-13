@@ -45,7 +45,7 @@ export function ChatbotCard({
   return (
     <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-all group">
       <div className="flex items-start justify-between mb-4">
-        <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+        <div className="w-12 h-12 bg-[#003A96] rounded-lg flex items-center justify-center">
           <Bot className="w-6 h-6 text-white" />
         </div>
         <div className="flex items-center gap-2">

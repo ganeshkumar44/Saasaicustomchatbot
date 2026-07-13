@@ -163,7 +163,7 @@ export function ChatHistory() {
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium">
+                          <div className="w-8 h-8 rounded-full bg-[#003A96] flex items-center justify-center text-white text-sm font-medium">
                             {visitorName.charAt(0).toUpperCase()}
                           </div>
                           <div>
@@ -263,7 +263,7 @@ export function ChatHistory() {
                 </button>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium">
+                    <div className="w-12 h-12 rounded-full bg-[#003A96] flex items-center justify-center text-white font-medium">
                       {selectedVisitorName.charAt(0).toUpperCase()}
                     </div>
                     <div>

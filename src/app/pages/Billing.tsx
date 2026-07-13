@@ -110,7 +110,7 @@ function BillingPlanCard({
     >
       {plan.is_popular && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <span className="px-4 py-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white text-xs font-semibold rounded-full">
+          <span className="px-4 py-1 bg-[#003A96] text-white text-xs font-semibold rounded-full">
             MOST POPULAR
           </span>
         </div>
@@ -128,7 +128,7 @@ function BillingPlanCard({
         <div
           className={`w-12 h-12 rounded-lg flex items-center justify-center ${
             plan.is_popular
-              ? 'bg-gradient-to-br from-purple-600 to-blue-600'
+              ? 'bg-[#003A96]'
               : 'bg-gray-100 dark:bg-gray-800'
           }`}
         >
@@ -176,7 +176,7 @@ function BillingPlanCard({
           isCurrentPlan
             ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'
             : plan.is_popular
-              ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 shadow-lg hover:shadow-xl'
+              ? 'bg-[#003A96] text-white hover:bg-[#002d75] shadow-lg hover:shadow-xl'
               : 'bg-blue-600 text-white hover:bg-blue-700'
         }`}
       >

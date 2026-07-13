@@ -67,7 +67,7 @@ export function ProfileAvatarPopover({
                 className="w-20 h-20 rounded-full object-cover ring-2 ring-gray-100 dark:ring-gray-800"
               />
             ) : (
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center ring-2 ring-gray-100 dark:ring-gray-800">
+              <div className="w-20 h-20 rounded-full bg-[#003A96] flex items-center justify-center ring-2 ring-gray-100 dark:ring-gray-800">
                 <User className="w-8 h-8 text-white" />
               </div>
             )}
@@ -96,7 +96,7 @@ export function ProfileAvatarPopover({
                 className="w-24 h-24 rounded-full object-cover ring-4 ring-gray-50 dark:ring-gray-800"
               />
             ) : (
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center ring-4 ring-gray-50 dark:ring-gray-800">
+              <div className="w-24 h-24 rounded-full bg-[#003A96] flex items-center justify-center ring-4 ring-gray-50 dark:ring-gray-800">
                 <User className="w-10 h-10 text-white" />
               </div>
             )}

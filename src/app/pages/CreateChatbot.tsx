@@ -736,7 +736,7 @@ export function CreateChatbot() {
             <button
               type="submit"
               disabled={publishLoading || reviewLoading}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-6 py-3 bg-[#003A96] text-white rounded-lg hover:bg-[#002d75] transition-all shadow-lg hover:shadow-xl flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {publishLoading ? (
                 <>

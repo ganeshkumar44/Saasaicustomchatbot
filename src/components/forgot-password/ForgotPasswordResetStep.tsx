@@ -42,7 +42,7 @@ export function ForgotPasswordResetStep() {
       </button>
 
       <div className="flex flex-col items-center mb-8">
-        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+        <div className="w-16 h-16 bg-[#003A96] rounded-2xl flex items-center justify-center mb-4 shadow-lg">
           <Bot className="w-10 h-10 text-white" />
         </div>
         <h1 className="text-3xl font-bold">Reset Password</h1>
@@ -118,7 +118,7 @@ export function ForgotPasswordResetStep() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-medium hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg hover:shadow-xl disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full py-3 bg-[#003A96] text-white rounded-lg font-medium hover:bg-[#002d75] transition-all shadow-lg hover:shadow-xl disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {loading ? (
             <>

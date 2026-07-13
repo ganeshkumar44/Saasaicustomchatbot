@@ -45,7 +45,7 @@ export function ProfileImageField({
           />
         ) : (
           <div
-            className={`${sizeClass} rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center`}
+            className={`${sizeClass} rounded-full bg-[#003A96] flex items-center justify-center`}
           >
             <User className={`${iconClass} text-white`} />
           </div>

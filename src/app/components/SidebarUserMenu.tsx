@@ -61,7 +61,7 @@ export function SidebarUserMenu({
 
     return (
       <div
-        className={`${sizeClass} rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 ring-2 ring-gray-100 dark:ring-gray-800`}
+        className={`${sizeClass} rounded-full bg-[#003A96] flex items-center justify-center flex-shrink-0 ring-2 ring-gray-100 dark:ring-gray-800`}
       >
         <User className={`${iconClass} text-white`} />
       </div>

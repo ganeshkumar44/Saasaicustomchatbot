@@ -160,7 +160,7 @@ export function Chatbots() {
                 onClick={handleCreateChatbot}
                 loading={createDraftLoading}
                 hasDraft={hasDraft}
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="px-6 py-3 bg-[#003A96] text-white rounded-lg hover:bg-[#002d75] transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
               />
             )}
           </div>

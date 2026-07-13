@@ -79,6 +79,7 @@
 }
 
 @theme inline {
+  --color-blue-600: #003A96;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

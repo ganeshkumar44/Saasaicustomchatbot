@@ -432,7 +432,7 @@ export function DashboardOverview() {
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium">
+                          <div className="w-10 h-10 rounded-full bg-[#003A96] flex items-center justify-center text-white font-medium">
                             {visitorName.charAt(0).toUpperCase()}
                           </div>
                           <div className="ml-3">

@@ -53,9 +53,9 @@ export function NgMarkIcon({ className }: NgMarkIconProps) {
   const iconClassName = cn(NG_MARK_SIZE_CLASS, 'flex-shrink-0', className);
 
   return (
-    <>
+    <span title="NexGenChat" aria-label="NexGenChat" className="inline-flex">
       <NgMarkDark className={cn(iconClassName, 'block dark:hidden')} />
       <NgMarkLight className={cn(iconClassName, 'hidden dark:block')} />
-    </>
+    </span>
   );
 }

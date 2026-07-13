@@ -69,7 +69,10 @@ export function ChatbotCard({
         </div>
       </div>
 
-      <h3 className="text-lg font-semibold dark:text-white mb-2">
+      <h3
+        className="text-lg font-semibold dark:text-white mb-2 truncate"
+        title={chatbot.chatbot_name ?? 'Untitled Chatbot'}
+      >
         {chatbot.chatbot_name ?? 'Untitled Chatbot'}
       </h3>
 

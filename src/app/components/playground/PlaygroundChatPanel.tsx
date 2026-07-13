@@ -250,11 +250,8 @@ export function PlaygroundChatPanel({
                 </div>
                 {playgroundUsageLabel ? (
                   <span
-                    className={`shrink-0 text-sm font-semibold tabular-nums ${
-                      messagingDisabled
-                        ? 'text-amber-600 dark:text-amber-400'
-                        : 'text-gray-700 dark:text-gray-300'
-                    }`}
+                    className="shrink-0 text-sm font-semibold tabular-nums"
+                    style={{ color: '#ff9900' }}
                     title="Playground messages used / plan limit"
                   >
                     {playgroundUsageLabel}

@@ -53,6 +53,8 @@ export function usePlayground({ chatbotId, enabled = true }: UsePlaygroundOption
   const {
     playgroundMessagingDisabled,
     playgroundLimitMessage,
+    usage,
+    limits,
     refreshUsage,
     disablePlaygroundMessaging,
   } = useSubscription({ chatbotId, enabled });
@@ -212,6 +214,9 @@ export function usePlayground({ chatbotId, enabled = true }: UsePlaygroundOption
     error,
     messagingDisabled: playgroundMessagingDisabled,
     limitMessage: playgroundLimitMessage,
+    playgroundMessagesUsed: usage?.playground_messages_used ?? null,
+    playgroundMessageLimit: limits?.playground_message_limit ?? null,
+    playgroundMessageUnlimited: limits?.playground_message_unlimited ?? false,
     selectSession,
     createSession,
     deleteSession,

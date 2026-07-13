@@ -47,6 +47,9 @@ export function PlaygroundChatPanel({
     error,
     messagingDisabled,
     limitMessage,
+    playgroundMessagesUsed,
+    playgroundMessageLimit,
+    playgroundMessageUnlimited,
     selectSession,
     createSession,
     deleteSession,
@@ -55,6 +58,12 @@ export function PlaygroundChatPanel({
     retryMessages,
   } = usePlayground({ chatbotId, enabled });
 
+  const playgroundUsageLabel =
+    !playgroundMessageUnlimited &&
+    playgroundMessagesUsed !== null &&
+    playgroundMessageLimit !== null
+      ? `${playgroundMessagesUsed} / ${playgroundMessageLimit}`
+      : null;
   const scrollMessagesToBottom = useCallback(() => {
     const container = messagesContainerRef.current;
     if (container) {
@@ -227,15 +236,31 @@ export function PlaygroundChatPanel({
                   Sessions
                 </button>
               )}
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-lg font-semibold dark:text-white">{chatbotName}</h2>
-                <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300">
-                  Playground
-                </span>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="text-lg font-semibold dark:text-white">{chatbotName}</h2>
+                    <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300">
+                      Playground
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    {currentSession?.title ?? 'New Chat'}
+                  </p>
+                </div>
+                {playgroundUsageLabel ? (
+                  <span
+                    className={`shrink-0 text-sm font-semibold tabular-nums ${
+                      messagingDisabled
+                        ? 'text-amber-600 dark:text-amber-400'
+                        : 'text-gray-700 dark:text-gray-300'
+                    }`}
+                    title="Playground messages used / plan limit"
+                  >
+                    {playgroundUsageLabel}
+                  </span>
+                ) : null}
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                {currentSession?.title ?? 'New Chat'}
-              </p>
             </div>
 
             {loadingMessages ? (

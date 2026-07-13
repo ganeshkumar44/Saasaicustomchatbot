@@ -26,7 +26,7 @@ function RequirementItem({ met, label }: RequirementItemProps) {
           : 'text-[var(--color-text-tertiary)]'
       }`}
     >
-      <span className="mr-2">{met ? '•' : '•'}</span>
+      <span className="mr-2">{met ? '✔' : '○'}</span>
       {label}
     </li>
   );
@@ -105,6 +105,7 @@ export function PasswordValidationBox({
           <RequirementItem met={checks.uppercase} label="One uppercase letter" />
           <RequirementItem met={checks.lowercase} label="One lowercase letter" />
           <RequirementItem met={checks.digit} label="One number" />
+          <RequirementItem met={checks.special} label="One special character" />
           {showMatchCheck && (
             <RequirementItem
               met={passwordsMatch}

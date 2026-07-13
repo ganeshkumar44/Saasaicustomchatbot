@@ -150,6 +150,14 @@ export function validateUpdatePasswordForm(data: UpdatePasswordRequest): Validat
     errors.push(passwordError);
   }
 
+  if (
+    data.current_password
+    && data.new_password
+    && data.current_password === data.new_password
+  ) {
+    errors.push('New password must be different from your current password.');
+  }
+
   if (!data.confirm_new_password) {
     errors.push('Confirm new password is required.');
   } else if (data.new_password !== data.confirm_new_password) {

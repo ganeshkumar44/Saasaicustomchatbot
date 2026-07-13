@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { ProfileAvatarPopover } from '@/app/components/account/ProfileAvatarPopover';
 import { NotificationSettingsPanel } from '@/app/components/account/NotificationSettingsPanel';
 import { ConfirmDialog } from '@/app/components/ui/ConfirmDialog';
+import { PasswordValidationBox } from '@/components/auth/PasswordValidationBox';
 import { UserLoginHistorySection } from '@/components/loginHistory/UserLoginHistoryList';
 import {
   Select,
@@ -581,6 +582,14 @@ export function AccountSettings() {
                     </button>
                   </div>
                 </div>
+
+                {(passwordForm.newPassword.length > 0 || passwordForm.confirmNewPassword.length > 0) && (
+                  <PasswordValidationBox
+                    password={passwordForm.newPassword}
+                    confirmPassword={passwordForm.confirmNewPassword}
+                    showMatchCheck
+                  />
+                )}
 
                 {passwordValidationErrors.length > 0 && (
                   <div className="rounded-lg border border-red-200 dark:border-red-800 p-3 space-y-1">

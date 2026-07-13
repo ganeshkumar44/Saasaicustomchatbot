@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Loader2, MessageSquare, Plus, Search, Trash2 } from 'lucide-react';
 import { SkeletonSessionList } from '@/components/Skeleton';
 import type { PlaygroundSession } from '@/types/playground.types';
-import { formatRelativeLastActivity } from '@/utils/timeFormatter';
+import { formatPlaygroundDayLabel } from '@/utils/timeFormatter';
 
 interface PlaygroundSessionSidebarProps {
   sessions: PlaygroundSession[];
@@ -123,7 +123,7 @@ export function PlaygroundSessionSidebar({
                     </p>
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 pl-6">
-                    {formatRelativeLastActivity(session.updated_at)}
+                    {formatPlaygroundDayLabel(session.updated_at)}
                   </p>
                 </button>
                 <button

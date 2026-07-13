@@ -12,6 +12,13 @@ import {
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { toast } from 'sonner';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/app/components/ui/carousel';
 import { SkeletonChart } from '@/components/Skeleton/SkeletonChart';
 import { SkeletonStatistic } from '@/components/Skeleton/SkeletonStatistic';
 import { useBillingPlans } from '@/hooks/useBillingPlans';
@@ -93,7 +100,7 @@ function BillingPlanCard({
 
   return (
     <div
-      className={`relative bg-white dark:bg-gray-900 rounded-xl p-6 border-2 transition-all ${
+      className={`relative h-full bg-white dark:bg-gray-900 rounded-xl p-6 border-2 transition-all ${
         isCurrentPlan
           ? 'border-blue-600 shadow-xl'
           : plan.is_popular
@@ -340,16 +347,27 @@ export function Billing() {
             {plans.length === 0 ? (
               <BillingPlansEmptyState />
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {plans.map((plan) => (
-                  <BillingPlanCard
-                    key={plan.plan_name}
-                    plan={plan}
-                    currentPlanName={currentPlanName}
-                    onUpgrade={handleUpgrade}
-                  />
-                ))}
-              </div>
+              <Carousel
+                opts={{ align: 'start', loop: false }}
+                className="w-full"
+              >
+                <CarouselContent className="-ml-4 pt-3">
+                  {plans.map((plan) => (
+                    <CarouselItem
+                      key={plan.plan_name}
+                      className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3"
+                    >
+                      <BillingPlanCard
+                        plan={plan}
+                        currentPlanName={currentPlanName}
+                        onUpgrade={handleUpgrade}
+                      />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="left-2 md:-left-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm" />
+                <CarouselNext className="right-2 md:-right-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm" />
+              </Carousel>
             )}
           </div>
         </>

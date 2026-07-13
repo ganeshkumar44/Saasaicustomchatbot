@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Copy } from 'lucide-react';
 import { MarkdownMessage } from '@/components/common/MarkdownMessage';
 import type { PlaygroundMessage } from '@/types/playground.types';
-import { formatChatMessageTime } from '@/utils/chatHistoryFormat';
 import { copyToClipboard } from '@/utils/copyToClipboard';
+import { formatPlaygroundMessageTimestamp } from '@/utils/timeFormatter';
 
 interface PlaygroundMessageBubbleProps {
   message: PlaygroundMessage;
@@ -19,7 +19,7 @@ export function PlaygroundMessageBubble({
   onTypingComplete,
 }: PlaygroundMessageBubbleProps) {
   const isUser = message.sender === 'user';
-  const timestamp = formatChatMessageTime(message.created_at);
+  const timestamp = formatPlaygroundMessageTimestamp(message.created_at);
   const [displayedContent, setDisplayedContent] = useState(
     animate ? '' : message.message,
   );

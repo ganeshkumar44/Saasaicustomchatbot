@@ -1,39 +1,43 @@
+import { useState } from 'react';
 import {
   Calendar,
-  Check,
   CreditCard,
-  Crown,
   DollarSign,
-  Download,
-  Rocket,
-  Sparkles,
   TrendingUp,
-  Zap,
 } from 'lucide-react';
+import { Link, Navigate, useNavigate } from 'react-router';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { toast } from 'sonner';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from '@/app/components/ui/carousel';
+import { BillingAlert } from '@/app/components/billing/BillingAlert';
+import { InvoiceCard } from '@/app/components/billing/InvoiceCard';
+import { BillingPricingSection } from '@/app/components/billing/BillingPricingSection';
+import { CancelSubscriptionModal } from '@/app/components/billing/CancelSubscriptionModal';
+import { CurrentPlanCard } from '@/app/components/billing/CurrentPlanCard';
+import { PaymentDetailsModal } from '@/app/components/billing/PaymentDetailsModal';
+import { PaymentHistoryTable } from '@/app/components/billing/PaymentHistoryTable';
+import { RenewalCard } from '@/app/components/billing/RenewalCard';
+import { SubscriptionStatusCard } from '@/app/components/billing/SubscriptionStatusCard';
 import { SkeletonChart } from '@/components/Skeleton/SkeletonChart';
 import { SkeletonStatistic } from '@/components/Skeleton/SkeletonStatistic';
 import { useBillingPlans } from '@/hooks/useBillingPlans';
-import type { BillingPlanCatalogItem } from '@/types/billing.types';
+import { useInvoices } from '@/hooks/useInvoices';
+import { usePricing } from '@/hooks/usePricing';
+import { useAppSelector } from '@/store/hooks';
+import { selectUser } from '@/store/authSelectors';
+import { selectUserDetails } from '@/store/accountSettingsSelectors';
+import type { CreateSubscriptionData } from '@/types/pricing.types';
 import {
   formatBillingAmount,
   formatBillingCycleLabel,
   formatNextBillingDate,
   formatPlanStatusLabel,
-  isCurrentBillingPlan,
 } from '@/utils/billing';
+import { openRazorpayCheckout } from '@/utils/openRazorpayCheckout';
 
 const SHOW_CONVERSATIONS_USED = false;
 const SHOW_USAGE_OVER_TIME = false;
-const SHOW_INVOICE_HISTORY = false;
+const PAYMENT_SUCCESS_STORAGE_KEY = 'billing_payment_success';
+const PAYMENT_FAILED_STORAGE_KEY = 'billing_payment_failed';
 
 const usageData = [
   { id: 'jul', month: 'Jul', cost: 45 },
@@ -44,154 +48,72 @@ const usageData = [
   { id: 'dec', month: 'Dec', cost: 85 },
 ];
 
-const invoices = [
-  { id: 'INV-001', date: '2024-01-01', amount: 85, status: 'paid' },
-  { id: 'INV-002', date: '2023-12-01', amount: 78, status: 'paid' },
-  { id: 'INV-003', date: '2023-11-01', amount: 65, status: 'paid' },
-  { id: 'INV-004', date: '2023-10-01', amount: 48, status: 'paid' },
-];
-
-function getPlanIcon(planName: string) {
-  const normalized = planName.trim().toLowerCase();
-
-  if (normalized === 'enterprise') {
-    return Crown;
+function formatEndDate(value: string | null | undefined): string {
+  if (!value) {
+    return 'the end of your billing period';
   }
-
-  if (normalized === 'pro') {
-    return Rocket;
+  try {
+    return new Intl.DateTimeFormat('en-IN', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    }).format(new Date(value));
+  } catch {
+    return value;
   }
-
-  if (normalized === 'starter') {
-    return Zap;
-  }
-
-  return Sparkles;
-}
-
-function BillingPlansEmptyState() {
-  return (
-    <div className="p-12 flex flex-col items-center justify-center text-center bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
-      <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
-        <CreditCard className="w-10 h-10 text-gray-400" />
-      </div>
-      <h3 className="text-xl font-semibold dark:text-white mb-2">No Plans Available</h3>
-      <p className="text-gray-600 dark:text-gray-400 max-w-md">
-        Subscription plans are not available right now. Please try again later.
-      </p>
-    </div>
-  );
-}
-
-function BillingPlanCard({
-  plan,
-  currentPlanName,
-  onUpgrade,
-}: {
-  plan: BillingPlanCatalogItem;
-  currentPlanName: string | null;
-  onUpgrade: (planName: string) => void;
-}) {
-  const isCurrentPlan = isCurrentBillingPlan(currentPlanName, plan.plan_name);
-  const PlanIcon = getPlanIcon(plan.plan_name);
-  const priceAmount = plan.price ? formatBillingAmount(plan.price) : null;
-  const billingCycleLabel = formatBillingCycleLabel(plan.billing_cycle);
-  const statusLabel = formatPlanStatusLabel(plan.status);
-
-  return (
-    <div
-      className={`relative h-full bg-white dark:bg-gray-900 rounded-xl p-6 border-2 transition-all ${
-        isCurrentPlan
-          ? 'border-blue-600 shadow-xl'
-          : plan.is_popular
-            ? 'border-purple-600'
-            : 'border-gray-200 dark:border-gray-800'
-      }`}
-    >
-      {plan.is_popular && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <span className="px-4 py-1 bg-[#003A96] text-white text-xs font-semibold rounded-full">
-            MOST POPULAR
-          </span>
-        </div>
-      )}
-      {isCurrentPlan && (
-        <div className="absolute -top-3 right-4">
-          <span className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full flex items-center gap-1">
-            <Check className="w-3 h-3" />
-            Current Plan
-          </span>
-        </div>
-      )}
-
-      <div className="flex items-center gap-3 mb-6">
-        <div
-          className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-            plan.is_popular
-              ? 'bg-[#003A96]'
-              : 'bg-gray-100 dark:bg-gray-800'
-          }`}
-        >
-          <PlanIcon
-            className={`w-6 h-6 ${plan.is_popular ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`}
-          />
-        </div>
-        <div>
-          <h3 className="text-xl font-bold dark:text-white">{plan.display_name}</h3>
-          {priceAmount && (
-            <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-bold dark:text-white">{priceAmount}</span>
-              {billingCycleLabel && billingCycleLabel !== 'Free' && (
-                <span className="text-gray-600 dark:text-gray-400">
-                  /{billingCycleLabel.toLowerCase()}
-                </span>
-              )}
-            </div>
-          )}
-          {statusLabel && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Status: {statusLabel}</p>
-          )}
-        </div>
-      </div>
-
-      <ul className="space-y-3 mb-6">
-        <li className="flex items-start gap-2">
-          <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
-          <span className="text-sm text-gray-600 dark:text-gray-400">
-            {plan.chatbot_limit} chatbot{plan.chatbot_limit === 1 ? '' : 's'}
-          </span>
-        </li>
-        {plan.features.map((feature) => (
-          <li key={`${plan.plan_name}-${feature}`} className="flex items-start gap-2">
-            <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
-            <span className="text-sm text-gray-600 dark:text-gray-400">{feature}</span>
-          </li>
-        ))}
-      </ul>
-
-      <button
-        onClick={() => onUpgrade(plan.display_name)}
-        disabled={isCurrentPlan}
-        className={`w-full py-3 rounded-lg font-medium transition-all ${
-          isCurrentPlan
-            ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'
-            : plan.is_popular
-              ? 'bg-[#003A96] text-white hover:bg-[#002d75] shadow-lg hover:shadow-xl'
-              : 'bg-blue-600 text-white hover:bg-blue-700'
-        }`}
-      >
-        {isCurrentPlan ? 'Current Plan' : 'Upgrade'}
-      </button>
-    </div>
-  );
 }
 
 export function Billing() {
-  const { billingData, plans, currentPlanName, loading, error } = useBillingPlans();
+  const navigate = useNavigate();
+  const user = useAppSelector(selectUser);
+  const userDetails = useAppSelector(selectUserDetails);
+  const { billingData, loading, error } = useBillingPlans();
+  const {
+    currentPlan,
+    loading: pricingLoading,
+    paymentHistory,
+    paymentHistoryLoading,
+    paymentHistoryError,
+    paymentDetail,
+    paymentDetailLoading,
+    paymentDetailError,
+    subscriptionStatus,
+    subscriptionStatusLoading,
+    cancelResult,
+    autoRenewLoading,
+    autoRenewError,
+    cancelLoading,
+    cancelError,
+    retryLoading,
+    retryError,
+    loadPaymentDetail,
+    clearDetail,
+    disableAutoRenew,
+    enableAutoRenew,
+    cancelSubscription,
+    retryFailedPayment,
+    refresh,
+  } = usePricing();
+  const {
+    latestInvoice,
+    downloadLoading: invoiceDownloadLoading,
+    download: downloadInvoicePdf,
+  } = useInvoices();
 
-  const handleUpgrade = (planName: string) => {
-    toast.success(`Upgraded to ${planName} plan!`);
-  };
+
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [confirmDisableOpen, setConfirmDisableOpen] = useState(false);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [enableCheckoutBusy, setEnableCheckoutBusy] = useState(false);
+  const [retryingPaymentId, setRetryingPaymentId] = useState<number | null>(null);
+
+  const isPaidPlan =
+    Boolean(currentPlan) &&
+    (currentPlan?.plan_name ?? '').trim().toLowerCase() !== 'free';
+
+  const canCancel =
+    Boolean(subscriptionStatus?.can_cancel) ||
+    Boolean(currentPlan?.is_auto_renew && currentPlan.razorpay_subscription_id);
 
   const planStatusLabel = formatPlanStatusLabel(billingData?.status);
   const currentBillingLabel = billingData
@@ -200,12 +122,212 @@ export function Billing() {
   const nextBillingLabel = formatNextBillingDate(billingData?.next_billing_date);
   const billingCycleLabel = formatBillingCycleLabel(billingData?.billing_cycle);
 
+  const subscriptionEndLabel = formatEndDate(
+    cancelResult?.subscription_end ??
+      subscriptionStatus?.subscription_end ??
+      currentPlan?.subscription_end,
+  );
+
+  const prefillName = [user?.first_name, user?.last_name]
+    .filter(Boolean)
+    .join(' ')
+    .trim();
+
+  const handleViewDetails = async (paymentId: number) => {
+    setDetailsOpen(true);
+    await loadPaymentDetail(paymentId);
+  };
+
+  const handleCloseDetails = () => {
+    setDetailsOpen(false);
+    clearDetail();
+  };
+
+  const handleConfirmDisable = async () => {
+    const result = await disableAutoRenew(currentPlan?.razorpay_subscription_id);
+    if (!result) {
+      toast.error(autoRenewError ?? 'Unable to disable Auto Renew.');
+      return;
+    }
+    setConfirmDisableOpen(false);
+    toast.success(
+      'Auto Renew disabled. Your subscription will remain active until the current billing period ends.',
+    );
+    refresh();
+  };
+
+  const handleConfirmCancel = async () => {
+    const result = await cancelSubscription(
+      currentPlan?.razorpay_subscription_id ??
+        subscriptionStatus?.razorpay_subscription_id,
+    );
+    if (!result) {
+      toast.error(cancelError ?? 'Unable to cancel subscription.');
+      return;
+    }
+    setCancelModalOpen(false);
+    toast.success(
+      'Auto Renew Disabled. Your current plan remains active until the billing period ends.',
+    );
+    refresh();
+  };
+
+  const handleRetryPayment = async (paymentId: number) => {
+    if (retryLoading) {
+      return;
+    }
+    setRetryingPaymentId(paymentId);
+    try {
+      const order = await retryFailedPayment(paymentId);
+      if (!order) {
+        toast.error(retryError ?? 'Unable to retry payment.');
+        return;
+      }
+
+      await openRazorpayCheckout({
+        order,
+        prefill: {
+          name: prefillName || undefined,
+          email: user?.email ?? userDetails?.email,
+          contact: userDetails?.mobile ?? undefined,
+        },
+        onSuccess: (payload) => {
+          sessionStorage.setItem(
+            PAYMENT_SUCCESS_STORAGE_KEY,
+            JSON.stringify({
+              ...payload,
+              plan_name: order.display_name,
+              billing_cycle: order.billing_cycle,
+              amount: order.total_amount,
+              currency: order.currency,
+              auto_renew: false,
+            }),
+          );
+          navigate('/dashboard/billing/payment-success');
+        },
+        onFailure: (errorPayload) => {
+          sessionStorage.setItem(
+            PAYMENT_FAILED_STORAGE_KEY,
+            JSON.stringify({
+              reason:
+                errorPayload.description || errorPayload.reason || 'Payment failed',
+              code: errorPayload.code ?? null,
+              order_id: order.order_id,
+              plan_name: order.display_name,
+            }),
+          );
+          navigate('/dashboard/billing/payment-failed');
+        },
+        onDismiss: () => {
+          toast.info('Retry payment cancelled.');
+          refresh();
+        },
+      });
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Unable to open Razorpay Checkout.';
+      toast.error(message);
+    } finally {
+      setRetryingPaymentId(null);
+    }
+  };
+
+  const handleEnableAutoRenew = async () => {
+    if (enableCheckoutBusy || autoRenewLoading) {
+      return;
+    }
+
+    setEnableCheckoutBusy(true);
+    try {
+      const result = await enableAutoRenew();
+      if (!result) {
+        toast.error(autoRenewError ?? 'Unable to enable Auto Renew.');
+        return;
+      }
+
+      if (!result.requires_checkout) {
+        toast.success('Auto Renew enabled successfully.');
+        refresh();
+        return;
+      }
+
+      if (!result.subscription_id || !result.key || result.plan_id == null) {
+        toast.error('Subscription checkout details are incomplete.');
+        return;
+      }
+
+      const subscription: CreateSubscriptionData = {
+        subscription_id: result.subscription_id,
+        key: result.key,
+        customer_id: result.customer_id,
+        plan_id: result.plan_id,
+        plan_name: result.plan_name ?? currentPlan?.plan_name ?? '',
+        display_name: result.display_name ?? currentPlan?.display_name ?? '',
+        billing_cycle: result.billing_cycle ?? currentPlan?.billing_cycle ?? 'monthly',
+        action: 'switch',
+        currency: result.currency ?? currentPlan?.currency ?? 'INR',
+        amount: result.amount ?? 0,
+        total_amount: result.total_amount ?? 0,
+        subtotal: result.total_amount ?? 0,
+        discount: 0,
+        gst_percentage: 0,
+        gst_amount: 0,
+        auto_renew: true,
+      };
+
+      await openRazorpayCheckout({
+        subscription,
+        prefill: {
+          name: prefillName || undefined,
+          email: user?.email ?? userDetails?.email,
+          contact: userDetails?.mobile ?? undefined,
+        },
+        onSuccess: (payload) => {
+          sessionStorage.setItem(
+            PAYMENT_SUCCESS_STORAGE_KEY,
+            JSON.stringify({
+              ...payload,
+              plan_name: subscription.display_name,
+              billing_cycle: subscription.billing_cycle,
+              amount: subscription.total_amount,
+              currency: subscription.currency,
+              auto_renew: true,
+            }),
+          );
+          navigate('/dashboard/billing/payment-success');
+        },
+        onFailure: (errorPayload) => {
+          sessionStorage.setItem(
+            PAYMENT_FAILED_STORAGE_KEY,
+            JSON.stringify({
+              reason:
+                errorPayload.description || errorPayload.reason || 'Payment failed',
+              code: errorPayload.code ?? null,
+              subscription_id: subscription.subscription_id,
+              plan_name: subscription.display_name,
+            }),
+          );
+          navigate('/dashboard/billing/payment-failed');
+        },
+        onDismiss: () => {
+          toast.info('Auto Renew checkout cancelled.');
+        },
+      });
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Unable to open Auto Renew checkout.';
+      toast.error(message);
+    } finally {
+      setEnableCheckoutBusy(false);
+    }
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-3xl font-bold dark:text-white">Billing & Plans</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">
-          Manage your subscription and payment methods
+          Manage your subscription, compare plans, and view payment history
         </p>
       </div>
 
@@ -214,6 +336,82 @@ export function Billing() {
           {error}
         </div>
       )}
+
+      {cancelResult ? (
+        <BillingAlert
+          variant="success"
+          title="Auto Renew Disabled"
+          description={`Your current plan remains active until ${formatEndDate(cancelResult.subscription_end)}.`}
+        />
+      ) : null}
+
+      <CurrentPlanCard plan={currentPlan} loading={pricingLoading && !currentPlan} />
+
+      <InvoiceCard
+        invoice={latestInvoice}
+        onDownload={() => {
+          if (!latestInvoice) {
+            return;
+          }
+          void downloadInvoicePdf(latestInvoice).then((ok) => {
+            if (ok) {
+              toast.success('Invoice downloaded.');
+            } else {
+              toast.error('Unable to download invoice.');
+            }
+          });
+        }}
+        downloadLoading={invoiceDownloadLoading}
+      />
+
+      <div className="flex justify-end">
+        <Link
+          to="/dashboard/billing/invoices"
+          className="text-sm font-semibold text-[#003A96] dark:text-blue-300 hover:underline"
+        >
+          View all invoices
+        </Link>
+      </div>
+
+      <SubscriptionStatusCard
+        status={subscriptionStatus}
+        loading={subscriptionStatusLoading && !subscriptionStatus}
+      />
+
+      {isPaidPlan && canCancel ? (
+        <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 space-y-3">
+          <div>
+            <h3 className="text-base font-semibold dark:text-white">
+              Cancel Subscription
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
+              Turns off Auto Renew only. You keep your current plan until{' '}
+              {subscriptionEndLabel}.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setCancelModalOpen(true)}
+            disabled={cancelLoading}
+            className="w-full sm:w-auto px-4 py-2 rounded-xl text-sm font-semibold border border-red-200 text-red-700 hover:bg-red-50 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950/30 disabled:opacity-50"
+          >
+            Cancel Subscription
+          </button>
+        </div>
+      ) : null}
+
+      {isPaidPlan ? (
+        <RenewalCard
+          isAutoRenew={Boolean(currentPlan?.is_auto_renew)}
+          subscriptionId={currentPlan?.razorpay_subscription_id ?? null}
+          loading={autoRenewLoading || enableCheckoutBusy || cancelLoading}
+          onDisable={() => setConfirmDisableOpen(true)}
+          onEnable={() => void handleEnableAutoRenew()}
+          confirmOpen={confirmDisableOpen}
+          onConfirmDisable={() => void handleConfirmDisable()}
+          onCancelConfirm={() => setConfirmDisableOpen(false)}
+        />
+      ) : null}
 
       {loading ? (
         <>
@@ -225,27 +423,6 @@ export function Billing() {
               <SkeletonChart height={250} />
             </div>
           )}
-          <div>
-            <div className="h-8 w-48 bg-gray-200 dark:bg-gray-800 rounded mb-6 animate-pulse" />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <div
-                  key={`billing-plan-skeleton-${index}`}
-                  className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800"
-                >
-                  <div className="w-12 h-12 bg-gray-200 dark:bg-gray-800 rounded-lg mb-4 animate-pulse" />
-                  <div className="h-6 w-3/4 bg-gray-200 dark:bg-gray-800 rounded mb-2 animate-pulse" />
-                  <div className="h-8 w-1/2 bg-gray-200 dark:bg-gray-800 rounded mb-4 animate-pulse" />
-                  <div className="space-y-2 mb-6">
-                    <div className="h-4 w-full bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-                    <div className="h-4 w-5/6 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-                    <div className="h-4 w-4/6 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-                  </div>
-                  <div className="h-10 w-full bg-gray-200 dark:bg-gray-800 rounded-lg animate-pulse" />
-                </div>
-              ))}
-            </div>
-          </div>
         </>
       ) : (
         <>
@@ -304,7 +481,9 @@ export function Billing() {
                   )}
                 </div>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Renews automatically</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Auto renew: {currentPlan?.is_auto_renew ? 'On' : 'Off'}
+              </p>
             </div>
           </div>
 
@@ -341,37 +520,27 @@ export function Billing() {
               </ResponsiveContainer>
             </div>
           )}
-
-          <div>
-            <h2 className="text-2xl font-bold dark:text-white mb-6">Available Plans</h2>
-            {plans.length === 0 ? (
-              <BillingPlansEmptyState />
-            ) : (
-              <Carousel
-                opts={{ align: 'start', loop: false }}
-                className="w-full"
-              >
-                <CarouselContent className="-ml-4 pt-3">
-                  {plans.map((plan) => (
-                    <CarouselItem
-                      key={plan.plan_name}
-                      className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3"
-                    >
-                      <BillingPlanCard
-                        plan={plan}
-                        currentPlanName={currentPlanName}
-                        onUpgrade={handleUpgrade}
-                      />
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselPrevious className="left-2 md:-left-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm" />
-                <CarouselNext className="right-2 md:-right-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm" />
-              </Carousel>
-            )}
-          </div>
         </>
       )}
+
+      <BillingPricingSection />
+
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-xl font-bold dark:text-white">Payment History</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Newest transactions first. Failed payments can be retried.
+          </p>
+        </div>
+        <PaymentHistoryTable
+          items={paymentHistory}
+          loading={paymentHistoryLoading}
+          error={paymentHistoryError}
+          retryingPaymentId={retryingPaymentId}
+          onViewDetails={(paymentId) => void handleViewDetails(paymentId)}
+          onRetryPayment={(paymentId) => void handleRetryPayment(paymentId)}
+        />
+      </section>
 
       <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
         <h2 className="text-lg font-semibold dark:text-white mb-4">Payment Method</h2>
@@ -381,72 +550,35 @@ export function Billing() {
               <CreditCard className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <p className="font-medium dark:text-white">•••• •••• •••• 4242</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Expires 12/25</p>
+              <p className="font-medium dark:text-white">Paid via Razorpay Checkout</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                UPI, cards, net banking, wallets, and EMI
+              </p>
             </div>
           </div>
-          <button className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-            Update
-          </button>
         </div>
       </div>
 
-      {SHOW_INVOICE_HISTORY && (
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-          <div className="p-6 border-b border-gray-200 dark:border-gray-800">
-            <h2 className="text-lg font-semibold dark:text-white">Invoice History</h2>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-gray-800">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Invoice ID
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Amount
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
-                {invoices.map((invoice) => (
-                  <tr key={invoice.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <td className="px-6 py-4 whitespace-nowrap font-medium dark:text-white">
-                      {invoice.id}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-400">
-                      {invoice.date}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap font-medium dark:text-white">
-                      ${invoice.amount}.00
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-400">
-                        {invoice.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <button className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-2 ml-auto">
-                        <Download className="w-4 h-4" />
-                        Download
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      <PaymentDetailsModal
+        open={detailsOpen}
+        payment={paymentDetail}
+        loading={paymentDetailLoading}
+        error={paymentDetailError}
+        onClose={handleCloseDetails}
+      />
+
+      <CancelSubscriptionModal
+        open={cancelModalOpen}
+        loading={cancelLoading}
+        subscriptionEndLabel={subscriptionEndLabel}
+        onConfirm={() => void handleConfirmCancel()}
+        onCancel={() => setCancelModalOpen(false)}
+      />
     </div>
   );
+}
+
+/** Old pricing URL redirects to the merged billing page. */
+export function BillingPricingRedirect() {
+  return <Navigate to="/dashboard/billing" replace />;
 }

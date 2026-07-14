@@ -11,6 +11,8 @@ import manageUsersReducer from '@/store/manageUsersSlice';
 import billingReducer from '@/store/billingSlice';
 import knowledgebaseUploadReducer from '@/store/knowledgebaseUploadSlice';
 import playgroundReducer from '@/store/playgroundSlice';
+import pricingReducer from '@/store/pricingSlice';
+import invoiceReducer from '@/store/invoiceSlice';
 import subscriptionReducer from '@/store/subscriptionSlice';
 import feedbackReducer from '@/store/feedbackSlice';
 import themeReducer from '@/store/themeSlice';
@@ -29,6 +31,8 @@ export const store = configureStore({
     billing: billingReducer,
     knowledgebaseUpload: knowledgebaseUploadReducer,
     playground: playgroundReducer,
+    pricing: pricingReducer,
+    invoice: invoiceReducer,
     subscription: subscriptionReducer,
     feedback: feedbackReducer,
     theme: themeReducer,

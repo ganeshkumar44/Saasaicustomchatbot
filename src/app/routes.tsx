@@ -13,7 +13,10 @@ import { ChatbotPreview } from "./pages/ChatbotPreview";
 import { KnowledgeBase } from "./pages/KnowledgeBase";
 import { ChatHistory } from "./pages/ChatHistory";
 import { Analytics } from "./pages/Analytics";
-import { Billing } from "./pages/Billing";
+import { Billing, BillingPricingRedirect } from "./pages/Billing";
+import { Invoices } from "./pages/Invoices";
+import { PaymentSuccess } from "./pages/PaymentSuccess";
+import { PaymentFailed } from "./pages/PaymentFailed";
 import { AccountSettings } from "./pages/AccountSettings";
 import { ManageUsers } from "./pages/ManageUsers";
 import { AdminRoute } from "@/components/AdminRoute";
@@ -53,6 +56,10 @@ export const router = createBrowserRouter([
           { path: "history", Component: ChatHistory },
           { path: "analytics", Component: Analytics },
           { path: "billing", Component: Billing },
+          { path: "billing/invoices", Component: Invoices },
+          { path: "billing/pricing", Component: BillingPricingRedirect },
+          { path: "billing/payment-success", Component: PaymentSuccess },
+          { path: "billing/payment-failed", Component: PaymentFailed },
           { path: "settings", Component: AccountSettings },
           {
             Component: AdminRoute,

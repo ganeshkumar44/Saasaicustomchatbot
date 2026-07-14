@@ -3,7 +3,7 @@ import { ImageWithFallback } from './figma/ImageWithFallback';
 
 export function AuthBackground({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen flex">
+    <div className="h-screen flex overflow-hidden">
       {/* Left side - Nature Visual */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         <ImageWithFallback
@@ -13,9 +13,9 @@ export function AuthBackground({ children }: { children: ReactNode }) {
         />
       </div>
 
-      {/* Right side - Auth Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 bg-[var(--color-bg)]">
-        <div className="w-full max-w-md">
+      {/* Right side - Auth Form (scrolls when content exceeds viewport) */}
+      <div className="w-full lg:w-1/2 h-full overflow-y-auto overscroll-contain flex justify-center p-6 lg:p-12 bg-[var(--color-bg)]">
+        <div className="w-full max-w-md my-auto py-2">
           {children}
         </div>
       </div>

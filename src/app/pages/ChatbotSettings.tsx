@@ -603,14 +603,15 @@ export function ChatbotSettings() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Primary Color</label>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3 md:gap-4">
                     <input
                       type="color"
                       value={appearanceForm.primary_color}
                       onChange={(event) =>
                         setAppearanceForm({ ...appearanceForm, primary_color: event.target.value })}
                       disabled={appearanceLoading}
-                      className="w-20 h-12 rounded-lg border border-gray-300 dark:border-gray-700 cursor-default"
+                      aria-label="Primary color picker"
+                      className="h-12 w-12 min-w-12 shrink-0 rounded-lg border border-gray-300 dark:border-gray-700 cursor-pointer bg-transparent p-0 overflow-hidden appearance-none [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:border-none [&::-webkit-color-swatch]:rounded-md md:h-12 md:w-20 md:min-w-20"
                     />
                     <input
                       type="text"
@@ -618,7 +619,7 @@ export function ChatbotSettings() {
                       onChange={(event) =>
                         setAppearanceForm({ ...appearanceForm, primary_color: event.target.value })}
                       disabled={appearanceLoading}
-                      className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
+                      className="min-w-0 flex-1 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
                     />
                   </div>
                 </div>

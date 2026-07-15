@@ -6,7 +6,7 @@ import {
   Settings,
 } from 'lucide-react';
 import { useAppSelector } from '@/store/hooks';
-import { selectUser } from '@/store/authSelectors';
+import { selectCanViewAnalytics, selectUser } from '@/store/authSelectors';
 import { ChatbotDeleteActionsMenu } from '@/app/components/chatbot/ChatbotDeleteActionsMenu';
 import type { ChatbotListItem } from '@/types/chatbot.types';
 import { formatRelativeTime } from '@/utils/formatRelativeTime';
@@ -33,6 +33,7 @@ export function ChatbotCard({
   const navigate = useNavigate();
   const user = useAppSelector(selectUser);
   const showOwnerInfo = hasAdminAccess(user?.role);
+  const showAnalytics = useAppSelector(selectCanViewAnalytics);
   const statusDisplay = getChatbotStatusDisplay(chatbot.status);
   const showDeleteMenu = canDeleteChatbot(user) && Boolean(onDelete);
   const isDeleted = chatbot.status === 'deleted';
@@ -113,13 +114,15 @@ export function ChatbotCard({
         </span>
       </div>
 
-      <button
-        onClick={() => navigate('/dashboard/analytics')}
-        className="w-full mt-4 px-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 group-hover:border-blue-500"
-      >
-        <BarChart3 className="w-4 h-4" />
-        View Analytics
-      </button>
+      {showAnalytics && (
+        <button
+          onClick={() => navigate('/dashboard/analytics')}
+          className="w-full mt-4 px-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 group-hover:border-blue-500"
+        >
+          <BarChart3 className="w-4 h-4" />
+          View Analytics
+        </button>
+      )}
     </div>
   );
 }

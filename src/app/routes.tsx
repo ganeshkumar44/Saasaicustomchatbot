@@ -20,6 +20,7 @@ import { PaymentFailed } from "./pages/PaymentFailed";
 import { AccountSettings } from "./pages/AccountSettings";
 import { ManageUsers } from "./pages/ManageUsers";
 import { AdminRoute } from "@/components/AdminRoute";
+import { AnalyticsRoute } from "@/components/AnalyticsRoute";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 export const router = createBrowserRouter([
@@ -54,7 +55,10 @@ export const router = createBrowserRouter([
           { path: "chatbot/:id/preview", Component: ChatbotPreview },
           { path: "knowledge-base", Component: KnowledgeBase },
           { path: "history", Component: ChatHistory },
-          { path: "analytics", Component: Analytics },
+          {
+            Component: AnalyticsRoute,
+            children: [{ path: "analytics", Component: Analytics }],
+          },
           { path: "billing", Component: Billing },
           { path: "billing/invoices", Component: Invoices },
           { path: "billing/pricing", Component: BillingPricingRedirect },

@@ -24,6 +24,8 @@ import { usePermanentlyDeleteChatbot } from '@/hooks/usePermanentlyDeleteChatbot
 import { useDashboardAnalytics } from '@/hooks/useDashboardAnalytics';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useDashboard } from '@/hooks/useDashboard';
+import { useAppSelector } from '@/store/hooks';
+import { selectCanViewAnalytics } from '@/store/authSelectors';
 import { formatMessageTime } from '@/utils/formatRelativeTime';
 import {
   formatAverageResponseTime,
@@ -53,6 +55,7 @@ export function DashboardOverview() {
     hasReachedChatbotLimit,
     chatbotLimitUpgradeMessage,
   } = useUserPlan();
+  const canViewAnalytics = useAppSelector(selectCanViewAnalytics);
   const {
     analytics,
     loading: analyticsLoading,
@@ -312,67 +315,69 @@ export function DashboardOverview() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-lg font-semibold dark:text-white">Conversations</h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{rangeLabel}</p>
+      {canViewAnalytics && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-lg font-semibold dark:text-white">Conversations</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{rangeLabel}</p>
+              </div>
             </div>
+            {conversationsLoading ? (
+              <SkeletonChart />
+            ) : conversationsError ? (
+              <div className="h-[300px] flex flex-col items-center justify-center text-center">
+                <p className="text-red-600 dark:text-red-400 mb-4">{conversationsError}</p>
+                <button
+                  onClick={() => refetchCharts()}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Try Again
+                </button>
+              </div>
+            ) : isChartDataEmpty(conversationsChart) ? (
+              <div className="h-[300px] flex items-center justify-center">
+                <p className="text-gray-600 dark:text-gray-400">No data available.</p>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={conversationsChartData}>
+                  <defs>
+                    <linearGradient id="colorConversations" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid key="conv-grid" strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
+                  <XAxis key="conv-x" dataKey="name" stroke="#9ca3af" />
+                  <YAxis key="conv-y" stroke="#9ca3af" />
+                  <Tooltip
+                    key="conv-tooltip"
+                    contentStyle={{
+                      backgroundColor: '#1f2937',
+                      border: 'none',
+                      borderRadius: '8px',
+                      color: '#fff',
+                    }}
+                  />
+                  <Area key="conversations-area" type="monotone" dataKey="conversations" stroke="#3b82f6" fillOpacity={1} fill="url(#colorConversations)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
           </div>
-          {conversationsLoading ? (
-            <SkeletonChart />
-          ) : conversationsError ? (
-            <div className="h-[300px] flex flex-col items-center justify-center text-center">
-              <p className="text-red-600 dark:text-red-400 mb-4">{conversationsError}</p>
-              <button
-                onClick={() => refetchCharts()}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Try Again
-              </button>
-            </div>
-          ) : isChartDataEmpty(conversationsChart) ? (
-            <div className="h-[300px] flex items-center justify-center">
-              <p className="text-gray-600 dark:text-gray-400">No data available.</p>
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={conversationsChartData}>
-                <defs>
-                  <linearGradient id="colorConversations" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid key="conv-grid" strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
-                <XAxis key="conv-x" dataKey="name" stroke="#9ca3af" />
-                <YAxis key="conv-y" stroke="#9ca3af" />
-                <Tooltip
-                  key="conv-tooltip"
-                  contentStyle={{
-                    backgroundColor: '#1f2937',
-                    border: 'none',
-                    borderRadius: '8px',
-                    color: '#fff',
-                  }}
-                />
-                <Area key="conversations-area" type="monotone" dataKey="conversations" stroke="#3b82f6" fillOpacity={1} fill="url(#colorConversations)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          )}
-        </div>
 
-        <UsersChartPanel
-          title="Total Users"
-          subtitle={rangeLabel}
-          data={usersChartData}
-          loading={usersLoading}
-          error={usersError}
-          isEmpty={isChartDataEmpty(usersChart)}
-          onRetry={() => refetchCharts()}
-        />
-      </div>
+          <UsersChartPanel
+            title="Total Users"
+            subtitle={rangeLabel}
+            data={usersChartData}
+            loading={usersLoading}
+            error={usersError}
+            isEmpty={isChartDataEmpty(usersChart)}
+            onRetry={() => refetchCharts()}
+          />
+        </div>
+      )}
 
       {/* Recent Chats */}
       <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">

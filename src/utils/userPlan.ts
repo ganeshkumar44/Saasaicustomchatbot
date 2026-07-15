@@ -44,6 +44,18 @@ export function canCreateChatbot(
   return !hasReachedChatbotLimit(plan, role);
 }
 
+/** Analytics page, dashboard charts, and View Analytics CTA. Admins always; Free plan never. */
+export function canViewAnalytics(
+  plan: UserPlanSummary | null | undefined,
+  role: string | null | undefined,
+): boolean {
+  if (hasAdminAccess(role)) {
+    return true;
+  }
+
+  return (plan?.plan_name ?? '').trim().toLowerCase() !== 'free';
+}
+
 /**
  * Whether the user may open the create/resume chatbot flow.
  * Plan limit still applies for new drafts, but an existing draft can always be resumed.

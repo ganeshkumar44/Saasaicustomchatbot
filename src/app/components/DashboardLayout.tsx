@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { selectUser } from '@/store/authSelectors';
+import { selectCanViewAnalytics, selectUser } from '@/store/authSelectors';
 import { selectUserDetails } from '@/store/accountSettingsSelectors';
 import { fetchUserDetails } from '@/store/accountSettingsThunk';
 import { useAuth } from '@/hooks/useAuth';
@@ -60,13 +60,16 @@ export function DashboardLayout() {
   };
 
   const showManageUsersMenu = hasAdminAccess(user?.role);
+  const showAnalyticsMenu = useAppSelector(selectCanViewAnalytics);
   const createLabel = hasDraft ? 'Continue Draft' : 'Create Chatbot';
 
   const menuItems = [
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/dashboard/create', icon: Plus, label: createLabel },
     { path: '/dashboard/history', icon: MessageSquare, label: 'Chat History' },
-    { path: '/dashboard/analytics', icon: BarChart3, label: 'Analytics' },
+    ...(showAnalyticsMenu
+      ? [{ path: '/dashboard/analytics', icon: BarChart3, label: 'Analytics' }]
+      : []),
     { path: '/dashboard/settings', icon: Settings, label: 'Settings' },
     { path: '/dashboard/billing', icon: CreditCard, label: 'Billing' },
     ...(showManageUsersMenu

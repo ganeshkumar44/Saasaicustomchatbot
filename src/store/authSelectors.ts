@@ -1,6 +1,7 @@
 import type { RootState } from '@/store/index';
 import {
   canCreateChatbot,
+  canViewAnalytics,
   formatPlanDisplayName,
   hasReachedChatbotLimit,
   shouldDisplayUserPlan,
@@ -52,6 +53,9 @@ export const selectDraftChatbotId = (state: RootState): number | null =>
 
 export const selectCanCreateChatbot = (state: RootState): boolean =>
   canCreateChatbot(selectUserPlan(state), selectUser(state)?.role);
+
+export const selectCanViewAnalytics = (state: RootState): boolean =>
+  canViewAnalytics(selectUserPlan(state), selectUser(state)?.role);
 
 export const selectAccessToken = (state: RootState): string | null =>
   state.auth.accessToken;

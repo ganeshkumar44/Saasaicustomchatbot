@@ -14,7 +14,7 @@ interface ChatbotListPaginationProps {
   onPageChange: (page: number) => void;
 }
 
-const MOBILE_VISIBLE_PAGES = 5;
+const MOBILE_VISIBLE_PAGES = 3;
 
 function getVisiblePages(
   currentPage: number,

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router';
-import { Bot, Save, Trash2, Copy, Eye, Code, Palette, MessageSquare, Shield, Database, ArrowLeft, Cpu, Loader2, FlaskConical } from 'lucide-react';
+import { Bot, Save, Trash2, Copy, Eye, Code, Palette, MessageSquare, Shield, Database, ArrowLeft, Cpu, Loader2, FlaskConical, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { CHATBOT_AI_MODELS } from '@/constants/chatbot';
 import { ChatbotDeleteActionsMenu } from '@/app/components/chatbot/ChatbotDeleteActionsMenu';
@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '@/app/components/ui/select';
 import { KnowledgeBaseProcessingBanner } from '@/components/knowledgebase/KnowledgeBaseProcessingBanner';
+import { PromptEditor } from '@/app/components/prompt/PromptEditor';
 import { useChatbotSettings } from '@/hooks/useChatbotSettings';
 import { useDeleteChatbot } from '@/hooks/useDeleteChatbot';
 import { usePermanentlyDeleteChatbot } from '@/hooks/usePermanentlyDeleteChatbot';
@@ -198,6 +199,7 @@ export function ChatbotSettings() {
     { id: 'appearance', label: 'Appearance', icon: Palette },
     { id: 'messages', label: 'Messages', icon: MessageSquare },
     { id: 'knowledge', label: 'Knowledge Base', icon: Database },
+    { id: 'prompt', label: 'Prompt', icon: Sparkles },
     { id: 'security', label: 'Security', icon: Shield },
     { id: 'embed', label: 'Embed Code', icon: Code },
   ];
@@ -903,6 +905,19 @@ export function ChatbotSettings() {
               </div>
             )}
 
+            {/* Prompt */}
+            {activeTab === 'prompt' && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-xl font-semibold dark:text-white mb-2">AI Instructions</h2>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Customize how this chatbot responds while keeping the global default prompt as the base.
+                  </p>
+                </div>
+                <PromptEditor enabled={activeTab === 'prompt'} disabled={isDeletedChatbot} />
+              </div>
+            )}
+
             {/* Security */}
             {activeTab === 'security' && (
               <div className="space-y-6">
@@ -980,6 +995,7 @@ export function ChatbotSettings() {
           </div>
 
           {/* Action Buttons */}
+          {activeTab !== 'prompt' && (
           <div className="flex items-center justify-between mt-6">
             <div className="flex items-center gap-3">
               {showDeleteMenu && (
@@ -1067,6 +1083,7 @@ export function ChatbotSettings() {
               )}
             </div>
           </div>
+          )}
           </>
           )}
         </div>

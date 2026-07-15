@@ -15,6 +15,7 @@ import pricingReducer from '@/store/pricingSlice';
 import invoiceReducer from '@/store/invoiceSlice';
 import subscriptionReducer from '@/store/subscriptionSlice';
 import feedbackReducer from '@/store/feedbackSlice';
+import chatbotPromptReducer from '@/store/chatbotPromptSlice';
 import themeReducer from '@/store/themeSlice';
 
 export const store = configureStore({
@@ -35,6 +36,7 @@ export const store = configureStore({
     invoice: invoiceReducer,
     subscription: subscriptionReducer,
     feedback: feedbackReducer,
+    chatbotPrompt: chatbotPromptReducer,
     theme: themeReducer,
   },
 });

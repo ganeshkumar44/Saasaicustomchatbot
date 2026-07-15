@@ -34,14 +34,17 @@ export function getPlanDiscountPercentageForCycle(
 }
 
 export function formatPricingAmount(amount: number, currency = 'INR'): string {
+  const normalizedCurrency =
+    !currency || currency.trim().toUpperCase() === 'USD' ? 'INR' : currency;
+
   try {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency,
+      currency: normalizedCurrency,
       maximumFractionDigits: 2,
     }).format(amount);
   } catch {
-    return `${currency} ${amount.toFixed(2)}`;
+    return `₹${amount.toFixed(2)}`;
   }
 }
 

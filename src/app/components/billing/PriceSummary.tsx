@@ -81,7 +81,11 @@ export function PriceSummary({
       </div>
       <div className="flex justify-between gap-4">
         <span className="text-gray-600 dark:text-gray-400">Currency</span>
-        <span className="font-medium dark:text-white">{checkout.currency}</span>
+        <span className="font-medium dark:text-white">
+          {!checkout.currency || checkout.currency.trim().toUpperCase() === 'USD'
+            ? 'INR'
+            : checkout.currency}
+        </span>
       </div>
       <div className="flex justify-between gap-4 pt-3 border-t border-gray-200 dark:border-gray-700">
         <span className="font-semibold dark:text-white">Grand Total</span>

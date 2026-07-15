@@ -986,7 +986,7 @@ export function ChatbotSettings() {
               )}
               {!showDeleteMenu && !showActivateButton && <div />}
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={() => {
@@ -994,33 +994,41 @@ export function ChatbotSettings() {
                     navigate(`/dashboard/chatbot/${chatbotId}/preview`);
                   }
                 }}
-                className="px-6 py-3 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-2"
+                aria-label="Preview"
+                title="Preview"
+                className="px-3 sm:px-6 py-3 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-2"
               >
                 <Eye className="w-5 h-5" />
-                Preview
+                <span className="hidden sm:inline">Preview</span>
               </button>
               {activeTab === 'embed' ? (
                 <button
                   type="button"
                   onClick={() => copyToClipboard(embedCode)}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                  aria-label="Copy"
+                  title="Copy"
+                  className="px-3 sm:px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
                 >
                   <Copy className="w-5 h-5" />
-                  Copy
+                  <span className="hidden sm:inline">Copy</span>
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={() => void handleSaveChanges()}
                   disabled={isDeletedChatbot || !isEditableTab || activeTabSaveLoading}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                  aria-label={activeTabSaveLoading ? 'Saving...' : 'Save Changes'}
+                  title={activeTabSaveLoading ? 'Saving...' : 'Save Changes'}
+                  className="px-3 sm:px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {activeTabSaveLoading ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
                   ) : (
                     <Save className="w-5 h-5" />
                   )}
-                  {activeTabSaveLoading ? 'Saving...' : 'Save Changes'}
+                  <span className="hidden sm:inline">
+                    {activeTabSaveLoading ? 'Saving...' : 'Save Changes'}
+                  </span>
                 </button>
               )}
             </div>

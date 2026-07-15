@@ -151,14 +151,16 @@ export function NotificationSettingsPanel({ enabled }: NotificationSettingsPanel
           type="button"
           onClick={() => void saveNotificationSettings()}
           disabled={saving}
-          className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          aria-label={saving ? 'Saving...' : 'Save Preferences'}
+          title={saving ? 'Saving...' : 'Save Preferences'}
+          className="flex items-center gap-2 px-3 sm:px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {saving ? (
             <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
             <Save className="w-4 h-4" />
           )}
-          {saving ? 'Saving...' : 'Save Preferences'}
+          <span className="hidden sm:inline">{saving ? 'Saving...' : 'Save Preferences'}</span>
         </button>
       </div>
     </div>

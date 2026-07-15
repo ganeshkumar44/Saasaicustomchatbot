@@ -19,6 +19,8 @@ interface SidebarUserMenuProps {
   collapsed: boolean;
   signoutLoading: boolean;
   onSignout: () => void;
+  /** Where the menu is rendered — affects dropdown direction. */
+  placement?: 'sidebar' | 'header';
 }
 
 export function SidebarUserMenu({
@@ -29,6 +31,7 @@ export function SidebarUserMenu({
   collapsed,
   signoutLoading,
   onSignout,
+  placement = 'sidebar',
 }: SidebarUserMenuProps) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -73,8 +76,12 @@ export function SidebarUserMenu({
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className={`w-full rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
-            collapsed ? 'flex justify-center p-1' : 'flex items-center gap-3 px-1 py-1'
+          className={`rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+            placement === 'header'
+              ? 'flex justify-center p-1'
+              : collapsed
+                ? 'w-full flex justify-center p-1'
+                : 'w-full flex items-center gap-3 px-1 py-1'
           }`}
           aria-label="Open account menu"
         >
@@ -109,8 +116,8 @@ export function SidebarUserMenu({
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
-        side="top"
-        align={collapsed ? 'center' : 'start'}
+        side={placement === 'header' ? 'bottom' : 'top'}
+        align={placement === 'header' ? 'end' : collapsed ? 'center' : 'start'}
         sideOffset={8}
         className="w-64 p-0 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg"
       >

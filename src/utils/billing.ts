@@ -9,16 +9,16 @@ const PLAN_ORDER: Record<string, number> = {
 
 export function formatBillingAmount(amount: string | null | undefined): string {
   if (!amount) {
-    return '$0.00';
+    return '₹0.00';
   }
 
   const parsed = Number.parseFloat(amount);
 
   if (Number.isNaN(parsed)) {
-    return `$${amount}`;
+    return `₹${amount}`;
   }
 
-  return `$${parsed.toFixed(2)}`;
+  return `₹${parsed.toFixed(2)}`;
 }
 
 export function formatBillingCycleLabel(

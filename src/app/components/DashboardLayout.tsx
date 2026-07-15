@@ -20,6 +20,8 @@ import {
   Settings,
   ChevronRight,
   ChevronLeft,
+  Menu,
+  X,
 } from 'lucide-react';
 import { SidebarUserMenu } from '@/app/components/SidebarUserMenu';
 import { FeedbackFloatingButton } from '@/app/components/feedback/FeedbackFloatingButton';
@@ -28,6 +30,7 @@ import { fetchCurrentUserProfile } from '@/store/authThunk';
 
 export function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useAppDispatch();
@@ -44,6 +47,23 @@ export function DashboardLayout() {
     void dispatch(fetchCurrentUserProfile());
   }, [dispatch]);
 
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileMenuOpen]);
+
   const profileImage = user?.profile_image ?? userDetails?.profile_image ?? null;
 
   const handleLogout = () => {
@@ -53,10 +73,12 @@ export function DashboardLayout() {
   const handleMenuClick = (path: string, label: string) => {
     if (label === 'Create Chatbot' || label === 'Continue Draft') {
       void createDraft();
+      setMobileMenuOpen(false);
       return;
     }
 
     navigate(path);
+    setMobileMenuOpen(false);
   };
 
   const showManageUsersMenu = hasAdminAccess(user?.role);
@@ -82,16 +104,33 @@ export function DashboardLayout() {
     return location.pathname.startsWith(path);
   };
 
+  const showExpandedLabels = mobileMenuOpen || !collapsed;
+
   return (
     <div className="h-screen flex overflow-hidden bg-white dark:bg-gray-950">
-      {/* Sidebar */}
+      {mobileMenuOpen ? (
+        <button
+          type="button"
+          aria-label="Close menu"
+          className="fixed inset-0 z-40 bg-black/40 md:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      ) : null}
+
+      {/* Sidebar — off-canvas on mobile, collapsible on tablet/desktop */}
       <aside
-        className={`${
-          collapsed ? 'w-[64px]' : 'w-60'
-        } transition-all duration-300 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col flex-shrink-0 relative`}
+        className={`
+          fixed inset-y-0 left-0 z-50 flex flex-col flex-shrink-0
+          bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800
+          transition-transform duration-300 ease-in-out
+          w-60
+          ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+          md:static md:translate-x-0 md:transition-[width] md:duration-300
+          ${collapsed ? 'md:w-[64px]' : 'md:w-60'}
+        `}
       >
-        {/* Logo */}
-        <div className="h-16 flex items-center justify-center border-b border-gray-200 dark:border-gray-800 overflow-hidden">
+        {/* Logo — desktop/tablet only (mobile logo is in header) */}
+        <div className="h-16 hidden md:flex items-center justify-center border-b border-gray-200 dark:border-gray-800 overflow-hidden">
           {collapsed ? (
             <NgMarkIcon />
           ) : (
@@ -102,19 +141,35 @@ export function DashboardLayout() {
           )}
         </div>
 
+        {/* Mobile drawer header */}
+        <div className="h-16 flex md:hidden items-center justify-between px-4 border-b border-gray-200 dark:border-gray-800">
+          <div className="flex items-center gap-2">
+            <NgMarkIcon />
+            <span className="font-bold text-lg dark:text-white">NexGenChat</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(false)}
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            aria-label="Close menu"
+          >
+            <X className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+          </button>
+        </div>
+
         {/* Nav items */}
         <nav className="flex-1 overflow-y-auto py-3">
           {menuItems.map((item) => (
             <button
               key={item.path}
               onClick={() => handleMenuClick(item.path, item.label)}
-              title={collapsed ? item.label : undefined}
+              title={!showExpandedLabels ? item.label : undefined}
               disabled={
                 (item.label === 'Create Chatbot' || item.label === 'Continue Draft')
                 && createDraftLoading
               }
-              className={`w-full flex items-center gap-3 py-3 transition-colors ${
-                collapsed ? 'justify-center px-0' : 'px-4'
+              className={`w-full flex items-center gap-3 py-3 transition-colors px-4 ${
+                !showExpandedLabels ? 'md:justify-center md:px-0' : ''
               } ${
                 isActive(item.path)
                   ? 'bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border-r-2 border-blue-600'
@@ -122,13 +177,15 @@ export function DashboardLayout() {
               }`}
             >
               <item.icon className="w-5 h-5 flex-shrink-0" />
-              {!collapsed && <span className="text-sm font-medium whitespace-nowrap">{item.label}</span>}
+              {showExpandedLabels && (
+                <span className="text-sm font-medium whitespace-nowrap">{item.label}</span>
+              )}
             </button>
           ))}
         </nav>
 
-        {/* User info */}
-        <div className="border-t border-gray-200 dark:border-gray-800 p-3">
+        {/* User info — tablet/desktop sidebar only */}
+        <div className="hidden md:block border-t border-gray-200 dark:border-gray-800 p-3">
           <SidebarUserMenu
             user={user}
             profileImage={profileImage}
@@ -140,10 +197,11 @@ export function DashboardLayout() {
           />
         </div>
 
-        {/* Collapse toggle button */}
+        {/* Collapse toggle — tablet/desktop only */}
         <button
+          type="button"
           onClick={() => setCollapsed(!collapsed)}
-          className="absolute -right-3 top-[72px] w-6 h-6 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors z-10"
+          className="hidden md:flex absolute -right-3 top-[72px] w-6 h-6 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors z-10"
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {collapsed ? (
@@ -155,15 +213,32 @@ export function DashboardLayout() {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Top Navbar */}
-        <header className="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-6">
-          <div className="flex-1" />
-          <div className="flex items-center gap-2">
+        <header className="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 md:px-6 gap-3">
+          <div className="flex items-center gap-2 min-w-0">
             <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              className="md:hidden p-2 -ml-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              aria-label="Open menu"
+            >
+              <Menu className="w-5 h-5 text-gray-700 dark:text-gray-200" />
+            </button>
+            <div className="md:hidden flex items-center gap-2 min-w-0">
+              <NgMarkIcon />
+              <span className="font-bold text-base dark:text-white truncate">NexGenChat</span>
+            </div>
+            <div className="hidden md:block flex-1" />
+          </div>
+
+          <div className="flex items-center gap-1 sm:gap-2">
+            <button
+              type="button"
               onClick={() => void toggleTheme()}
               disabled={themeLoading}
               className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              aria-label="Toggle theme"
             >
               {theme === 'dark' ? (
                 <Sun className="w-5 h-5 text-gray-600 dark:text-gray-300" />
@@ -171,6 +246,19 @@ export function DashboardLayout() {
                 <Moon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
               )}
             </button>
+
+            <div className="md:hidden">
+              <SidebarUserMenu
+                user={user}
+                profileImage={profileImage}
+                roleLabel={roleLabel}
+                roleBadgeClassName={roleBadgeClassName}
+                collapsed
+                placement="header"
+                signoutLoading={signoutLoading}
+                onSignout={handleLogout}
+              />
+            </div>
           </div>
         </header>
 

@@ -391,10 +391,12 @@ export function ManageUserEditModal({
             type="button"
             onClick={() => void handleSave()}
             disabled={updating || loading || !user}
-            className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            aria-label="Save"
+            title="Save"
+            className="flex items-center gap-2 px-3 sm:px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {updating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Save
+            <span className="hidden sm:inline">Save</span>
           </button>
         </div>
       </div>

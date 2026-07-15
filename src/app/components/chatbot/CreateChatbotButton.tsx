@@ -44,13 +44,15 @@ export function CreateChatbotButton({
       onClick={onClick}
       disabled={loading}
       className={className}
+      aria-label={typeof label === 'string' ? label : undefined}
+      title={typeof label === 'string' ? label : undefined}
     >
       {loading ? (
         <Loader2 className="w-5 h-5 animate-spin" />
       ) : (
         showIcon && <Plus className="w-5 h-5" />
       )}
-      {label}
+      <span className="hidden sm:inline">{label}</span>
     </button>
   );
 

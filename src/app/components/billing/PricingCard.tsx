@@ -55,7 +55,11 @@ export function PricingCard({
             </p>
           ) : null}
         </div>
-        {isCurrent ? <CurrentPlanBadge /> : null}
+        {isCurrent ? (
+          <div className="shrink-0">
+            <CurrentPlanBadge />
+          </div>
+        ) : null}
       </div>
 
       <div className="mb-5 space-y-2">

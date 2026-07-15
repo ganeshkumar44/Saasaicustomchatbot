@@ -513,14 +513,16 @@ export function AccountSettings() {
                     <button
                       onClick={() => void handleSaveProfile()}
                       disabled={profileUpdating}
-                      className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      aria-label="Save Changes"
+                      title="Save Changes"
+                      className="flex items-center gap-2 px-3 sm:px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       {profileUpdating ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
                       ) : (
                         <Save className="w-4 h-4" />
                       )}
-                      Save Changes
+                      <span className="hidden sm:inline">Save Changes</span>
                     </button>
                   </div>
                 </>
@@ -605,10 +607,16 @@ export function AccountSettings() {
                   <button
                     onClick={() => void handleSavePassword()}
                     disabled={passwordUpdating}
-                    className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    aria-label="Update Password"
+                    title="Update Password"
+                    className="flex items-center gap-2 px-3 sm:px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
-                    {passwordUpdating && <Loader2 className="w-4 h-4 animate-spin" />}
-                    Update Password
+                    {passwordUpdating ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Lock className="w-4 h-4" />
+                    )}
+                    <span className="hidden sm:inline">Update Password</span>
                   </button>
                 </div>
               </div>

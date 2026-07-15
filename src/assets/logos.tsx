@@ -27,8 +27,8 @@ function NgMarkSvg({ fill, ...props }: SVGProps<SVGSVGElement> & { fill: string 
       aria-hidden
       {...props}
     >
-      {NG_MARK_PATHS.map((d) => (
-        <path key={d.slice(0, 24)} d={d} fill={fill} />
+      {NG_MARK_PATHS.map((d, index) => (
+        <path key={index} d={d} fill={fill} />
       ))}
     </svg>
   );

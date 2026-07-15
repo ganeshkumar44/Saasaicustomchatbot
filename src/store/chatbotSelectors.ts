@@ -1,3 +1,4 @@
+import { createSelector } from '@reduxjs/toolkit';
 import type { RootState } from '@/store/index';
 import { filterListableChatbots } from '@/utils/chatbotList';
 
@@ -81,8 +82,10 @@ export const selectPublishError = (state: RootState): string | null =>
 
 export const selectChatbotList = (state: RootState) => state.chatbot.chatbotList;
 
-export const selectListableChatbotList = (state: RootState) =>
-  filterListableChatbots(state.chatbot.chatbotList);
+export const selectListableChatbotList = createSelector(
+  [selectChatbotList],
+  (chatbotList) => filterListableChatbots(chatbotList),
+);
 
 export const selectChatbotListLoading = (state: RootState): boolean =>
   state.chatbot.chatbotListLoading;

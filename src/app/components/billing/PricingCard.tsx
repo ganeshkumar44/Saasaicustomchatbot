@@ -46,19 +46,19 @@ export function PricingCard({
         </span>
       ) : null}
 
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div>
+      <div className="mb-3">
+        <div className="flex items-start justify-between gap-3">
           <h3 className="text-xl font-bold dark:text-white">{plan.display_name}</h3>
-          {plan.description ? (
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-              {plan.description}
-            </p>
+          {isCurrent ? (
+            <div className="shrink-0">
+              <CurrentPlanBadge />
+            </div>
           ) : null}
         </div>
-        {isCurrent ? (
-          <div className="shrink-0">
-            <CurrentPlanBadge />
-          </div>
+        {plan.description ? (
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 w-full">
+            {plan.description}
+          </p>
         ) : null}
       </div>
 

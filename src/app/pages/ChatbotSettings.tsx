@@ -7,6 +7,13 @@ import { ChatbotDeleteActionsMenu } from '@/app/components/chatbot/ChatbotDelete
 import { DeleteChatbotConfirmDialog } from '@/app/components/chatbot/DeleteChatbotConfirmDialog';
 import { PermanentlyDeleteChatbotConfirmDialog } from '@/app/components/chatbot/PermanentlyDeleteChatbotConfirmDialog';
 import { PlaygroundChatPanel } from '@/app/components/playground/PlaygroundChatPanel';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/app/components/ui/select';
 import { KnowledgeBaseProcessingBanner } from '@/components/knowledgebase/KnowledgeBaseProcessingBanner';
 import { useChatbotSettings } from '@/hooks/useChatbotSettings';
 import { useDeleteChatbot } from '@/hooks/useDeleteChatbot';
@@ -478,8 +485,34 @@ export function ChatbotSettings() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Tabs Sidebar */}
-        <div className="lg:col-span-1">
+        {/* Mobile tab dropdown */}
+        <div className="md:hidden">
+          <Select value={activeTab} onValueChange={setActiveTab}>
+            <SelectTrigger
+              aria-label="Select settings section"
+              className="h-12 w-full rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 text-sm font-medium text-gray-900 dark:text-white shadow-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500"
+            >
+              <SelectValue placeholder="Select section" />
+            </SelectTrigger>
+            <SelectContent className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+              {tabs.map((tab) => (
+                <SelectItem
+                  key={tab.id}
+                  value={tab.id}
+                  className="rounded-md py-2.5 pl-3 pr-8 text-sm font-medium text-gray-900 dark:text-white cursor-pointer focus:bg-blue-50 focus:text-blue-700 dark:focus:bg-blue-950/60 dark:focus:text-blue-300"
+                >
+                  <span className="flex items-center gap-2">
+                    <tab.icon className="w-4 h-4" />
+                    {tab.label}
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Tabs Sidebar — tablet/desktop */}
+        <div className="hidden md:block lg:col-span-1">
           <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-2">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;

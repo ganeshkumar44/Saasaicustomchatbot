@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import {
   Pagination,
   PaginationContent,
@@ -13,11 +14,42 @@ interface ChatbotListPaginationProps {
   onPageChange: (page: number) => void;
 }
 
+const MOBILE_VISIBLE_PAGES = 5;
+
+function getVisiblePages(
+  currentPage: number,
+  totalPages: number,
+  maxVisible: number,
+): number[] {
+  if (totalPages <= maxVisible) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+  let end = start + maxVisible - 1;
+
+  if (end > totalPages) {
+    end = totalPages;
+    start = Math.max(1, end - maxVisible + 1);
+  }
+
+  return Array.from({ length: end - start + 1 }, (_, index) => start + index);
+}
+
 export function ChatbotListPagination({
   currentPage,
   totalPages,
   onPageChange,
 }: ChatbotListPaginationProps) {
+  const mobilePages = useMemo(
+    () => getVisiblePages(currentPage, totalPages, MOBILE_VISIBLE_PAGES),
+    [currentPage, totalPages],
+  );
+  const desktopPages = useMemo(
+    () => Array.from({ length: totalPages }, (_, index) => index + 1),
+    [totalPages],
+  );
+
   if (totalPages <= 1) {
     return null;
   }
@@ -25,7 +57,7 @@ export function ChatbotListPagination({
   return (
     <div className="flex justify-center pt-6">
       <Pagination>
-        <PaginationContent>
+        <PaginationContent className="gap-0.5 md:gap-1 flex-wrap justify-center">
           <PaginationItem>
             <PaginationPrevious
               href="#"
@@ -35,11 +67,32 @@ export function ChatbotListPagination({
                   onPageChange(currentPage - 1);
                 }
               }}
-              className={currentPage <= 1 ? 'pointer-events-none opacity-50' : ''}
+              className={`h-8 min-w-8 px-2 text-xs md:h-9 md:min-w-9 md:px-2.5 md:text-sm ${
+                currentPage <= 1 ? 'pointer-events-none opacity-50' : ''
+              }`}
             />
           </PaginationItem>
-          {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
-            <PaginationItem key={page}>
+
+          {/* Mobile: compact window of up to 5 pages */}
+          {mobilePages.map((page) => (
+            <PaginationItem key={`mobile-${page}`} className="md:hidden">
+              <PaginationLink
+                href="#"
+                isActive={page === currentPage}
+                onClick={(event) => {
+                  event.preventDefault();
+                  onPageChange(page);
+                }}
+                className="h-8 w-8 text-xs"
+              >
+                {page}
+              </PaginationLink>
+            </PaginationItem>
+          ))}
+
+          {/* Tablet/desktop: full page list */}
+          {desktopPages.map((page) => (
+            <PaginationItem key={`desktop-${page}`} className="hidden md:list-item">
               <PaginationLink
                 href="#"
                 isActive={page === currentPage}
@@ -52,6 +105,7 @@ export function ChatbotListPagination({
               </PaginationLink>
             </PaginationItem>
           ))}
+
           <PaginationItem>
             <PaginationNext
               href="#"
@@ -61,7 +115,9 @@ export function ChatbotListPagination({
                   onPageChange(currentPage + 1);
                 }
               }}
-              className={currentPage >= totalPages ? 'pointer-events-none opacity-50' : ''}
+              className={`h-8 min-w-8 px-2 text-xs md:h-9 md:min-w-9 md:px-2.5 md:text-sm ${
+                currentPage >= totalPages ? 'pointer-events-none opacity-50' : ''
+              }`}
             />
           </PaginationItem>
         </PaginationContent>

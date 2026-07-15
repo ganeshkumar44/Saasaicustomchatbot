@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { Bot, Sparkles, Settings, ArrowRight, Upload, CheckCircle, X, Loader2, Globe } from 'lucide-react';
+import { Bot, Sparkles, Settings, ArrowLeft, ArrowRight, Upload, CheckCircle, X, Loader2, Globe } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   CHATBOT_AI_MODELS,
@@ -704,10 +704,13 @@ export function CreateChatbot() {
             <button
               type="button"
               onClick={() => goToStep(step - 1)}
-              className="px-6 py-3 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              aria-label="Back"
+              title="Back"
+              className="px-3 md:px-6 py-3 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-2"
               disabled={isStepLoading}
             >
-              Back
+              <ArrowLeft className="w-5 h-5" />
+              <span className="hidden md:inline">Back</span>
             </button>
           ) : (
             <div />
@@ -718,16 +721,20 @@ export function CreateChatbot() {
               type="button"
               onClick={() => void handleNext()}
               disabled={isStepLoading}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+              aria-label={step === 3 ? 'Continue' : 'Next'}
+              title={step === 3 ? 'Continue' : 'Next'}
+              className="px-3 md:px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {(step === 1 && basicInfoLoading) || (step === 2 && behaviourLoading) || isUploadingKnowledgeBase ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  {isUploadingKnowledgeBase ? 'Uploading...' : 'Saving...'}
+                  <span className="hidden md:inline">
+                    {isUploadingKnowledgeBase ? 'Uploading...' : 'Saving...'}
+                  </span>
                 </>
               ) : (
                 <>
-                  {step === 3 ? 'Continue' : 'Next'}
+                  <span className="hidden md:inline">{step === 3 ? 'Continue' : 'Next'}</span>
                   <ArrowRight className="w-5 h-5" />
                 </>
               )}
@@ -736,16 +743,18 @@ export function CreateChatbot() {
             <button
               type="submit"
               disabled={publishLoading || reviewLoading}
-              className="px-6 py-3 bg-[#003A96] text-white rounded-lg hover:bg-[#002d75] transition-all shadow-lg hover:shadow-xl flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+              aria-label="Create Chatbot"
+              title="Create Chatbot"
+              className="px-3 md:px-6 py-3 bg-[#003A96] text-white rounded-lg hover:bg-[#002d75] transition-all shadow-lg hover:shadow-xl flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {publishLoading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Creating...
+                  <span className="hidden md:inline">Creating...</span>
                 </>
               ) : (
                 <>
-                  Create Chatbot
+                  <span className="hidden md:inline">Create Chatbot</span>
                   <Sparkles className="w-5 h-5" />
                 </>
               )}

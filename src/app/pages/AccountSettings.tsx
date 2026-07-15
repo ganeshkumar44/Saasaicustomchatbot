@@ -238,7 +238,6 @@ export function AccountSettings() {
   const isAccountDeactivateOrDeleteDisabled = hasAdminAccess(userDetails?.role);
   const roleLabel = formatRoleLabel(userDetails?.role);
   const roleBadgeClassName = getRoleBadgeClassName(userDetails?.role);
-  const activeTabConfig = tabs.find((tab) => tab.id === activeTab) ?? tabs[0];
   const {
     data: loginHistory,
     loading: loginHistoryLoading,
@@ -305,10 +304,7 @@ export function AccountSettings() {
               aria-label="Select settings section"
               className="h-12 w-full rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 text-sm font-medium text-gray-900 dark:text-white shadow-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500"
             >
-              <div className="flex items-center gap-2">
-                <activeTabConfig.icon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <SelectValue placeholder="Select section" />
-              </div>
+              <SelectValue placeholder="Select section" />
             </SelectTrigger>
             <SelectContent className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
               {tabs.map((tab) => (
@@ -665,21 +661,21 @@ export function AccountSettings() {
                 )}
 
                 <div className="space-y-4">
-                  <div className="flex items-start justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-800">
+                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-800">
                     <div>
                       <p className="text-sm font-medium dark:text-white">Export account data</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Download all your data including chatbots, conversations, and settings</p>
                     </div>
                     <button
                       onClick={() => toast.success('Export started — you\'ll receive an email when ready')}
-                      className="flex-shrink-0 ml-4 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                      className="w-full md:w-auto md:flex-shrink-0 md:ml-4 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                     >
                       Export
                     </button>
                   </div>
 
                   {userDetails && !userDetails.is_active && (
-                    <div className="flex items-start justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-800">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-800">
                       <div>
                         <p className="text-sm font-medium dark:text-white">Activate account</p>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Reactivate your account to regain full access.</p>
@@ -687,7 +683,7 @@ export function AccountSettings() {
                       <button
                         onClick={() => setConfirmAction('activate')}
                         disabled={activateLoading}
-                        className="flex-shrink-0 ml-4 px-4 py-2 border border-green-200 dark:border-green-900/50 text-green-600 dark:text-green-400 rounded-lg text-sm font-medium hover:bg-green-50 dark:hover:bg-green-950/30 transition-colors disabled:opacity-40"
+                        className="w-full md:w-auto md:flex-shrink-0 md:ml-4 px-4 py-2 border border-green-200 dark:border-green-900/50 text-green-600 dark:text-green-400 rounded-lg text-sm font-medium hover:bg-green-50 dark:hover:bg-green-950/30 transition-colors disabled:opacity-40"
                       >
                         Activate
                       </button>
@@ -695,7 +691,7 @@ export function AccountSettings() {
                   )}
 
                   {userDetails?.is_active && (
-                    <div className="flex items-start justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-800">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-800">
                       <div>
                         <p className="text-sm font-medium dark:text-white">Deactivate account</p>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Temporarily disable your account. You can reactivate at any time.</p>
@@ -703,14 +699,14 @@ export function AccountSettings() {
                       <button
                         onClick={() => setConfirmAction('deactivate')}
                         disabled={deactivateLoading || isAccountDeactivateOrDeleteDisabled}
-                        className="flex-shrink-0 ml-4 px-4 py-2 border border-orange-200 dark:border-orange-900/50 text-orange-600 dark:text-orange-400 rounded-lg text-sm font-medium hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="w-full md:w-auto md:flex-shrink-0 md:ml-4 px-4 py-2 border border-orange-200 dark:border-orange-900/50 text-orange-600 dark:text-orange-400 rounded-lg text-sm font-medium hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         Deactivate
                       </button>
                     </div>
                   )}
 
-                  <div className="flex items-start justify-between p-4 rounded-lg border border-red-200 dark:border-red-900/40 bg-red-50/50 dark:bg-red-950/10">
+                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 p-4 rounded-lg border border-red-200 dark:border-red-900/40 bg-red-50/50 dark:bg-red-950/10">
                     <div>
                       <p className="text-sm font-medium text-red-700 dark:text-red-400">Delete account</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Permanently delete your account and all associated data. This cannot be undone.</p>
@@ -718,7 +714,7 @@ export function AccountSettings() {
                     <button
                       onClick={() => setConfirmAction('delete')}
                       disabled={deleteLoading || isAccountDeactivateOrDeleteDisabled}
-                      className="flex-shrink-0 ml-4 flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="w-full md:w-auto md:flex-shrink-0 md:ml-4 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       <Trash2 className="w-4 h-4" />
                       Delete

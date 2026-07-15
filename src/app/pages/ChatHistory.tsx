@@ -309,7 +309,7 @@ export function ChatHistory() {
                         </div>
                       </div>
                       <div className="flex justify-start mt-4">
-                        <div className="max-w-[70%] bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-2xl px-4 py-3">
+                        <div className="w-full max-w-full md:max-w-[70%] bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-2xl px-4 py-3">
                           <MarkdownMessage content={message.bot_response} />
                           <p className="text-xs mt-1 text-gray-500 dark:text-gray-400">
                             {formatChatMessageTime(message.created_at)}

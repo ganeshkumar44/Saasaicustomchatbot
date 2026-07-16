@@ -4,6 +4,7 @@ import authReducer from '@/store/authSlice';
 import chatbotReducer from '@/store/chatbotSlice';
 import chatbotSettingsReducer from '@/store/chatbotSettingsSlice';
 import chatHistoryReducer from '@/store/chatHistorySlice';
+import chatbotAnalyticsReducer from '@/store/chatbotAnalyticsSlice';
 import dashboardAnalyticsReducer from '@/store/dashboardAnalyticsSlice';
 import dashboardReducer from '@/store/dashboardSlice';
 import forgotPasswordReducer from '@/store/forgotPasswordSlice';
@@ -25,6 +26,7 @@ export const store = configureStore({
     chatbot: chatbotReducer,
     chatbotSettings: chatbotSettingsReducer,
     chatHistory: chatHistoryReducer,
+    chatbotAnalytics: chatbotAnalyticsReducer,
     dashboardAnalytics: dashboardAnalyticsReducer,
     dashboard: dashboardReducer,
     forgotPassword: forgotPasswordReducer,

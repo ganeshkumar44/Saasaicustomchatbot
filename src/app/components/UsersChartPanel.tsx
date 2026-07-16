@@ -17,6 +17,7 @@ interface UsersChartPanelProps {
   error: string | null;
   isEmpty: boolean;
   onRetry: () => void;
+  emptyMessage?: string;
 }
 
 export function UsersChartPanel({
@@ -27,6 +28,7 @@ export function UsersChartPanel({
   error,
   isEmpty,
   onRetry,
+  emptyMessage = 'No analytics data available.',
 }: UsersChartPanelProps) {
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
@@ -50,7 +52,7 @@ export function UsersChartPanel({
         </div>
       ) : isEmpty ? (
         <div className="h-[300px] flex items-center justify-center">
-          <p className="text-gray-600 dark:text-gray-400">No analytics data available.</p>
+          <p className="text-gray-600 dark:text-gray-400">{emptyMessage}</p>
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={300}>

@@ -13,6 +13,7 @@ import { ChatbotPreview } from "./pages/ChatbotPreview";
 import { KnowledgeBase } from "./pages/KnowledgeBase";
 import { ChatHistory } from "./pages/ChatHistory";
 import { Analytics } from "./pages/Analytics";
+import { ChatbotAnalytics } from "./pages/ChatbotAnalytics";
 import { Billing, BillingPricingRedirect } from "./pages/Billing";
 import { Invoices } from "./pages/Invoices";
 import { PaymentSuccess } from "./pages/PaymentSuccess";
@@ -57,7 +58,10 @@ export const router = createBrowserRouter([
           { path: "history", Component: ChatHistory },
           {
             Component: AnalyticsRoute,
-            children: [{ path: "analytics", Component: Analytics }],
+            children: [
+              { path: "analytics", Component: Analytics },
+              { path: "chatbot/:id/analytics", Component: ChatbotAnalytics },
+            ],
           },
           { path: "billing", Component: Billing },
           { path: "billing/invoices", Component: Invoices },

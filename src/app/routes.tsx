@@ -22,6 +22,7 @@ import { AccountSettings } from "./pages/AccountSettings";
 import { ManageUsers } from "./pages/ManageUsers";
 import { AdminRoute } from "@/components/AdminRoute";
 import { AnalyticsRoute } from "@/components/AnalyticsRoute";
+import { BillingRoute } from "@/components/BillingRoute";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 export const router = createBrowserRouter([
@@ -63,11 +64,17 @@ export const router = createBrowserRouter([
               { path: "chatbot/:id/analytics", Component: ChatbotAnalytics },
             ],
           },
-          { path: "billing", Component: Billing },
-          { path: "billing/invoices", Component: Invoices },
-          { path: "billing/pricing", Component: BillingPricingRedirect },
-          { path: "billing/payment-success", Component: PaymentSuccess },
-          { path: "billing/payment-failed", Component: PaymentFailed },
+          {
+            path: "billing",
+            Component: BillingRoute,
+            children: [
+              { index: true, Component: Billing },
+              { path: "invoices", Component: Invoices },
+              { path: "pricing", Component: BillingPricingRedirect },
+              { path: "payment-success", Component: PaymentSuccess },
+              { path: "payment-failed", Component: PaymentFailed },
+            ],
+          },
           { path: "settings", Component: AccountSettings },
           {
             Component: AdminRoute,

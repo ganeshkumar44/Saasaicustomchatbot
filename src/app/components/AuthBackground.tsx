@@ -56,32 +56,32 @@ export function AuthBackground({ children }: { children: ReactNode }) {
 
         {/* Content */}
         <div className="relative z-10 flex flex-col justify-center w-full px-12 xl:px-16 py-12">
-          <div className="flex items-center gap-3 mb-10">
+          <div className="flex items-center gap-2 mb-6">
             <div className="w-12 h-12 rounded-xl bg-white shadow-sm border border-blue-100 flex items-center justify-center">
               <NgMarkDark className="w-7 h-auto" />
             </div>
             <span className="text-xl font-bold text-gray-900">NexGenChat</span>
           </div>
 
-          <span className="inline-flex items-center gap-2 self-start rounded-full bg-blue-100/70 px-3 py-1 text-xs font-medium text-[#003A96] mb-5">
+          <span className="inline-flex items-center gap-2 self-start rounded-full bg-blue-100/70 px-3 py-1 text-xs font-medium text-[#003A96] mb-4">
             <Sparkles className="w-3.5 h-3.5" />
             AI-Powered Customer Engagement
           </span>
 
-          <h1 className="text-4xl xl:text-5xl font-bold leading-tight text-gray-900">
-            Build smarter
-            <span className="block bg-gradient-to-r from-[#003A96] to-indigo-500 bg-clip-text text-transparent">
+          <h1 className="text-2xl xl:text-3xl font-bold leading-tight text-gray-900">
+            Build smarter{' '}
+            <span className="bg-gradient-to-r from-[#003A96] to-indigo-500 bg-clip-text text-transparent">
               AI chatbots
             </span>
-            for your business
+            <span className="block">for your business</span>
           </h1>
 
-          <p className="mt-5 text-base text-gray-600 max-w-md">
+          <p className="mt-4 text-sm text-gray-600">
             Create, customize, and deploy intelligent chatbots trained on your data —
             delivering instant, human-like support to your customers around the clock.
           </p>
 
-          <ul className="mt-10 space-y-5 max-w-md">
+          <ul className="mt-10 space-y-5">
             {PLATFORM_HIGHLIGHTS.map(({ icon: Icon, title, description }) => (
               <li key={title} className="flex items-start gap-4">
                 <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm border border-blue-100 text-[#003A96]">

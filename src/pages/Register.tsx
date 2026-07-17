@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Mail, Lock, User, Eye, EyeOff, Phone, Loader2 } from 'lucide-react';
 import { AuthBackground } from '@/app/components/AuthBackground';
-import { NgMarkIcon } from '@/assets/logos';
 import { PasswordValidationBox } from '@/components/auth/PasswordValidationBox';
 import { useSignup } from '@/hooks/useSignup';
 import type { SignupRequest } from '@/types/auth.types';
@@ -67,9 +66,6 @@ export function Register() {
   return (
     <AuthBackground>
       <div className="flex flex-col items-center mb-8">
-        <div className="mb-4">
-          <NgMarkIcon className="w-[94px] h-[56px]" />
-        </div>
         <h1 className="text-3xl font-bold">Create Account</h1>
         <p className="text-[var(--color-text-secondary)] mt-2">Get started with ChatAI</p>
       </div>

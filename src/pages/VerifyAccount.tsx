@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import { AuthBackground } from '@/app/components/AuthBackground';
-import { NgMarkIcon } from '@/assets/logos';
 import { useVerification } from '@/hooks/useVerification';
 import { validateVerificationForm } from '@/utils/validation';
 
@@ -89,9 +88,6 @@ export function VerifyAccount() {
       {!verificationSuccess ? (
         <>
           <div className="flex flex-col items-center mb-8">
-            <div className="mb-4">
-              <NgMarkIcon className="w-[94px] h-[56px]" />
-            </div>
             <h1 className="text-3xl font-bold">Verify Your Account</h1>
             <p className="text-[var(--color-text-secondary)] mt-2 text-center">We've sent a verification code to your email</p>
             <p className="text-indigo-500 dark:text-indigo-400 font-medium mt-1">{registeredEmail}</p>

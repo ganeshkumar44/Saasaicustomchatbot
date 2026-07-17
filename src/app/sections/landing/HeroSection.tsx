@@ -1,4 +1,4 @@
-import { ArrowRight, PlayCircle } from 'lucide-react';
+import { ArrowRight, Clock3, Code2, Headphones, PlayCircle } from 'lucide-react';
 import { LandingButton } from '@/app/components/landing/LandingButton';
 import { HeroMockup } from '@/app/components/landing/HeroMockup';
 import { Reveal } from '@/app/components/landing/Reveal';
@@ -26,7 +26,11 @@ export function HeroSection() {
               {LANDING_TAGLINE}
             </span>
             <h1 className="mt-5 text-4xl sm:text-5xl xl:text-5xl font-bold tracking-tight text-slate-900 leading-[1.1]">
-              Build AI Chatbots for Any Website in Minutes
+              Build{' '}
+              <span className="bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#06B6D4] bg-clip-text text-transparent">
+                AI Chatbots
+              </span>{' '}
+              for Any Website in Minutes
             </h1>
             <p className="mt-5 text-base sm:text-lg text-slate-600 leading-relaxed max-w-xl">
               Train intelligent assistants on your documents and website content, embed a
@@ -43,15 +47,42 @@ export function HeroSection() {
                 Book Demo
               </LandingButton>
             </div>
-            <dl className="mt-10 grid grid-cols-3 gap-4 max-w-md">
+            <dl className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-xl">
               {[
-                { label: 'Setup time', value: '< 10 min' },
-                { label: 'Uptime focus', value: '24/7 AI' },
-                { label: 'Embed', value: '1 snippet' },
+                {
+                  label: 'Setup time',
+                  value: '< 10 min',
+                  icon: Clock3,
+                  color: 'bg-blue-100 text-blue-600',
+                },
+                {
+                  label: 'Always available',
+                  value: '24/7 AI',
+                  icon: Headphones,
+                  color: 'bg-violet-100 text-violet-600',
+                },
+                {
+                  label: 'Easy install',
+                  value: '1 snippet',
+                  icon: Code2,
+                  color: 'bg-cyan-100 text-cyan-600',
+                },
               ].map((item) => (
-                <div key={item.label}>
-                  <dt className="text-xs text-slate-500">{item.label}</dt>
-                  <dd className="mt-1 text-sm font-semibold text-slate-900">{item.value}</dd>
+                <div
+                  key={item.label}
+                  className="group rounded-2xl border border-white/80 bg-white/75 p-3.5 shadow-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
+                >
+                  <span
+                    className={`flex h-8 w-8 items-center justify-center rounded-lg ${item.color}`}
+                  >
+                    <item.icon className="h-4 w-4" />
+                  </span>
+                  <dt className="mt-3 text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                    {item.label}
+                  </dt>
+                  <dd className="mt-1 text-base font-bold text-slate-900">
+                    {item.value}
+                  </dd>
                 </div>
               ))}
             </dl>

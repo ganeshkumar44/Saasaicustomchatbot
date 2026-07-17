@@ -4,7 +4,7 @@ import { fetchThemeMode, updateThemeModeThunk } from '@/store/themeThunk';
 import type { ThemeState } from '@/types/theme.types';
 
 const initialState: ThemeState = {
-  theme: 'dark',
+  theme: 'light',
   loading: false,
   error: null,
   initialized: false,

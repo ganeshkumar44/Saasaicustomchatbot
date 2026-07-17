@@ -167,7 +167,7 @@ export function ForgotPasswordOtpStep() {
           </button>
         </p>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/signin')}
           disabled={isProcessing}
           className="text-sm text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] transition-colors disabled:opacity-40"
         >

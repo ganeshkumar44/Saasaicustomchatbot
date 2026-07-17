@@ -1,26 +1,70 @@
-
-  <!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-      <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-      <link rel="shortcut icon" href="/favicon.ico" />
-      <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-      <link rel="manifest" href="/site.webmanifest" />
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>NexGenChat | Custom AI Chatbots for Every Website</title>
-      <meta name="description" content="Manage and optimize AI chatbots with a user-friendly dashboard featuring analytics, settings, and billing options for businesses seeking enhanced customer engagement." />
-      <meta name="robots" content="noindex, nofollow" />
-      <style>html, body { height: 100%; margin: 0; } #root { height: 100%; }</style>
-      
-    </head>
-
-    <body>
-      
-      <div id="root"></div>
-      <script type="module" src="/src/main.tsx"></script>
-      
-    </body>
-  </html>
-  
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#2563EB" />
+    <meta name="robots" content="index, follow" />
+    <title>NexGenChat | AI-Powered Chatbot for Every Website</title>
+    <meta
+      name="description"
+      content="Build AI chatbots for any website in minutes. Train on PDFs and site content, embed a branded widget, and deliver 24/7 support with NexGenChat."
+    />
+    <link rel="canonical" href="https://nexgenchat.com/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="NexGenChat" />
+    <meta property="og:title" content="NexGenChat | AI-Powered Chatbot for Every Website" />
+    <meta
+      property="og:description"
+      content="Build AI chatbots for any website in minutes. Train on your content and embed a branded assistant anywhere."
+    />
+    <meta property="og:url" content="https://nexgenchat.com/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="NexGenChat | AI-Powered Chatbot for Every Website" />
+    <meta
+      name="twitter:description"
+      content="Build AI chatbots for any website in minutes. Train on your content and embed a branded assistant anywhere."
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <style>
+      html { scroll-behavior: smooth; }
+      html, body { height: 100%; margin: 0; }
+      #root { min-height: 100%; }
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+      }
+    </style>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "name": "NexGenChat",
+            "url": "https://nexgenchat.com/",
+            "email": "hello@nexgenchat.com",
+            "description": "AI-powered chatbot platform for every website."
+          },
+          {
+            "@type": "SoftwareApplication",
+            "name": "NexGenChat",
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "Web",
+            "description": "Build, train, and embed AI chatbots for websites with knowledge base, analytics, and branded widgets.",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "INR",
+              "description": "Free plan available"
+            }
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

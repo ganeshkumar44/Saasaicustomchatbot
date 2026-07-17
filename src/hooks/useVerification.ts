@@ -54,7 +54,7 @@ export function useVerification() {
     if (verificationSuccess && verificationSuccessMessage) {
       toast.success(verificationSuccessMessage);
       const redirectTimer = setTimeout(() => {
-        navigate('/');
+        navigate('/signin');
       }, 2000);
 
       return () => clearTimeout(redirectTimer);

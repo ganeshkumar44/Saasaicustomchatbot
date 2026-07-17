@@ -120,7 +120,7 @@ export function useAccountSettings() {
     if (deactivateUserAccount.fulfilled.match(result)) {
       toast.success(result.payload.message);
       dispatch(logout());
-      navigate('/');
+      navigate('/signin');
       return result;
     }
 
@@ -138,7 +138,7 @@ export function useAccountSettings() {
       if (deleteUserAccount.fulfilled.match(result)) {
         toast.success(result.payload.message);
         dispatch(logout());
-        navigate('/');
+        navigate('/signin');
         return result;
       }
 

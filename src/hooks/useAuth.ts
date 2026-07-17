@@ -50,7 +50,7 @@ export function useAuth() {
 
     if (signoutUser.fulfilled.match(result)) {
       toast.success(result.payload.message);
-      navigate('/');
+      navigate('/signin');
       return;
     }
 
@@ -60,7 +60,7 @@ export function useAuth() {
 
     if (shouldForceLocalSignout(errorMessage)) {
       dispatch(logout());
-      navigate('/');
+      navigate('/signin');
     }
   }, [dispatch, navigate]);
 

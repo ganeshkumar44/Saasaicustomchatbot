@@ -211,7 +211,7 @@ export function Register() {
       <div className="mt-6 text-center">
         <span className="text-[var(--color-text-secondary)]">Already have an account? </span>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/signin')}
           className="text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium transition-colors"
           disabled={loading}
         >

@@ -130,7 +130,7 @@ export function ForgotPasswordResetStep() {
 
       <div className="mt-6 text-center">
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/signin')}
           className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors"
           disabled={loading}
         >

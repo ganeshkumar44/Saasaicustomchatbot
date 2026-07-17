@@ -34,7 +34,7 @@ export function IdleLogoutSync() {
       }
 
       toast.info(INACTIVE_LOGOUT_MESSAGE);
-      router.navigate('/', { replace: true });
+      router.navigate('/signin', { replace: true });
     } finally {
       isLoggingOutRef.current = false;
     }

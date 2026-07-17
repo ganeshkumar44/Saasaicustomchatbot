@@ -72,7 +72,7 @@ export function useForgotPassword() {
       toast.success(successMessage);
 
       const redirectTimer = setTimeout(() => {
-        navigate('/');
+        navigate('/signin');
       }, 2000);
 
       return () => clearTimeout(redirectTimer);

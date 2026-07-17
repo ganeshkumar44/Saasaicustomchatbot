@@ -1,5 +1,6 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, Navigate } from "react-router";
 import { DashboardLayout } from "./components/DashboardLayout";
+import { Landing } from "./pages/Landing";
 import { Login } from "@/pages/Login";
 import { Register } from "@/pages/Register";
 import { ForgotPassword } from "@/pages/ForgotPassword";
@@ -28,7 +29,15 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 export const router = createBrowserRouter([
   {
     path: "/",
+    Component: Landing,
+  },
+  {
+    path: "/signin",
     Component: Login,
+  },
+  {
+    path: "/login",
+    element: <Navigate to="/signin" replace />,
   },
   {
     path: "/register",

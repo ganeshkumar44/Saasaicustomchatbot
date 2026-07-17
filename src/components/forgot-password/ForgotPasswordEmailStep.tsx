@@ -27,7 +27,7 @@ export function ForgotPasswordEmailStep() {
   return (
     <>
       <button
-        onClick={() => navigate('/')}
+        onClick={() => navigate('/signin')}
         className="flex items-center gap-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text)] mb-6 transition-colors text-sm"
       >
         <ArrowLeft className="w-4 h-4" />
@@ -87,7 +87,7 @@ export function ForgotPasswordEmailStep() {
 
       <div className="mt-6 text-center">
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/signin')}
           className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors"
           disabled={loading}
         >

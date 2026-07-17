@@ -9,9 +9,14 @@ import { useVerifyAccountRedirect } from '@/hooks/useVerifyAccountRedirect';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { resetLoginState } from '@/store/authSlice';
 import { selectThemeInitialized } from '@/store/themeSelectors';
+import { usePageSeo } from '@/hooks/usePageSeo';
 import { validateLoginForm } from '@/utils/validation';
 
 export function Login() {
+  usePageSeo({
+    title: 'Sign In | NexGenChat',
+    description: 'Sign in to your NexGenChat account to manage AI chatbots, knowledge, and analytics.',
+  });
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const {

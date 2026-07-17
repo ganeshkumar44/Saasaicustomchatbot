@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { MessageSquarePlus } from 'lucide-react';
 import { FeedbackModal } from '@/app/components/feedback/FeedbackModal';
 import { useAppSelector } from '@/store/hooks';
 import { selectUser } from '@/store/authSelectors';

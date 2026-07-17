@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
-import { NgMarkIcon } from '@/assets/logos';
 import { useForgotPassword } from '@/hooks/useForgotPassword';
 import { PasswordValidationBox } from '@/components/auth/PasswordValidationBox';
 import { validateResetPasswordForm } from '@/utils/validation';
@@ -43,9 +42,6 @@ export function ForgotPasswordResetStep() {
       </button>
 
       <div className="flex flex-col items-center mb-8">
-        <div className="mb-4">
-          <NgMarkIcon className="w-[94px] h-[56px]" />
-        </div>
         <h1 className="text-3xl font-bold">Reset Password</h1>
         <p className="text-[var(--color-text-secondary)] mt-2 text-center">Create a new password for your account</p>
       </div>

@@ -6,7 +6,7 @@ import { LANDING_TAGLINE } from '@/constants/landing';
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden pt-10 pb-20 sm:pt-16 sm:pb-28">
+    <section className="relative overflow-hidden pt-10 pb-10 sm:pt-16 sm:pb-28">
       <div
         className="absolute inset-0 opacity-40"
         style={{
@@ -25,7 +25,7 @@ export function HeroSection() {
             <span className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-[#2563EB]">
               {LANDING_TAGLINE}
             </span>
-            <h1 className="mt-5 text-4xl sm:text-5xl xl:text-6xl font-bold tracking-tight text-slate-900 leading-[1.1]">
+            <h1 className="mt-5 text-4xl sm:text-5xl xl:text-5xl font-bold tracking-tight text-slate-900 leading-[1.1]">
               Build AI Chatbots for Any Website in Minutes
             </h1>
             <p className="mt-5 text-base sm:text-lg text-slate-600 leading-relaxed max-w-xl">

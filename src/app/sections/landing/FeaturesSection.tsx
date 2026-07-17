@@ -32,6 +32,15 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Clock,
 };
 
+const ICON_COLORS = [
+  'bg-blue-50 text-blue-600',
+  'bg-violet-50 text-violet-600',
+  'bg-cyan-50 text-cyan-600',
+  'bg-emerald-50 text-emerald-600',
+  'bg-amber-50 text-amber-600',
+  'bg-rose-50 text-rose-600',
+] as const;
+
 export function FeaturesSection() {
   return (
     <section id="features" className="py-20 sm:py-24 scroll-mt-20">
@@ -47,13 +56,20 @@ export function FeaturesSection() {
         <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {LANDING_FEATURES.map((feature, index) => {
             const Icon = ICON_MAP[feature.icon] ?? Sparkles;
+            const iconColor = ICON_COLORS[index % ICON_COLORS.length];
             return (
               <Reveal key={feature.id} delay={Math.min(index * 0.04, 0.24)}>
                 <article className="h-full rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md hover:border-blue-200 transition-all">
-                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-[#2563EB]">
-                    <Icon className="h-5 w-5" />
-                  </span>
-                  <h3 className="mt-4 text-lg font-semibold text-slate-900">{feature.title}</h3>
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${iconColor}`}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <h3 className="text-lg font-semibold text-slate-900">
+                      {feature.title}
+                    </h3>
+                  </div>
                   <p className="mt-2 text-sm text-slate-600 leading-relaxed">
                     {feature.description}
                   </p>

@@ -64,9 +64,17 @@ export function LandingButton(props: LandingButtonProps) {
     );
   }
 
-  const { type = 'button', ...buttonProps } = props as LandingButtonAsButton;
+  const {
+    type = 'button',
+    variant: _variant,
+    className: _className,
+    children: _children,
+    href: _href,
+    to: _to,
+    ...buttonProps
+  } = props as LandingButtonAsButton;
   return (
-    <button type={type} className={classes} {...buttonProps}>
+    <button {...buttonProps} type={type} className={classes}>
       {children}
     </button>
   );

@@ -71,9 +71,11 @@ export interface LandingIntegration {
   description: string;
 }
 
-export interface LandingLogoItem {
+export interface LandingAudience {
   id: string;
   name: string;
+  description: string;
+  icon: string;
 }
 
 export interface ContactRequest {

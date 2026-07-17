@@ -11,6 +11,7 @@ export function DevelopersSection() {
             eyebrow="Developer friendly"
             title="API-ready and embed-first"
             description="Ship quickly with a one-line widget, then extend with authenticated REST APIs when you need deeper control."
+            tone="dark"
           />
         </Reveal>
 

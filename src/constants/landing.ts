@@ -1,10 +1,10 @@
 import type {
+  LandingAudience,
   LandingCapability,
   LandingComparisonRow,
   LandingFaqItem,
   LandingFeature,
   LandingIntegration,
-  LandingLogoItem,
   LandingNavItem,
   LandingPlan,
   LandingStep,
@@ -395,13 +395,43 @@ export const LANDING_INTEGRATIONS: LandingIntegration[] = [
   },
 ];
 
-export const LANDING_LOGOS: LandingLogoItem[] = [
-  { id: 'intel', name: 'Intel' },
-  { id: 'microsoft', name: 'Microsoft' },
-  { id: 'google', name: 'Google' },
-  { id: 'amazon', name: 'Amazon' },
-  { id: 'nova', name: 'NovaLabs' },
-  { id: 'helix', name: 'HelixSoft' },
+export const LANDING_AUDIENCES: LandingAudience[] = [
+  {
+    id: 'startups',
+    name: 'Startups',
+    description: 'Launch support that scales with your growth.',
+    icon: 'Rocket',
+  },
+  {
+    id: 'agencies',
+    name: 'Agencies',
+    description: 'Create branded AI experiences for every client.',
+    icon: 'BriefcaseBusiness',
+  },
+  {
+    id: 'healthcare',
+    name: 'Healthcare',
+    description: 'Guide visitors to the right information quickly.',
+    icon: 'HeartPulse',
+  },
+  {
+    id: 'education',
+    name: 'Education',
+    description: 'Answer student and learner questions around the clock.',
+    icon: 'GraduationCap',
+  },
+  {
+    id: 'ecommerce',
+    name: 'E-commerce',
+    description: 'Help shoppers discover products and make decisions.',
+    icon: 'ShoppingBag',
+  },
+  {
+    id: 'saas',
+    name: 'SaaS',
+    description: 'Turn product knowledge into instant customer support.',
+    icon: 'CloudCog',
+  },
 ];
 
 export const LANDING_EMBED_SNIPPET = `<script

@@ -86,16 +86,51 @@ export function DashboardLayout() {
   const createLabel = hasDraft ? 'Continue Draft' : 'Create Chatbot';
 
   const menuItems = [
-    { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { path: '/dashboard/create', icon: Plus, label: createLabel },
-    { path: '/dashboard/history', icon: MessageSquare, label: 'Chat History' },
+    {
+      path: '/dashboard',
+      icon: LayoutDashboard,
+      label: 'Dashboard',
+      iconClassName: 'text-blue-600 dark:text-blue-400',
+    },
+    {
+      path: '/dashboard/create',
+      icon: Plus,
+      label: createLabel,
+      iconClassName: 'text-violet-600 dark:text-violet-400',
+    },
+    {
+      path: '/dashboard/history',
+      icon: MessageSquare,
+      label: 'Chat History',
+      iconClassName: 'text-emerald-600 dark:text-emerald-400',
+    },
     ...(showAnalyticsMenu
-      ? [{ path: '/dashboard/analytics', icon: BarChart3, label: 'Analytics' }]
+      ? [{
+          path: '/dashboard/analytics',
+          icon: BarChart3,
+          label: 'Analytics',
+          iconClassName: 'text-amber-600 dark:text-amber-400',
+        }]
       : []),
-    { path: '/dashboard/settings', icon: Settings, label: 'Settings' },
-    { path: '/dashboard/billing', icon: CreditCard, label: 'Billing' },
+    {
+      path: '/dashboard/settings',
+      icon: Settings,
+      label: 'Settings',
+      iconClassName: 'text-rose-600 dark:text-rose-400',
+    },
+    {
+      path: '/dashboard/billing',
+      icon: CreditCard,
+      label: 'Billing',
+      iconClassName: 'text-cyan-600 dark:text-cyan-400',
+    },
     ...(showManageUsersMenu
-      ? [{ path: '/dashboard/manage-users', icon: UserCog, label: 'Manage Users' }]
+      ? [{
+          path: '/dashboard/manage-users',
+          icon: UserCog,
+          label: 'Manage Users',
+          iconClassName: 'text-fuchsia-600 dark:text-fuchsia-400',
+        }]
       : []),
   ];
 
@@ -176,7 +211,7 @@ export function DashboardLayout() {
                   : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
-              <item.icon className="w-5 h-5 flex-shrink-0" />
+              <item.icon className={`w-5 h-5 flex-shrink-0 ${item.iconClassName}`} />
               {showExpandedLabels && (
                 <span className="text-sm font-medium whitespace-nowrap">{item.label}</span>
               )}

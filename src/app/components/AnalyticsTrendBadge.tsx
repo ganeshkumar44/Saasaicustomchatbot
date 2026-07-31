@@ -8,11 +8,12 @@ import {
 interface AnalyticsTrendBadgeProps {
   change: string;
   trend: AnalyticsTrend;
+  className?: string;
 }
 
-export function AnalyticsTrendBadge({ change, trend }: AnalyticsTrendBadgeProps) {
+export function AnalyticsTrendBadge({ change, trend, className = '' }: AnalyticsTrendBadgeProps) {
   return (
-    <span className={`flex items-center gap-1 text-sm ${getAnalyticsTrendClassName(trend)}`}>
+    <span className={`flex items-center gap-1 text-sm ${getAnalyticsTrendClassName(trend)} ${className}`}>
       {trend === 'up' ? (
         <ArrowUp className="w-4 h-4" />
       ) : (

@@ -235,80 +235,84 @@ export function DashboardOverview() {
           </div>
         ) : (
           <>
-            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+            <div className="bg-blue-600 dark:bg-blue-700 rounded-xl p-6 border border-blue-500 dark:border-blue-600">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-950 rounded-lg flex items-center justify-center">
-                  <MessageSquare className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                <div className="w-12 h-12 bg-white/15 rounded-lg flex items-center justify-center">
+                  <MessageSquare className="w-6 h-6 text-white" />
                 </div>
                 {analytics && (
                   <AnalyticsTrendBadge
                     change={analytics.total_conversations_change}
                     trend={analytics.total_conversations_trend}
+                    className="!text-white/90"
                   />
                 )}
               </div>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">Total Conversations</p>
-              <p className="text-3xl font-bold dark:text-white mt-1">
+              <p className="text-blue-100 text-sm">Total Conversations</p>
+              <p className="text-3xl font-bold text-white mt-1">
                 {analytics?.total_conversations.toLocaleString() ?? '0'}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">vs last month</p>
+              <p className="text-xs text-blue-100/80 mt-3">vs last month</p>
             </div>
 
-            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+            <div className="bg-fuchsia-600 dark:bg-fuchsia-700 rounded-xl p-6 border border-fuchsia-500 dark:border-fuchsia-600">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-purple-100 dark:bg-purple-950 rounded-lg flex items-center justify-center">
-                  <Users className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                <div className="w-12 h-12 bg-white/15 rounded-lg flex items-center justify-center">
+                  <Users className="w-6 h-6 text-white" />
                 </div>
                 {analytics && (
                   <AnalyticsTrendBadge
                     change={analytics.total_visitors_change}
                     trend={analytics.total_visitors_trend}
+                    className="!text-white/90"
                   />
                 )}
               </div>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">Total Users</p>
-              <p className="text-3xl font-bold dark:text-white mt-1">
+              <p className="text-fuchsia-100 text-sm">Total Users</p>
+              <p className="text-3xl font-bold text-white mt-1">
                 {analytics?.total_visitors.toLocaleString() ?? '0'}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">vs last month</p>
+              <p className="text-xs text-fuchsia-100/80 mt-3">vs last month</p>
             </div>
 
-            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+            <div className="bg-emerald-600 dark:bg-emerald-700 rounded-xl p-6 border border-emerald-500 dark:border-emerald-600">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-green-100 dark:bg-green-950 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
+                <div className="w-12 h-12 bg-white/15 rounded-lg flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-white" />
                 </div>
                 {analytics && (
                   <AnalyticsTrendBadge
                     change={analytics.resolution_rate_change}
                     trend={analytics.resolution_rate_trend}
+                    className="!text-white/90"
                   />
                 )}
               </div>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">Resolution Rate</p>
-              <p className="text-3xl font-bold dark:text-white mt-1">
+              <p className="text-emerald-100 text-sm">Resolution Rate</p>
+              <p className="text-3xl font-bold text-white mt-1">
                 {formatResolutionRate(analytics?.resolution_rate ?? '0')}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">vs last month</p>
+              <p className="text-xs text-emerald-100/80 mt-3">vs last month</p>
             </div>
 
-            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
+            <div className="bg-orange-600 dark:bg-orange-700 rounded-xl p-6 border border-orange-500 dark:border-orange-600">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-orange-100 dark:bg-orange-950 rounded-lg flex items-center justify-center">
-                  <Zap className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+                <div className="w-12 h-12 bg-white/15 rounded-lg flex items-center justify-center">
+                  <Zap className="w-6 h-6 text-white" />
                 </div>
                 {analytics && (
                   <AnalyticsTrendBadge
                     change={analytics.average_response_time_change}
                     trend={analytics.average_response_time_trend}
+                    className="!text-white/90"
                   />
                 )}
               </div>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">Average Response Time</p>
-              <p className="text-3xl font-bold dark:text-white mt-1">
+              <p className="text-orange-100 text-sm">Average Response Time</p>
+              <p className="text-3xl font-bold text-white mt-1">
                 {formatAverageResponseTime(analytics?.average_response_time ?? '0')}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">vs last month</p>
+              <p className="text-xs text-orange-100/80 mt-3">vs last month</p>
             </div>
           </>
         )}

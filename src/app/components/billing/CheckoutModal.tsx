@@ -93,21 +93,6 @@ export function CheckoutModal({
                   onChange={onAutoRenewChange}
                   disabled={orderLoading}
                 />
-                {autoRenewEnabled ? (
-                  <p className="text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-lg px-3 py-2">
-                    Auto Renew opens Razorpay Subscriptions. In test mode, choose{' '}
-                    <strong>UPI</strong> and approve (e.g. any VPA like{' '}
-                    <code className="font-mono">success@razorpay</code>). Card Autopay
-                    needs card-recurring enabled on the merchant — leave Auto Renew off
-                    to pay once with a card.
-                  </p>
-                ) : (
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    One-time payment. Test card:{' '}
-                    <code className="font-mono">4111 1111 1111 1111</code>, any future
-                    expiry, any CVV.
-                  </p>
-                )}
               </div>
             </>
           ) : null}
